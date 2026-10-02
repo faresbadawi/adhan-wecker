@@ -1,6 +1,10 @@
 // Einstellungen des Adhan-Weckers
 #pragma once
 
+// Gerät und Firmware (angezeigt in der Web-App)
+#define DEVICE_NAME "Smart Azan Clock"
+#define FW_VERSION "1.0.0"
+
 // 1 = simulierte Beispieldaten (Uhr startet am 01.10.2026 um 18:42, feste Gebetszeiten und Wetter)
 // 0 = echte Daten (NTP, Aladhan-API)
 #define DEMO_MODE 0

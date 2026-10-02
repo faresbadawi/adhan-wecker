@@ -10,6 +10,8 @@ namespace wifimgr
     static const char *s_apName = "";
     static uint32_t s_connectStart = 0;
     static bool s_portal = false;
+    static String s_pendingSsid, s_pendingPass; // Wechsel in ein anderes Netz, ausgeführt in update()
+    static bool s_pending = false;
 
     static void startPortal()
     {
@@ -41,6 +43,22 @@ namespace wifimgr
 
     void update()
     {
+        if (s_pending)
+        {
+            s_pending = false;
+            Serial.printf("WLAN: wechsle zu %s\n", s_pendingSsid.c_str());
+            if (s_portal)
+            {
+                s_wm.stopConfigPortal();
+                s_portal = false;
+            }
+            WiFi.mode(WIFI_STA);
+            WiFi.disconnect();
+            WiFi.begin(s_pendingSsid.c_str(), s_pendingPass.c_str()); // wird dauerhaft gespeichert
+            s_pendingPass = "";
+            s_connectStart = millis(); // klappt es nicht, öffnet sich nach 20 s das Einrichtungsportal
+        }
+
         if (s_portal)
         {
             s_wm.process();
@@ -76,5 +94,41 @@ namespace wifimgr
             strlcpy(i.ssid, WiFi.SSID().c_str(), sizeof(i.ssid));
         }
         return i;
+    }
+
+    void connect(const String &ssid, const String &password)
+    {
+        s_pendingSsid = ssid;
+        s_pendingPass = password;
+        s_pending = true;
+    }
+
+    int scan(Network *out, int max)
+    {
+        const int n = WiFi.scanNetworks();
+        int count = 0;
+        for (int i = 0; i < n && count < max; i++)
+        {
+            const String ssid = WiFi.SSID(i);
+            if (ssid.isEmpty())
+                continue;
+            bool dup = false; // gleiche SSID mehrfach (mehrere Zugangspunkte): stärksten behalten
+            for (int k = 0; k < count && !dup; k++)
+                dup = strcmp(out[k].ssid, ssid.c_str()) == 0;
+            if (dup)
+                continue;
+            strlcpy(out[count].ssid, ssid.c_str(), sizeof(out[count].ssid));
+            const int rssi = WiFi.RSSI(i);
+            out[count].bars = rssi > -55 ? 4 : rssi > -65 ? 3 : rssi > -75 ? 2 : 1;
+            out[count].secure = WiFi.encryptionType(i) != WIFI_AUTH_OPEN;
+            count++;
+        }
+        WiFi.scanDelete();
+        return count;
+    }
+
+    void forget()
+    {
+        s_wm.resetSettings(); // gespeicherte Zugangsdaten löschen
     }
 }

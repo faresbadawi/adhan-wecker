@@ -1,5 +1,6 @@
 #include "web_server.h"
 #include <ArduinoJson.h>
+#include <Preferences.h>
 #include <ESPmDNS.h>
 #include <LittleFS.h>
 #include <WebServer.h>
@@ -7,8 +8,12 @@
 #include "assistant.h"
 #include "audio_manager.h"
 #include "azan_controller.h"
+#include "config.h"
 #include "mawaqit.h"
+#include "prayer_times.h"
 #include "settings.h"
+#include "time_manager.h"
+#include "weather.h"
 #include "wifi_manager.h"
 
 namespace web
@@ -18,6 +23,17 @@ namespace web
     static WebServer s_server(80);
     static bool s_running = false;
     static char s_url[40] = "";
+    static uint32_t s_restartAt = 0; // Neustart nach dem Senden der Antwort
+
+    // Sprache der Web-App (ar, de, en), gespeichert im NVS
+    static String webLang()
+    {
+        Preferences p;
+        p.begin("web", true);
+        String l = p.getString("lang", "ar");
+        p.end();
+        return l;
+    }
 
     static const char *AZAN_KEYS[5] = {"fajr", "dhuhr", "asr", "maghrib", "isha"};
     // Index = settings::PageId
@@ -314,6 +330,158 @@ namespace web
         sendSounds();
     }
 
+    // ---------- Gerätestatus für das Dashboard
+
+    static const char *skyKey(model::Sky s)
+    {
+        static const char *K[] = {"clear", "partly_cloudy", "cloudy", "fog", "drizzle", "rain", "snow", "thunder"};
+        return K[(int)s];
+    }
+
+    static void sendStatus()
+    {
+        static const char *PRAYER_KEYS[model::PRAYER_COUNT] = {"fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"};
+        JsonDocument doc;
+        doc["lang"] = webLang();
+
+        JsonObject dev = doc["device"].to<JsonObject>();
+        dev["name"] = DEVICE_NAME;
+        dev["firmware"] = FW_VERSION;
+        dev["host"] = String(HOSTNAME) + ".local";
+        dev["ip"] = WiFi.localIP().toString();
+        dev["uptime"] = millis() / 1000;
+
+        const model::WifiInfo w = wifimgr::info();
+        JsonObject wifi = doc["wifi"].to<JsonObject>();
+        wifi["connected"] = w.connected;
+        wifi["ssid"] = w.ssid;
+        wifi["bars"] = w.connected ? w.bars : 0;
+
+        const settings::Settings st = settings::get();
+        doc["location"]["city"] = st.city;
+        doc["location"]["country"] = st.country;
+
+        struct tm now;
+        if (timemgr::now(now))
+        {
+            char b[20];
+            strftime(b, sizeof(b), "%Y-%m-%d", &now);
+            doc["time"]["date"] = b;
+            strftime(b, sizeof(b), "%H:%M:%S", &now);
+            doc["time"]["clock"] = b;
+            doc["time"]["weekday"] = now.tm_wday;
+
+            model::PrayerDay day;
+            if (prayers::forDay(now, day))
+            {
+                JsonObject times = doc["prayer"]["times"].to<JsonObject>();
+                for (int p = 0; p < model::PRAYER_COUNT; p++)
+                {
+                    snprintf(b, sizeof(b), "%02d:%02d", day.minutes[p] / 60, day.minutes[p] % 60);
+                    times[PRAYER_KEYS[p]] = b;
+                }
+                model::Prayer next;
+                int32_t left;
+                prayers::next(now, day, next, left);
+                doc["prayer"]["next"]["key"] = PRAYER_KEYS[next];
+                doc["prayer"]["next"]["seconds"] = left;
+                doc["prayer"]["hijri"]["day"] = day.hijriDay;
+                doc["prayer"]["hijri"]["month"] = day.hijriMonth;
+                doc["prayer"]["hijri"]["year"] = day.hijriYear;
+            }
+        }
+
+        model::Weather wx;
+        if (weather::get(wx))
+        {
+            doc["weather"]["temp"] = lroundf(wx.temp);
+            doc["weather"]["sky"] = skyKey(wx.sky);
+            doc["weather"]["day"] = wx.isDay;
+        }
+        doc["assistant"]["hasKey"] = assistant::hasKey();
+
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+
+    // ---------- WLAN und Gerät
+
+    static void wifiScan()
+    {
+        static wifimgr::Network nets[20];
+        const int n = wifimgr::scan(nets, 20);
+        JsonDocument doc;
+        JsonArray list = doc.to<JsonArray>();
+        for (int i = 0; i < n; i++)
+        {
+            JsonObject o = list.add<JsonObject>();
+            o["ssid"] = nets[i].ssid;
+            o["bars"] = nets[i].bars;
+            o["secure"] = nets[i].secure;
+        }
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+
+    static void wifiConnect()
+    {
+        JsonDocument doc;
+        if (deserializeJson(doc, s_server.arg("plain")) || !(doc["ssid"] | "")[0])
+        {
+            s_server.send(400, "application/json", "{\"error\":\"ssid\"}");
+            return;
+        }
+        s_server.send(200, "application/json", "{}"); // erst antworten, dann wechseln
+        wifimgr::connect(doc["ssid"] | "", doc["password"] | "");
+    }
+
+    static void wifiForget()
+    {
+        wifimgr::forget();
+        s_server.send(200, "application/json", "{}");
+        s_restartAt = millis() + 800; // nach dem Neustart öffnet sich das Einrichtungsportal
+    }
+
+    static void deviceRestart()
+    {
+        s_server.send(200, "application/json", "{}");
+        s_restartAt = millis() + 800;
+    }
+
+    // Werkseinstellungen: Einstellungen, Gebetszeiten-Cache, Assistent und WLAN löschen
+    static void deviceReset()
+    {
+        for (const char *ns : {"adhan", "assistant", "web"})
+        {
+            Preferences p;
+            p.begin(ns, false);
+            p.clear();
+            p.end();
+        }
+        wifimgr::forget();
+        s_server.send(200, "application/json", "{}");
+        s_restartAt = millis() + 800;
+    }
+
+    static void deviceLang()
+    {
+        JsonDocument doc;
+        deserializeJson(doc, s_server.arg("plain"));
+        const String lang = doc["lang"] | "";
+        if (lang != "ar" && lang != "de" && lang != "en")
+        {
+            s_server.send(400, "application/json", "{\"error\":\"lang\"}");
+            return;
+        }
+        Preferences p;
+        p.begin("web", false);
+        p.putString("lang", lang);
+        p.end();
+        s_server.send(200, "application/json", "{}");
+    }
+
     // ---------- Sprachassistent
 
     static const char *stateName(assistant::State st)
@@ -414,6 +582,13 @@ namespace web
 
     static void start()
     {
+        s_server.on("/api/status", HTTP_GET, sendStatus);
+        s_server.on("/api/wifi/scan", HTTP_GET, wifiScan);
+        s_server.on("/api/wifi/connect", HTTP_POST, wifiConnect);
+        s_server.on("/api/wifi/forget", HTTP_POST, wifiForget);
+        s_server.on("/api/device/restart", HTTP_POST, deviceRestart);
+        s_server.on("/api/device/reset", HTTP_POST, deviceReset);
+        s_server.on("/api/device/lang", HTTP_POST, deviceLang);
         s_server.on("/api/assistant", HTTP_GET, sendAssistant);
         s_server.serveStatic("/api/assistant/last.mp3", LittleFS, "/tts.mp3", "no-cache"); // letzte gesprochene Antwort
         s_server.on("/api/assistant/key", HTTP_POST, assistantKey);
@@ -461,6 +636,12 @@ namespace web
             return;
         }
         s_server.handleClient();
+        if (s_restartAt && (int32_t)(millis() - s_restartAt) > 0)
+        {
+            Serial.println("Web: Neustart");
+            delay(100);
+            ESP.restart();
+        }
     }
 
     const char *url() { return s_url; }
