@@ -45,10 +45,10 @@ namespace clock_screen
         s_weekday = image(parent, nullptr, Role::MAIN);
         lv_obj_align(s_weekday, LV_ALIGN_TOP_MID, 0, 176);
 
-        // Hijri-Datum von rechts nach links: Tag, Monat, Jahr
+        // Hijri-Datum in Leserichtung: Tag, Monat, Jahr
         s_hijri = box(parent);
         lv_obj_set_size(s_hijri, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-        lv_obj_set_style_base_dir(s_hijri, LV_BASE_DIR_RTL, 0);
+        lv_obj_set_style_base_dir(s_hijri, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
         lv_obj_set_flex_flow(s_hijri, LV_FLEX_FLOW_ROW);
         lv_obj_set_flex_align(s_hijri, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(s_hijri, 10, 0);

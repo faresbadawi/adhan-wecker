@@ -3,11 +3,6 @@
 
 extern "C"
 {
-    LV_IMG_DECLARE(img_ar_txt_settings);
-    LV_IMG_DECLARE(img_ar_txt_network);
-    LV_IMG_DECLARE(img_ar_txt_web);
-    LV_IMG_DECLARE(img_ar_txt_scan);
-    LV_IMG_DECLARE(img_ar_txt_offline);
     extern const lv_img_dsc_t *const img_wifi_list[5];
 }
 
@@ -39,29 +34,28 @@ namespace settings_screen
 
     void create(lv_obj_t *parent)
     {
-        lv_obj_align(image(parent, &img_ar_txt_settings, Role::ACCENT), LV_ALIGN_TOP_MID, 0, 8);
+        lv_obj_align(image(parent, lang::text(TXT_SETTINGS), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 8);
 
         // Rechts: Netzwerk
         lv_obj_t *net = card(parent, COL_X, SCREEN_W - MARGIN - COL_X);
-        lv_obj_align(image(net, &img_ar_txt_network, Role::MUTED), LV_ALIGN_TOP_RIGHT, -14, 10);
+        alignStart(image(net, lang::text(TXT_NETWORK), Role::MUTED), 14, 10);
         s_wifiIcon = image(net, img_wifi_list[0], Role::ACCENT);
-        lv_obj_align(s_wifiIcon, LV_ALIGN_TOP_RIGHT, -14, 50);
+        alignStart(s_wifiIcon, 14, 50);
         s_ssid = label(net, &font_josefin_18, Role::MAIN, "");
         lv_label_set_long_mode(s_ssid, LV_LABEL_LONG_DOT);
         lv_obj_set_width(s_ssid, 146);
-        lv_obj_set_style_text_align(s_ssid, LV_TEXT_ALIGN_RIGHT, 0);
-        lv_obj_align(s_ssid, LV_ALIGN_TOP_RIGHT, -46, 52);
+        lv_obj_set_style_text_align(s_ssid, lang::rtl() ? LV_TEXT_ALIGN_RIGHT : LV_TEXT_ALIGN_LEFT, 0);
+        alignStart(s_ssid, 46, 52);
         s_signal = label(net, &font_josefin_15, Role::MUTED, "");
-        lv_obj_align(s_signal, LV_ALIGN_TOP_RIGHT, -46, 80);
-        s_offline = image(net, &img_ar_txt_offline, Role::MAIN);
-        lv_obj_align(s_offline, LV_ALIGN_TOP_RIGHT, -46, 48);
+        alignStart(s_signal, 46, 80);
+        s_offline = image(net, lang::text(TXT_OFFLINE), Role::MAIN);
+        alignStart(s_offline, 46, 48);
 
-        lv_obj_t *webLbl = image(net, &img_ar_txt_web, Role::MUTED);
-        lv_obj_align(webLbl, LV_ALIGN_TOP_RIGHT, -14, 128);
+        alignStart(image(net, lang::text(TXT_WEB), Role::MUTED), 14, 128);
         s_url = label(net, &font_josefin_18, Role::MAIN, "");
-        lv_obj_align(s_url, LV_ALIGN_TOP_RIGHT, -14, 160);
+        alignStart(s_url, 14, 160);
         lv_obj_t *host = label(net, &font_josefin_15, Role::MUTED, "azan-clock.local");
-        lv_obj_align(host, LV_ALIGN_TOP_RIGHT, -14, 188);
+        alignStart(host, 14, 188);
 
         // Links: QR-Code zur Weboberfläche
         lv_obj_t *qrCard = card(parent, MARGIN, COL_X - MARGIN - 12);
@@ -69,7 +63,7 @@ namespace settings_screen
         lv_obj_set_style_border_color(s_qr, lv_color_white(), 0);
         lv_obj_set_style_border_width(s_qr, 6, 0); // heller Rand, damit Kameras den Code finden
         lv_obj_align(s_qr, LV_ALIGN_TOP_MID, 0, 18);
-        s_scan = image(qrCard, &img_ar_txt_scan, Role::MUTED);
+        s_scan = image(qrCard, lang::text(TXT_SCAN), Role::MUTED);
         lv_obj_align(s_scan, LV_ALIGN_BOTTOM_MID, 0, -14);
     }
 

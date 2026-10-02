@@ -4,7 +4,7 @@
   - Hintergrund mit dezentem islamischem Sternmuster (480x320, RGB565)
   - Schriften (Marcellus, Josefin Sans) als LVGL-Fonts, 4 bpp
   - Wettersymbole (Material Design Icons) als Bilder
-  - arabische Gebetsnamen (Amiri) als Bilder mit Alphakanal
+  - feste Texte in Arabisch (Amiri), Deutsch und Englisch (Marcellus, Josefin Sans) als Alphamasken
 
 Aufruf:  python tools/gen_assets.py [--preview ordner]
 Benötigt: pip install pillow numpy   (Pillow mit libraqm für arabischen Textsatz)
@@ -200,36 +200,15 @@ def arabic_bbox(text, font):
     return font.getbbox(text, anchor="rs", direction="rtl", language="ar")
 
 
-def write_arabic(name, text, size, color, font_file, band=None):
-    """Arabischer Schriftzug als Bild mit Alphakanal (Farbe fest eingebrannt).
-    `band` = (oben, unten) relativ zur Grundlinie, damit mehrere Wörter auf
-    derselben Grundlinie stehen."""
-    font = arabic_font(size, font_file)
-    x0, y0, x1, y1 = arabic_bbox(text, font)
-    if band:
-        y0, y1 = band
-    w, h = x1 - x0 + 2, y1 - y0 + 2
-    mask = Image.new("L", (w, h), 0)
-    ImageDraw.Draw(mask).text((1 - x0, 1 - y0), text, font=font, fill=255, anchor="rs",
-                              direction="rtl", language="ar")
-    a = np.asarray(mask, np.uint8)
-    col = rgb565_be(np.broadcast_to(np.array(IMG_WHITE, np.uint8), (h, w, 3)))
-    data = np.concatenate([col, a[..., None]], axis=-1).tobytes()
-    write_image_c(name, data, w, h, "LV_IMG_CF_TRUE_COLOR_ALPHA")
-    return mask
-
-
 def write_icon_image(name, codepoint, size, color):
-    """Icon aus der MDI-Schrift als Bild mit Alphakanal (zuverlässiger als 4-Byte-UTF-8-Glyphen)."""
+    """Icon aus der MDI-Schrift als 8-Bit-Alphamaske (zuverlässiger als 4-Byte-UTF-8-Glyphen)."""
     font = ImageFont.truetype(str(FONTS / MDI), size)
     ch = chr(codepoint)
     x0, y0, x1, y1 = font.getbbox(ch, anchor="ls")
     w, h = x1 - x0, y1 - y0
     mask = Image.new("L", (w, h), 0)
     ImageDraw.Draw(mask).text((-x0, -y0), ch, font=font, fill=255, anchor="ls")
-    a = np.asarray(mask, np.uint8)
-    col = rgb565_be(np.broadcast_to(np.array(IMG_WHITE, np.uint8), (h, w, 3)))
-    write_image_c(name, np.concatenate([col, a[..., None]], axis=-1).tobytes(), w, h, "LV_IMG_CF_TRUE_COLOR_ALPHA")
+    write_image_c(name, np.asarray(mask, np.uint8).tobytes(), w, h, "LV_IMG_CF_ALPHA_8BIT")
     return mask
 
 
@@ -385,81 +364,160 @@ GERMAN = "äöüÄÖÜß·•–°\u2236\u200e"
 DIGITS = "0123456789:-"
 TEMP = "0123456789-°C"
 
-AR_SIZES = {"": 20, "_lg": 34}  # Zeile (Wetter/Home) und Azan-Bildschirm
-AR_FONT = "Amiri-Regular.ttf"
-AR_ROWS = {
-    "img_ar_fajr": "الفجر",
-    "img_ar_shuruq": "الشروق",
-    "img_ar_dhuhr": "الظهر",
-    "img_ar_asr": "العصر",
-    "img_ar_maghrib": "المغرب",
-    "img_ar_isha": "العشاء",
+LANGS = ["ar", "de", "en"]  # Reihenfolge = ui::Lang
+
+# Feste Texte: Schlüssel -> (Größe der arabischen Fassung, fett, {Sprache: Text}).
+# Alle Texte werden weiß als Alphamaske erzeugt und auf dem Gerät in ihrer Farbgruppe gezeichnet.
+TEXTS = {
+    "title": (30, True, {"ar": "مواقيت الصلاة", "de": "Gebetszeiten", "en": "Prayer Times"}),
+    "next": (20, False, {"ar": "الصلاة القادمة", "de": "Nächstes Gebet", "en": "Next prayer"}),
+    "loading": (22, False, {"ar": "جارٍ تحميل المواقيت …", "de": "Gebetszeiten werden geladen …",
+                            "en": "Loading prayer times …"}),
+    "azan_now": (26, False, {"ar": "حان الآن وقت صلاة", "de": "Es ist Zeit für das Gebet", "en": "It is time for"}),
+    "azan_stop": (20, False, {"ar": "المس الشاشة لإيقاف الأذان", "de": "Bildschirm berühren, um den Azan zu beenden",
+                              "en": "Touch the screen to stop the azan"}),
+    "weather": (30, True, {"ar": "الطقس", "de": "Wetter", "en": "Weather"}),
+    "feels": (20, False, {"ar": "الإحساس", "de": "Gefühlt", "en": "Feels like"}),
+    "humidity": (20, False, {"ar": "الرطوبة", "de": "Feuchte", "en": "Humidity"}),
+    "wind": (20, False, {"ar": "الرياح", "de": "Wind", "en": "Wind"}),
+    "today": (20, False, {"ar": "اليوم", "de": "Heute", "en": "Today"}),
+    "tomorrow": (20, False, {"ar": "غدًا", "de": "Morgen", "en": "Tomorrow"}),
+    "after": (20, False, {"ar": "بعد غد", "de": "Übermorgen", "en": "Day after"}),
+    "no_weather": (22, False, {"ar": "جارٍ تحميل الطقس …", "de": "Wetter wird geladen …", "en": "Loading weather …"}),
+    "alarm": (30, True, {"ar": "المنبه", "de": "Wecker", "en": "Alarm"}),
+    "alarm_stop": (20, False, {"ar": "المس الشاشة لإيقاف المنبه", "de": "Bildschirm berühren, um den Wecker zu beenden",
+                               "en": "Touch the screen to stop the alarm"}),
+    "settings": (30, True, {"ar": "الإعدادات", "de": "Einstellungen", "en": "Settings"}),
+    "network": (20, False, {"ar": "الشبكة", "de": "Netzwerk", "en": "Network"}),
+    "web": (20, False, {"ar": "صفحة الإعدادات", "de": "Einstellungsseite", "en": "Settings page"}),
+    "scan": (18, False, {"ar": "امسح الرمز بهاتفك لفتح الإعدادات", "de": "Mit dem Handy scannen",
+                         "en": "Scan with your phone"}),
+    "offline": (22, False, {"ar": "غير متصل بالشبكة", "de": "Nicht verbunden", "en": "Not connected"}),
+    "wifi_title": (28, True, {"ar": "إعداد الواي فاي", "de": "WLAN einrichten", "en": "Wi-Fi setup"}),
+    "wifi_1": (21, False, {"ar": "١. اتصل بالهاتف بشبكة Adhan-Wecker", "de": "1. Handy mit dem WLAN Adhan-Wecker verbinden",
+                           "en": "1. Connect your phone to the Wi-Fi Adhan-Wecker"}),
+    "wifi_2": (21, False, {"ar": "٢. افتح في المتصفح", "de": "2. Im Browser öffnen", "en": "2. Open in the browser"}),
+    "wifi_3": (21, False, {"ar": "٣. اختر شبكتك وأدخل كلمة المرور", "de": "3. Eigenes WLAN wählen, Passwort eingeben",
+                           "en": "3. Choose your Wi-Fi, enter the password"}),
 }
 
-
-WHITE = (244, 241, 234)
-MUTED = (140, 151, 143)
-
-# Feste arabische Texte: Name -> (Text, Größe, Farbe, Schrift)
-AR_TEXTS = {
-    "img_ar_txt_title": ("مواقيت الصلاة", 30, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_next": ("الصلاة القادمة", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_remaining": ("الوقت المتبقي", 18, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_loading": ("جارٍ تحميل المواقيت …", 22, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_azan_now": ("حان الآن وقت صلاة", 26, WHITE, "Amiri-Regular.ttf"),
-    "img_ar_txt_azan_stop": ("المس الشاشة لإيقاف الأذان", 20, MUTED, "Amiri-Regular.ttf"),
-    # Wetter
-    "img_ar_txt_weather": ("الطقس", 30, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_feels": ("الإحساس", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_humidity": ("الرطوبة", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_wind": ("الرياح", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_max": ("العظمى", 18, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_min": ("الصغرى", 18, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_today": ("اليوم", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_tomorrow": ("غدًا", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_after": ("بعد غد", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_no_weather": ("جارٍ تحميل الطقس …", 22, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_alarm": ("المنبه", 30, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_alarm_stop": ("المس الشاشة لإيقاف المنبه", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_settings": ("الإعدادات", 30, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_network": ("الشبكة", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_web": ("صفحة الإعدادات", 20, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_setup": ("إعداد الجهاز", 28, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_scan": ("امسح الرمز بهاتفك لفتح الإعدادات", 18, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_offline": ("غير متصل بالشبكة", 22, WHITE, "Amiri-Regular.ttf"),
-    "img_ar_txt_wifi_title": ("إعداد الواي فاي", 28, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_wifi_1": ("١. اتصل بالهاتف بشبكة Adhan-Wecker", 21, WHITE, "Amiri-Regular.ttf"),
-    "img_ar_txt_wifi_2": ("٢. افتح في المتصفح", 21, WHITE, "Amiri-Regular.ttf"),
-    "img_ar_txt_wifi_3": ("٣. اختر شبكتك وأدخل كلمة المرور", 21, WHITE, "Amiri-Regular.ttf"),
+HIJRI = {
+    "ar": ["محرم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة",
+           "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"],
+    "de": ["Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani", "Dschumada al-Ula", "Dschumada al-Achira",
+           "Radschab", "Scha'ban", "Ramadan", "Schawwal", "Dhu l-Qa'da", "Dhu l-Hiddscha"],
+    "en": ["Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani", "Jumada al-Ula", "Jumada al-Akhira",
+           "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhu al-Qa'da", "Dhu al-Hijja"],
+}
+# Kurzformen für die Kalender-Kopfzeile (Platz für zwei Monate nebeneinander)
+HIJRI_SHORT = {
+    "ar": HIJRI["ar"],
+    "de": ["Muharram", "Safar", "Rabi' I", "Rabi' II", "Dschumada I", "Dschumada II",
+           "Radschab", "Scha'ban", "Ramadan", "Schawwal", "Dhu l-Qa'da", "Dhu l-Hiddscha"],
+    "en": ["Muharram", "Safar", "Rabi' I", "Rabi' II", "Jumada I", "Jumada II",
+           "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhu al-Qa'da", "Dhu al-Hijja"],
+}
+PRAYER_NAMES = {  # model::Prayer
+    "ar": ["الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"],
+    "de": ["Fajr", "Sonnenaufgang", "Dhuhr", "Asr", "Maghrib", "Isha"],
+    "en": ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"],
 }
 
+# Wortlisten mit gemeinsamer Grundlinie: Schlüssel -> (Größe, fett, {Sprache: Liste})
+LISTS = {
+    "prayer": (20, False, PRAYER_NAMES),
+    "prayer_lg": (34, False, PRAYER_NAMES),
+    "wday": (32, False, {  # tm_wday 0..6
+        "ar": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+        "de": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+        "en": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]}),
+    "wshort": (17, False, {
+        "ar": ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
+        "de": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
+        "en": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}),
+    "gmonth": (28, True, {
+        "ar": ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+               "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+        "de": ["Januar", "Februar", "März", "April", "Mai", "Juni",
+               "Juli", "August", "September", "Oktober", "November", "Dezember"],
+        "en": ["January", "February", "March", "April", "May", "June",
+               "July", "August", "September", "October", "November", "December"]}),
+    "hmonth": (26, False, HIJRI),
+    "hmonth_sm": ((20, 18), False, HIJRI_SHORT),  # (Größe Arabisch, Größe Latein vor Skalierung)
+    "sky": (26, False, {  # model::Sky
+        "ar": ["صافٍ", "غائم جزئيًا", "غائم", "ضباب", "رذاذ", "مطر", "ثلج", "عاصفة رعدية"],
+        "de": ["Klar", "Teils bewölkt", "Bewölkt", "Nebel", "Nieselregen", "Regen", "Schnee", "Gewitter"],
+        "en": ["Clear", "Partly cloudy", "Cloudy", "Fog", "Drizzle", "Rain", "Snow", "Thunderstorm"]}),
+}
 
-AR_WEEKDAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]  # tm_wday 0..6
-AR_HIJRI_MONTHS = ["محرم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة",
-                   "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"]
-AR_WEEKDAYS_SHORT = ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"]  # tm_wday 0..6
-AR_GREG_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-                  "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
-AR_SKY = ["صافٍ", "غائم جزئيًا", "غائم", "ضباب", "رذاذ", "مطر", "ثلج", "عاصفة رعدية"]  # model::Sky
+LATIN_SCALE = 0.8  # lateinische Schrift wirkt bei gleicher Pixelgröße größer als Amiri
+
+
+def text_font(lang, size, bold):
+    if isinstance(size, tuple):
+        size = size[0] if lang == "ar" else size[1]
+    if lang == "ar":
+        return arabic_font(size, "Amiri-Bold.ttf" if bold else "Amiri-Regular.ttf"), size
+    size = round(size * LATIN_SCALE)
+    if bold:
+        return ImageFont.truetype(str(FONTS / "Marcellus-Regular.ttf"), size, layout_engine=ImageFont.Layout.RAQM), size
+    f = ImageFont.truetype(str(FONTS / "JosefinSans-Variable.ttf"), size, layout_engine=ImageFont.Layout.RAQM)
+    f.set_variation_by_axes([400])
+    return f, size
+
+
+def text_bbox(lang, text, font):
+    if lang == "ar":
+        return arabic_bbox(text, font)
+    return font.getbbox(text, anchor="ls", direction="ltr", language=lang)
+
+
+def write_text(name, lang, text, font, band=None):
+    """Schriftzug als 8-Bit-Alphamaske; LVGL zeichnet ihn in der Farbe der Farbgruppe (img_recolor).
+    `band` = (oben, unten) relativ zur Grundlinie, damit mehrere Wörter auf derselben Grundlinie stehen."""
+    x0, y0, x1, y1 = text_bbox(lang, text, font)
+    if band:
+        y0, y1 = band
+    w, h = x1 - x0 + 2, y1 - y0 + 2
+    mask = Image.new("L", (w, h), 0)
+    if lang == "ar":
+        ImageDraw.Draw(mask).text((1 - x0, 1 - y0), text, font=font, fill=255, anchor="rs", direction="rtl", language="ar")
+    else:
+        ImageDraw.Draw(mask).text((1 - x0, 1 - y0), text, font=font, fill=255, anchor="ls", direction="ltr", language=lang)
+    write_image_c(name, np.asarray(mask, np.uint8).tobytes(), w, h, "LV_IMG_CF_ALPHA_8BIT")
+    return mask
+
+
+def write_texts(masks):
+    """Alle Texte in allen Sprachen + Tabelle ui_texts[Sprache][TextId] (src/ui/assets/texts.h)."""
+    ids = list(TEXTS) + [f"{k}_{i}" for k, (_, _, d) in LISTS.items() for i in range(len(d["ar"]))]
+    for lang in LANGS:
+        for key, (size, bold, tr) in TEXTS.items():
+            font, _ = text_font(lang, size, bold)
+            masks[f"{lang}_{key}"] = write_text(f"img_{lang}_{key}", lang, tr[lang], font)
+        for key, (size, bold, tr) in LISTS.items():
+            font, _ = text_font(lang, size, bold)
+            boxes = [text_bbox(lang, t, font) for t in tr[lang]]
+            band = (min(b[1] for b in boxes), max(b[3] for b in boxes))
+            for i, t in enumerate(tr[lang]):
+                masks[f"{lang}_{key}_{i}"] = write_text(f"img_{lang}_{key}_{i}", lang, t, font, band)
+    names = [f"img_{lang}_{i}" for lang in LANGS for i in ids]
+    rows = ",\n".join("    {" + ", ".join(f"&img_{lang}_{i}" for i in ids) + "}" for lang in LANGS)
+    (OUT / "texts.c").write_text(
+        '// Automatisch erzeugt von tools/gen_assets.py\n#include "lvgl.h"\n#include "texts.h"\n'
+        + "\n".join(f"extern const lv_img_dsc_t {n};" for n in names)
+        + f"\nconst lv_img_dsc_t *const ui_texts[{len(LANGS)}][TXT_COUNT] = {{\n{rows}\n}};\n")
+    enum = ",\n".join(f"    TXT_{i.upper()}" for i in ids)
+    (OUT / "texts.h").write_text(
+        "// Automatisch erzeugt von tools/gen_assets.py – nicht von Hand bearbeiten.\n#pragma once\n#include \"lvgl.h\"\n\n"
+        f"#ifdef __cplusplus\nextern \"C\" {{\n#endif\n\nenum TextId\n{{\n{enum},\n    TXT_COUNT\n}};\n\n"
+        f"// [Sprache: {', '.join(LANGS)}][TextId]\nextern const lv_img_dsc_t *const ui_texts[{len(LANGS)}][TXT_COUNT];\n\n"
+        "#ifdef __cplusplus\n}\n#endif\n")
+
 
 # Wettersymbole: Reihenfolge = model::Sky, dazu Nachtvarianten
 SKY_ICONS = ["SUNNY", "PARTLY_CLOUDY", "CLOUDY", "FOG", "RAINY", "POURING", "SNOWY", "LIGHTNING",
              "NIGHT", "NIGHT_PARTLY_CLOUDY"]
-
-
-def write_list(prefix, texts, size, color, font_file):
-    """Mehrere Wörter mit gemeinsamer Grundlinie + Tabelle in <prefix>_list.c"""
-    f = arabic_font(size, font_file)
-    boxes = [arabic_bbox(t, f) for t in texts]
-    band = (min(b[1] for b in boxes), max(b[3] for b in boxes))
-    names = [f"{prefix}_{i}" for i in range(len(texts))]
-    for n, t in zip(names, texts):
-        write_arabic(n, t, size, color, font_file, band)
-    decl = "\n".join(f"extern const lv_img_dsc_t {n};" for n in names)
-    arr = ", ".join(f"&{n}" for n in names)
-    (OUT / f"{prefix}_list.c").write_text(
-        f'// Automatisch erzeugt von tools/gen_assets.py\n#include "lvgl.h"\n{decl}\n'
-        f"const lv_img_dsc_t *const {prefix}_list[{len(names)}] = {{{arr}}};\n")
 
 
 def main():
@@ -494,21 +552,8 @@ def main():
     write_font("font_josefin_15", "JosefinSans-Variable.ttf", 15, ASCII + GERMAN, weight=400, fallback="font_ar_17")
 
 
-    # arabische Gebetsnamen, je Größe mit gemeinsamer Grundlinie
     masks = {}
-    for suffix, size in AR_SIZES.items():
-        rf = arabic_font(size, AR_FONT)
-        boxes = [arabic_bbox(t, rf) for t in AR_ROWS.values()]
-        band = (min(b[1] for b in boxes), max(b[3] for b in boxes))
-        for name, text in AR_ROWS.items():
-            masks[name + suffix] = write_arabic(name + suffix, text, size, GOLD, AR_FONT, band)
-
-    write_list("img_ar_wday", AR_WEEKDAYS, 32, WHITE, "Amiri-Regular.ttf")
-    write_list("img_ar_hmonth", AR_HIJRI_MONTHS, 26, GOLD, "Amiri-Regular.ttf")
-    write_list("img_ar_sky", AR_SKY, 26, WHITE, "Amiri-Regular.ttf")
-    write_list("img_ar_wshort", AR_WEEKDAYS_SHORT, 17, MUTED, "Amiri-Regular.ttf")
-    write_list("img_ar_gmonth", AR_GREG_MONTHS, 28, GOLD, "Amiri-Bold.ttf")
-    write_list("img_ar_hmonth_sm", AR_HIJRI_MONTHS, 20, MUTED, "Amiri-Regular.ttf")
+    write_texts(masks)
     for i, icon in enumerate(["WIFI_OFF", "WIFI_1", "WIFI_2", "WIFI_3", "WIFI_4"]):
         write_icon_image(f"img_wifi_{i}", ICONS[icon], 22, IMG_WHITE)
     (OUT / "img_wifi_list.c").write_text(
@@ -526,9 +571,6 @@ def main():
             + "\n".join(f"extern const lv_img_dsc_t img_wx_{suffix}_{i};" for i in range(len(SKY_ICONS)))
             + f"\nconst lv_img_dsc_t *const img_wx_{suffix}_list[{len(SKY_ICONS)}] = {{"
             + ", ".join(f"&img_wx_{suffix}_{i}" for i in range(len(SKY_ICONS))) + "};\n")
-
-    for name, (text, size, color, f) in AR_TEXTS.items():
-        masks[name] = write_arabic(name, text, size, color, f)
 
     if args.preview:
         args.preview.mkdir(parents=True, exist_ok=True)

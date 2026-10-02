@@ -18,6 +18,7 @@
 #include "ui/alarm_screen.h"
 #include "ui/calendar_screen.h"
 #include "ui/clock_screen.h"
+#include "ui/lang.h"
 #include "ui/prayer_screen.h"
 #include "ui/settings_screen.h"
 #include "ui/theme.h"
@@ -259,6 +260,7 @@ void setup()
     }
     audio::begin(AZAN_VOLUME, CODEC_VOLUME); // nach dem Touch: gemeinsamer I2C-Bus
 
+    lang::begin();  // Anzeigesprache vor dem Aufbau der Oberfläche
     theme::begin(); // Farbgruppen vor dem Aufbau der Oberfläche
     ui::begin(settings::get().city);
     alarm_screen::create([] {

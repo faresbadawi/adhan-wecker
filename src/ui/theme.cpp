@@ -1,22 +1,6 @@
 #include "theme.h"
 #include <LittleFS.h>
 
-extern "C"
-{
-    LV_IMG_DECLARE(img_ar_fajr);
-    LV_IMG_DECLARE(img_ar_shuruq);
-    LV_IMG_DECLARE(img_ar_dhuhr);
-    LV_IMG_DECLARE(img_ar_asr);
-    LV_IMG_DECLARE(img_ar_maghrib);
-    LV_IMG_DECLARE(img_ar_isha);
-    LV_IMG_DECLARE(img_ar_fajr_lg);
-    LV_IMG_DECLARE(img_ar_shuruq_lg);
-    LV_IMG_DECLARE(img_ar_dhuhr_lg);
-    LV_IMG_DECLARE(img_ar_asr_lg);
-    LV_IMG_DECLARE(img_ar_maghrib_lg);
-    LV_IMG_DECLARE(img_ar_isha_lg);
-}
-
 namespace theme
 {
     static lv_style_t s_style[3];
@@ -161,12 +145,6 @@ namespace theme
 
     extern "C" const lv_img_dsc_t *const img_wx_sm_list[10];
     extern "C" const lv_img_dsc_t *const img_wx_lg_list[10];
-    extern "C" const lv_img_dsc_t *const img_ar_sky_list[8];
-    extern "C" const lv_img_dsc_t *const img_ar_wday_list[7];
-    extern "C" const lv_img_dsc_t *const img_ar_hmonth_list[12];
-    extern "C" const lv_img_dsc_t *const img_ar_hmonth_sm_list[12];
-    extern "C" const lv_img_dsc_t *const img_ar_wshort_list[7];
-    extern "C" const lv_img_dsc_t *const img_ar_gmonth_list[12];
 
     const lv_img_dsc_t *weatherIcon(model::Sky sky, bool isDay, bool large)
     {
@@ -179,20 +157,25 @@ namespace theme
         return (large ? img_wx_lg_list : img_wx_sm_list)[idx];
     }
 
-    const lv_img_dsc_t *skyText(model::Sky sky) { return img_ar_sky_list[(int)sky]; }
-    const lv_img_dsc_t *weekday(int wday) { return img_ar_wday_list[constrain(wday, 0, 6)]; }
-    const lv_img_dsc_t *hijriMonth(int month) { return img_ar_hmonth_list[constrain(month, 1, 12) - 1]; }
-    const lv_img_dsc_t *hijriMonthSmall(int month) { return img_ar_hmonth_sm_list[constrain(month, 1, 12) - 1]; }
-    const lv_img_dsc_t *weekdayShort(int wday) { return img_ar_wshort_list[constrain(wday, 0, 6)]; }
-    const lv_img_dsc_t *gregMonth(int month) { return img_ar_gmonth_list[constrain(month, 1, 12) - 1]; }
+    using lang::text;
+    const lv_img_dsc_t *skyText(model::Sky sky) { return text(TXT_SKY_0 + (int)sky); }
+    const lv_img_dsc_t *weekday(int wday) { return text(TXT_WDAY_0 + constrain(wday, 0, 6)); }
+    const lv_img_dsc_t *hijriMonth(int month) { return text(TXT_HMONTH_0 + constrain(month, 1, 12) - 1); }
+    const lv_img_dsc_t *hijriMonthSmall(int month) { return text(TXT_HMONTH_SM_0 + constrain(month, 1, 12) - 1); }
+    const lv_img_dsc_t *weekdayShort(int wday) { return text(TXT_WSHORT_0 + constrain(wday, 0, 6)); }
+    const lv_img_dsc_t *gregMonth(int month) { return text(TXT_GMONTH_0 + constrain(month, 1, 12) - 1); }
 
-    const lv_img_dsc_t *arabicName(model::Prayer p, bool large)
+    const lv_img_dsc_t *prayerName(model::Prayer p, bool large)
     {
-        static const lv_img_dsc_t *SMALL[model::PRAYER_COUNT] = {&img_ar_fajr, &img_ar_shuruq, &img_ar_dhuhr,
-                                                                 &img_ar_asr, &img_ar_maghrib, &img_ar_isha};
-        static const lv_img_dsc_t *LARGE[model::PRAYER_COUNT] = {&img_ar_fajr_lg, &img_ar_shuruq_lg,
-                                                                 &img_ar_dhuhr_lg, &img_ar_asr_lg,
-                                                                 &img_ar_maghrib_lg, &img_ar_isha_lg};
-        return (large ? LARGE : SMALL)[p < model::PRAYER_COUNT ? p : 0];
+        const int i = p < model::PRAYER_COUNT ? p : 0;
+        return text((large ? TXT_PRAYER_LG_0 : TXT_PRAYER_0) + i);
+    }
+
+    void alignStart(lv_obj_t *obj, lv_coord_t x, lv_coord_t y)
+    {
+        if (lang::rtl())
+            lv_obj_align(obj, LV_ALIGN_TOP_RIGHT, -x, y);
+        else
+            lv_obj_align(obj, LV_ALIGN_TOP_LEFT, x, y);
     }
 }

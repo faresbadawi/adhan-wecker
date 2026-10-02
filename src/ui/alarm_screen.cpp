@@ -4,8 +4,6 @@
 extern "C"
 {
     LV_IMG_DECLARE(img_alarm_lg);
-    LV_IMG_DECLARE(img_ar_txt_alarm);
-    LV_IMG_DECLARE(img_ar_txt_alarm_stop);
 }
 
 namespace alarm_screen
@@ -38,11 +36,11 @@ namespace alarm_screen
         lv_obj_set_style_border_width(card, 1, 0);
 
         lv_obj_align(image(card, &img_alarm_lg, Role::ACCENT), LV_ALIGN_TOP_MID, 0, 18);
-        lv_obj_align(image(card, &img_ar_txt_alarm, Role::ACCENT), LV_ALIGN_TOP_MID, 0, 86);
+        lv_obj_align(image(card, lang::text(TXT_ALARM), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 86);
         s_time = label(card, &font_count_52, Role::MAIN, "");
         lv_obj_align(s_time, LV_ALIGN_TOP_MID, 0, 128);
         divider(card, 190, 192, 140);
-        lv_obj_align(image(card, &img_ar_txt_alarm_stop, Role::MUTED), LV_ALIGN_TOP_MID, 0, 204);
+        lv_obj_align(image(card, lang::text(TXT_ALARM_STOP), Role::MUTED), LV_ALIGN_TOP_MID, 0, 204);
     }
 
     void show(bool on, int hour, int minute)

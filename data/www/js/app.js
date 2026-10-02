@@ -419,7 +419,8 @@ VIEWS.lang.bind = () => {
   $("langs").onclick = async e => {
     const b = e.target.closest("button"); if (!b || b.dataset.l === lang()) return;
     applyLang(b.dataset.l);
-    try { await api("/api/device/lang", { lang: b.dataset.l }); } catch (err) { /* lokal reicht */ }
+    try { const r = await api("/api/device/lang", { lang: b.dataset.l }); if (r.ok) toast(t("lang_restart")); }
+    catch (err) { toast(t("offline"), true); }
   };
 };
 

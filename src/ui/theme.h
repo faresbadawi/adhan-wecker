@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include "model.h"
+#include "lang.h"
 
 extern "C"
 {
@@ -59,9 +60,9 @@ namespace theme
 
     // Wettersymbol (Bild, gold) passend zu Himmel und Tageszeit; klein 34 px, groß 112 px
     const lv_img_dsc_t *weatherIcon(model::Sky sky, bool isDay, bool large);
-    // Wetterbeschreibung auf Arabisch ("غائم")
+    // Wetterbeschreibung in der Anzeigesprache
     const lv_img_dsc_t *skyText(model::Sky sky);
-    // Wochentag (tm_wday 0..6) und Hijri-Monat (1..12) auf Arabisch
+    // Wochentag (tm_wday 0..6) und Hijri-Monat (1..12)
     const lv_img_dsc_t *weekday(int wday);
     const lv_img_dsc_t *hijriMonth(int month);
     const lv_img_dsc_t *hijriMonthSmall(int month);
@@ -69,6 +70,9 @@ namespace theme
     const lv_img_dsc_t *weekdayShort(int wday);
     const lv_img_dsc_t *gregMonth(int month);
 
-    // Arabischer Schriftzug eines Gebets (klein: 20 px, groß: 34 px)
-    const lv_img_dsc_t *arabicName(model::Prayer p, bool large);
+    // Name eines Gebets (klein: Zeile, groß: Azan und nächstes Gebet)
+    const lv_img_dsc_t *prayerName(model::Prayer p, bool large);
+
+    // An der Anfangsseite der Sprache ausrichten: Arabisch rechts, sonst links (x = Abstand zum Rand)
+    void alignStart(lv_obj_t *obj, lv_coord_t x, lv_coord_t y);
 }

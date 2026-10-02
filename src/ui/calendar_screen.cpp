@@ -8,15 +8,15 @@ namespace calendar_screen
     static constexpr int COLS = 7, ROWS = 6;
     static constexpr lv_coord_t CELL_W = 61, CELL_H = 37;
     static constexpr lv_coord_t GRID_X = (SCREEN_W - COLS * CELL_W) / 2, GRID_Y = 82;
-    static constexpr int FRIDAY = 6; // Spalte von rechts: Samstag = 0 ... Freitag = 6
 
     static lv_obj_t *s_gMonth, *s_gYear;
     static lv_obj_t *s_hRow, *s_hFirst, *s_hSep, *s_hLast, *s_hYear;
     static lv_obj_t *s_cell[ROWS * COLS], *s_greg[ROWS * COLS], *s_hijri[ROWS * COLS];
 
-    // Spalte von rechts gezählt: Samstag = 0 ... Freitag = 6
-    static int columnOf(int wday) { return (wday + 1) % 7; }
-    static lv_coord_t columnX(int col) { return GRID_X + (COLS - 1 - col) * CELL_W; }
+    // Arabisch: Woche ab Samstag, Spalten von rechts gezählt. Deutsch/Englisch: ab Montag, von links.
+    static int columnOf(int wday) { return lang::rtl() ? (wday + 1) % 7 : (wday + 6) % 7; }
+    static lv_coord_t columnX(int col) { return GRID_X + (lang::rtl() ? COLS - 1 - col : col) * CELL_W; }
+    static int fridayColumn() { return columnOf(5); }
 
     static void show(lv_obj_t *o, bool on)
     {
@@ -33,11 +33,12 @@ namespace calendar_screen
         return DAYS[month - 1] + (month == 2 && leap ? 1 : 0);
     }
 
-    static lv_obj_t *rtlRow(lv_obj_t *parent, lv_coord_t gap)
+    // Zeile in Leserichtung der Sprache
+    static lv_obj_t *textRow(lv_obj_t *parent, lv_coord_t gap)
     {
         lv_obj_t *r = box(parent);
         lv_obj_set_size(r, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-        lv_obj_set_style_base_dir(r, LV_BASE_DIR_RTL, 0);
+        lv_obj_set_style_base_dir(r, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
         lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
         lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(r, gap, 0);
@@ -46,15 +47,15 @@ namespace calendar_screen
 
     void create(lv_obj_t *parent)
     {
-        // Rechts: gregorianischer Monat und Jahr
-        lv_obj_t *title = rtlRow(parent, 10);
-        lv_obj_align(title, LV_ALIGN_TOP_RIGHT, -GRID_X, 6);
+        // Anfangsseite (Arabisch rechts): gregorianischer Monat und Jahr
+        lv_obj_t *title = textRow(parent, 10);
+        alignStart(title, GRID_X, 6);
         s_gMonth = image(title, nullptr, Role::ACCENT);
         s_gYear = label(title, &font_josefin_22, Role::ACCENT, "");
 
-        // Links: Hijri-Monat(e) und Jahr
-        s_hRow = rtlRow(parent, 6);
-        lv_obj_align(s_hRow, LV_ALIGN_TOP_LEFT, GRID_X, 12);
+        // Gegenüber: Hijri-Monat(e) und Jahr
+        s_hRow = textRow(parent, 6);
+        lv_obj_align(s_hRow, lang::rtl() ? LV_ALIGN_TOP_LEFT : LV_ALIGN_TOP_RIGHT, lang::rtl() ? GRID_X : -GRID_X, 12);
         s_hFirst = image(s_hRow, nullptr, Role::MUTED);
         s_hSep = label(s_hRow, &font_josefin_15, Role::MUTED, "/");
         s_hLast = image(s_hRow, nullptr, Role::MUTED);
@@ -65,7 +66,7 @@ namespace calendar_screen
         for (int wday = 0; wday < 7; wday++)
         {
             const int col = columnOf(wday);
-            lv_obj_t *h = image(parent, weekdayShort(wday), col == FRIDAY ? Role::ACCENT : Role::MUTED);
+            lv_obj_t *h = image(parent, weekdayShort(wday), col == fridayColumn() ? Role::ACCENT : Role::MUTED);
             lv_obj_set_pos(h, columnX(col) + (CELL_W - weekdayShort(wday)->header.w) / 2, GRID_Y - 32);
         }
         divider(parent, SCREEN_W / 2, GRID_Y - 3, COLS * CELL_W / 2);
@@ -119,7 +120,7 @@ namespace calendar_screen
             int d = i - offset + 1; // Monatstag in dieser Zelle
             const bool inMonth = d >= 1 && d <= days;
             const bool isToday = inMonth && d == today.tm_mday;
-            const bool isFriday = i % COLS == FRIDAY;
+            const bool isFriday = i % COLS == fridayColumn();
 
             // Tage aus Vor- und Folgemonat blass; Zeilen ganz außerhalb des Monats ausblenden
             if (d < 1)

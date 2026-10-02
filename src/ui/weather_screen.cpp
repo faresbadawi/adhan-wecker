@@ -1,18 +1,6 @@
 #include "weather_screen.h"
 #include "theme.h"
 
-extern "C"
-{
-    LV_IMG_DECLARE(img_ar_txt_weather);
-    LV_IMG_DECLARE(img_ar_txt_feels);
-    LV_IMG_DECLARE(img_ar_txt_humidity);
-    LV_IMG_DECLARE(img_ar_txt_wind);
-    LV_IMG_DECLARE(img_ar_txt_today);
-    LV_IMG_DECLARE(img_ar_txt_tomorrow);
-    LV_IMG_DECLARE(img_ar_txt_after);
-    LV_IMG_DECLARE(img_ar_txt_no_weather);
-}
-
 namespace weather_screen
 {
     using namespace theme;
@@ -23,26 +11,27 @@ namespace weather_screen
     static lv_obj_t *s_feels, *s_humidity, *s_wind;
     static lv_obj_t *s_dayIcon[DAYS], *s_dayRange[DAYS];
 
-    // Detailzeile: arabische Bezeichnung rechts, Wert links
+    // Detailzeile: Bezeichnung an der Anfangsseite der Sprache, Wert gegenüber
     static lv_obj_t *detail(lv_obj_t *parent, lv_coord_t y, const lv_img_dsc_t *name)
     {
         constexpr lv_coord_t X = MARGIN, W = 160;
         lv_obj_t *row = box(parent);
         lv_obj_set_pos(row, X, y);
         lv_obj_set_size(row, W, 34);
-        lv_obj_align(image(row, name, Role::MUTED), LV_ALIGN_RIGHT_MID, 0, 0);
+        const bool rtl = lang::rtl();
+        lv_obj_align(image(row, name, Role::MUTED), rtl ? LV_ALIGN_RIGHT_MID : LV_ALIGN_LEFT_MID, 0, 0);
         lv_obj_t *v = label(row, &font_josefin_22, Role::MAIN, "");
-        lv_obj_align(v, LV_ALIGN_LEFT_MID, 0, 2);
+        lv_obj_align(v, rtl ? LV_ALIGN_LEFT_MID : LV_ALIGN_RIGHT_MID, 0, 2);
         return v;
     }
 
     void create(lv_obj_t *parent)
     {
-        lv_obj_align(image(parent, &img_ar_txt_weather, Role::ACCENT), LV_ALIGN_TOP_MID, 0, 6);
+        lv_obj_align(image(parent, lang::text(TXT_WEATHER), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 6);
         s_city = label(parent, &font_josefin_18, Role::MUTED, "");
         lv_obj_set_pos(s_city, MARGIN, 18);
 
-        s_loading = image(parent, &img_ar_txt_no_weather, Role::MUTED);
+        s_loading = image(parent, lang::text(TXT_NO_WEATHER), Role::MUTED);
         lv_obj_align(s_loading, LV_ALIGN_CENTER, 0, 0);
 
         s_content = box(parent);
@@ -58,20 +47,20 @@ namespace weather_screen
         lv_obj_align(s_sky, LV_ALIGN_TOP_RIGHT, -152, 124);
 
         // Links: Details
-        s_feels = detail(s_content, 56, &img_ar_txt_feels);
-        s_humidity = detail(s_content, 94, &img_ar_txt_humidity);
-        s_wind = detail(s_content, 132, &img_ar_txt_wind);
+        s_feels = detail(s_content, 56, lang::text(TXT_FEELS));
+        s_humidity = detail(s_content, 94, lang::text(TXT_HUMIDITY));
+        s_wind = detail(s_content, 132, lang::text(TXT_WIND));
 
         divider(s_content, SCREEN_W / 2, 182, SCREEN_W / 2 - MARGIN);
 
-        // Vorhersage von rechts nach links: اليوم ganz rechts
-        static const lv_img_dsc_t *NAMES[DAYS] = {&img_ar_txt_today, &img_ar_txt_tomorrow, &img_ar_txt_after};
+        // Vorhersage in Leserichtung: "heute" auf Arabisch ganz rechts, sonst ganz links
+        static const int NAMES[DAYS] = {TXT_TODAY, TXT_TOMORROW, TXT_AFTER};
         constexpr lv_coord_t CW = 138, GAP = 10, Y = 194, H = 106;
         const lv_coord_t x0 = (SCREEN_W - DAYS * CW - (DAYS - 1) * GAP) / 2;
         for (int i = 0; i < DAYS; i++)
         {
             lv_obj_t *c = box(s_content);
-            lv_obj_set_pos(c, x0 + (DAYS - 1 - i) * (CW + GAP), Y);
+            lv_obj_set_pos(c, x0 + (lang::rtl() ? DAYS - 1 - i : i) * (CW + GAP), Y);
             lv_obj_set_size(c, CW, H);
             lv_obj_set_style_radius(c, 10, 0);
             setRole(c, Role::ACCENT); // Rahmenfarbe
@@ -80,7 +69,7 @@ namespace weather_screen
             lv_obj_set_style_border_opa(c, LV_OPA_20, 0);
             lv_obj_set_style_border_width(c, 1, 0);
 
-            lv_obj_align(image(c, NAMES[i], Role::MUTED), LV_ALIGN_TOP_MID, 0, 2);
+            lv_obj_align(image(c, lang::text(NAMES[i]), Role::MUTED), LV_ALIGN_TOP_MID, 0, 2);
             s_dayIcon[i] = image(c, nullptr, Role::ACCENT);
             lv_obj_align(s_dayIcon[i], LV_ALIGN_TOP_MID, 0, 38);
             s_dayRange[i] = label(c, &font_josefin_18, Role::MAIN, "");

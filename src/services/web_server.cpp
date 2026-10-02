@@ -8,6 +8,7 @@
 #include "audio_manager.h"
 #include "azan_controller.h"
 #include "config.h"
+#include "ui/lang.h"
 #include "mawaqit.h"
 #include "prayer_times.h"
 #include "settings.h"
@@ -463,21 +464,18 @@ namespace web
         s_restartAt = millis() + 800;
     }
 
+    // Sprache von Web-App und Uhr; die Uhr startet neu, damit alle Seiten in der neuen Sprache entstehen
     static void deviceLang()
     {
         JsonDocument doc;
         deserializeJson(doc, s_server.arg("plain"));
-        const String lang = doc["lang"] | "";
-        if (lang != "ar" && lang != "de" && lang != "en")
+        if (!lang::save(doc["lang"] | ""))
         {
             s_server.send(400, "application/json", "{\"error\":\"lang\"}");
             return;
         }
-        Preferences p;
-        p.begin("web", false);
-        p.putString("lang", lang);
-        p.end();
         s_server.send(200, "application/json", "{}");
+        s_restartAt = millis() + 800;
     }
 
     static void start()

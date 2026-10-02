@@ -40,7 +40,7 @@ const T = {
     tone_playing: "♪ تشغيل النغمة على الجهاز", day_min: "اختر يومًا واحدًا على الأقل",
     days: ["ح", "ن", "ث", "ر", "خ", "ج", "س"],
     // Sprache
-    language: "اللغة", language_hint: "لغة هذا التطبيق. شاشة الساعة تبقى بالعربية.",
+    language: "اللغة", language_hint: "تُطبَّق اللغة على التطبيق وشاشة الساعة. تُعاد الساعة تشغيلها لذلك (حوالي ١٠ ثوانٍ).", lang_restart: "تُعاد الساعة تشغيلها باللغة الجديدة …",
     
     
     // WLAN
@@ -96,7 +96,7 @@ const T = {
     alarm_tone: "Weckton", tone_calm: "Ruhig · aufsteigende Glocken", tone_bells: "Glocken · sanfte Melodie", tone_classic: "Klassisch · Piepen",
     tone_playing: "♪ Ton wird auf der Uhr abgespielt", day_min: "Mindestens einen Tag wählen",
     days: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
-    language: "Sprache", language_hint: "Sprache dieser App. Das Display der Uhr bleibt arabisch.",
+    language: "Sprache", language_hint: "Gilt für die App und das Display der Uhr. Die Uhr startet dafür kurz neu (ca. 10 Sekunden).", lang_restart: "Die Uhr startet in der neuen Sprache neu …",
     
     
     
@@ -155,7 +155,7 @@ const T = {
     alarm_tone: "Alarm tone", tone_calm: "Calm · rising bells", tone_bells: "Bells · gentle melody", tone_classic: "Classic · beeping",
     tone_playing: "♪ Playing on the clock", day_min: "Select at least one day",
     days: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-    language: "Language", language_hint: "Language of this app. The clock's display stays Arabic.",
+    language: "Language", language_hint: "Applies to the app and the clock's display. The clock restarts briefly (about 10 seconds).", lang_restart: "The clock is restarting in the new language …",
     
     
     

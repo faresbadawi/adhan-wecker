@@ -4,15 +4,6 @@
 
 extern "C"
 {
-    LV_IMG_DECLARE(img_ar_txt_title);
-    LV_IMG_DECLARE(img_ar_txt_next);
-    LV_IMG_DECLARE(img_ar_txt_loading);
-    LV_IMG_DECLARE(img_ar_txt_wifi_title);
-    LV_IMG_DECLARE(img_ar_txt_wifi_1);
-    LV_IMG_DECLARE(img_ar_txt_wifi_2);
-    LV_IMG_DECLARE(img_ar_txt_wifi_3);
-    LV_IMG_DECLARE(img_ar_txt_azan_now);
-    LV_IMG_DECLARE(img_ar_txt_azan_stop);
     extern const lv_img_dsc_t *const img_wifi_list[5];
     LV_IMG_DECLARE(img_alarm);
 }
@@ -51,16 +42,19 @@ namespace prayer_screen
         lv_obj_set_style_border_opa(card, LV_OPA_60, 0);
         lv_obj_set_style_border_width(card, 1, 0);
 
-        lv_obj_align(image(card, &img_ar_txt_wifi_title, Role::ACCENT), LV_ALIGN_TOP_MID, 0, 16);
+        lv_obj_align(image(card, lang::text(TXT_WIFI_TITLE), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 16);
         divider(card, 200, 66, 150);
-        // rechtsbündig, wie arabischer Text
-        lv_obj_align(image(card, &img_ar_txt_wifi_1, Role::MAIN), LV_ALIGN_TOP_RIGHT, -24, 86);
-        lv_obj_t *step2 = image(card, &img_ar_txt_wifi_2, Role::MAIN);
-        lv_obj_align(step2, LV_ALIGN_TOP_RIGHT, -24, 128);
+        // an der Anfangsseite der Sprache ausgerichtet (Arabisch rechts)
+        alignStart(image(card, lang::text(TXT_WIFI_1), Role::MAIN), 24, 86);
+        lv_obj_t *step2 = image(card, lang::text(TXT_WIFI_2), Role::MAIN);
+        alignStart(step2, 24, 128);
         // IP in lateinischer Schrift, sonst setzt Amiri arabische Trennzeichen
         lv_obj_t *ip = label(card, &font_josefin_18, Role::MAIN, "192.168.4.1");
-        lv_obj_align_to(ip, step2, LV_ALIGN_OUT_LEFT_MID, -8, 2);
-        lv_obj_align(image(card, &img_ar_txt_wifi_3, Role::MAIN), LV_ALIGN_TOP_RIGHT, -24, 170);
+        if (lang::rtl())
+            lv_obj_align_to(ip, step2, LV_ALIGN_OUT_LEFT_MID, -8, 2);
+        else
+            lv_obj_align_to(ip, step2, LV_ALIGN_OUT_RIGHT_MID, 8, 0);
+        alignStart(image(card, lang::text(TXT_WIFI_3), Role::MAIN), 24, 170);
     }
 
     // Vollflächig und klickbar: ein Tippen irgendwo beendet den Azan
@@ -83,11 +77,11 @@ namespace prayer_screen
         lv_obj_set_style_border_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_width(card, 1, 0);
 
-        lv_obj_align(image(card, &img_ar_txt_azan_now, Role::MAIN), LV_ALIGN_TOP_MID, 0, 26);
+        lv_obj_align(image(card, lang::text(TXT_AZAN_NOW), Role::MAIN), LV_ALIGN_TOP_MID, 0, 26);
         s_azanName = image(card, nullptr, Role::ACCENT);
         lv_obj_align(s_azanName, LV_ALIGN_TOP_MID, 0, 72);
         divider(card, 190, 140, 140);
-        lv_obj_align(image(card, &img_ar_txt_azan_stop, Role::MUTED), LV_ALIGN_TOP_MID, 0, 160);
+        lv_obj_align(image(card, lang::text(TXT_AZAN_STOP), Role::MUTED), LV_ALIGN_TOP_MID, 0, 160);
     }
 
     void create(lv_obj_t *scr, const char *city)
@@ -120,7 +114,7 @@ namespace prayer_screen
         lv_obj_add_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
 
         // Oben rechts: Titel und Stadt
-        lv_obj_t *title = image(scr, &img_ar_txt_title, Role::ACCENT);
+        lv_obj_t *title = image(scr, lang::text(TXT_TITLE), Role::ACCENT);
         lv_obj_align(title, LV_ALIGN_TOP_RIGHT, -MARGIN, 20);
 
         // Oben rechts unter dem Titel: Wetter klein (Symbol + Temperatur + Stadt)
@@ -137,7 +131,7 @@ namespace prayer_screen
 
         divider(scr, SCREEN_W / 2, 108, SCREEN_W / 2 - MARGIN);
 
-        s_loading = image(scr, &img_ar_txt_loading, Role::MUTED);
+        s_loading = image(scr, lang::text(TXT_LOADING), Role::MUTED);
         lv_obj_align(s_loading, LV_ALIGN_TOP_MID, 0, 170);
 
         // Inhalt, erst sichtbar wenn Zeiten vorliegen
@@ -145,26 +139,26 @@ namespace prayer_screen
         lv_obj_set_size(s_content, SCREEN_W, SCREEN_H);
         lv_obj_add_flag(s_content, LV_OBJ_FLAG_HIDDEN);
 
-        lv_obj_align(image(s_content, &img_ar_txt_next, Role::MUTED), LV_ALIGN_TOP_MID, 0, 118);
+        lv_obj_align(image(s_content, lang::text(TXT_NEXT), Role::MUTED), LV_ALIGN_TOP_MID, 0, 118);
         s_nextName = image(s_content, nullptr, Role::ACCENT);
         lv_obj_align(s_nextName, LV_ALIGN_TOP_MID, 0, 138);
         s_countdown = label(s_content, &font_count_52, Role::MAIN, "--:--:--");
         lv_obj_align(s_countdown, LV_ALIGN_TOP_MID, 0, 180);
 
-        // Fünf Gebete von rechts nach links: الفجر ganz rechts
+        // Fünf Gebete in Leserichtung: الفجر auf Arabisch ganz rechts, sonst Fajr ganz links
         const lv_coord_t x0 = (SCREEN_W - CELLS * CELL_W) / 2;
         for (int i = 0; i < CELLS; i++)
         {
             const model::Prayer p = model::DAILY_PRAYERS[i];
             lv_obj_t *c = box(s_content);
-            lv_obj_set_pos(c, x0 + (CELLS - 1 - i) * CELL_W + 3, ROW_Y);
+            lv_obj_set_pos(c, x0 + (lang::rtl() ? CELLS - 1 - i : i) * CELL_W + 3, ROW_Y);
             lv_obj_set_size(c, CELL_W - 6, CELL_H);
             lv_obj_set_style_radius(c, 10, 0);
             setRole(c, Role::ACCENT); // Rahmen und Hinterlegung
             lv_obj_set_style_border_opa(c, LV_OPA_70, 0);
             s_cell[i] = c;
 
-            s_cellName[i] = image(c, arabicName(p, false), Role::ACCENT);
+            s_cellName[i] = image(c, prayerName(p, false), Role::ACCENT);
             lv_obj_align(s_cellName[i], LV_ALIGN_TOP_MID, 0, 6);
             s_cellTime[i] = label(c, &font_josefin_22, Role::MAIN, "--:--");
             lv_obj_align(s_cellTime[i], LV_ALIGN_TOP_MID, 0, 32);
@@ -213,7 +207,7 @@ namespace prayer_screen
         if (p != last)
         {
             last = p;
-            lv_img_set_src(s_nextName, arabicName(p, true));
+            lv_img_set_src(s_nextName, prayerName(p, true));
             lv_obj_align(s_nextName, LV_ALIGN_TOP_MID, 0, 138);
             for (int i = 0; i < CELLS; i++)
             {
@@ -243,7 +237,7 @@ namespace prayer_screen
     {
         if (show)
         {
-            lv_img_set_src(s_azanName, arabicName(p, true));
+            lv_img_set_src(s_azanName, prayerName(p, true));
             lv_obj_align(s_azanName, LV_ALIGN_TOP_MID, 0, 72);
             lv_obj_clear_flag(s_azan, LV_OBJ_FLAG_HIDDEN);
         }
