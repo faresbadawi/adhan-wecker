@@ -120,7 +120,8 @@
   .stepper span.nz { color:var(--gold); font-weight:700; }
 
   /* Schieberegler */
-  .range { display:flex; align-items:center; gap:14px; }
+  /* Regler immer von links (leise/dunkel) nach rechts (laut/hell), auch auf der arabischen Seite */
+  .range { display:flex; align-items:center; gap:14px; direction:ltr; }
   .range svg { color:var(--muted); }
   input[type=range] { flex:1; -webkit-appearance:none; appearance:none; height:6px; border-radius:999px; background:var(--line2); outline:none; padding:0; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--gold); border:3px solid #0b0f0d; box-shadow:0 0 0 1px var(--gold); }
