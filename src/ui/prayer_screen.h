@@ -25,5 +25,8 @@ namespace prayer_screen
 
     // Azan-Anzeige; Tippen irgendwo auf den Bildschirm ruft onTap auf (Azan beenden).
     void setAzanCallback(void (*onTap)());
+
+    // Antippen des Mikrofon-Symbols
+    void setMicCallback(void (*onTap)());
     void showAzan(bool show, model::Prayer p);
 }

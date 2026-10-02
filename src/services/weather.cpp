@@ -138,4 +138,46 @@ namespace weather
     }
 
     uint32_t version() { return s_version; }
+
+    bool fetchAt(float lat, float lon, model::Weather &out) { return fetch(lat, lon, out); }
+
+    bool geocode(const char *name, float &lat, float &lon, String &displayName)
+    {
+        String url = "http://geocoding-api.open-meteo.com/v1/search?count=1&language=ar&name=";
+        for (const char *p = name; *p; p++) // URL-kodieren
+        {
+            const uint8_t c = *p;
+            if (isalnum(c) || c == '-' || c == '.')
+                url += (char)c;
+            else
+            {
+                char b[4];
+                snprintf(b, sizeof(b), "%%%02X", c);
+                url += b;
+            }
+        }
+        netlock::Guard net;
+        WiFiClient client;
+        HTTPClient http;
+        http.useHTTP10(true);
+        http.setTimeout(10000);
+        if (!http.begin(client, url) || http.GET() != 200)
+        {
+            http.end();
+            return false;
+        }
+        String body;
+        const bool ok = httputil::readBody(http, body);
+        http.end();
+        JsonDocument doc;
+        if (!ok || deserializeJson(doc, body))
+            return false;
+        JsonObject r = doc["results"][0];
+        if (r.isNull())
+            return false;
+        lat = r["latitude"] | 0.0f;
+        lon = r["longitude"] | 0.0f;
+        displayName = String((const char *)(r["name"] | name)) + "، " + String((const char *)(r["country"] | ""));
+        return true;
+    }
 }

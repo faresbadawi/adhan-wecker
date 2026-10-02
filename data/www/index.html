@@ -158,6 +158,20 @@
   .sound.sel .mark { border-color:var(--gold); background:var(--gold); color:#0b0f0d; }
   .sound.sel .mark svg { width:14px; height:14px; stroke-width:2.5; }
 
+  /* Sprachassistent */
+  .keyrow { display:flex; gap:8px; }
+  .keyrow input { flex:1; direction:ltr; text-align:left; }
+  .keystate { display:flex; align-items:center; gap:8px; font-size:.9rem; margin-bottom:6px; }
+  .keystate .dot { width:10px; height:10px; border-radius:50%; background:var(--danger); }
+  .keystate.ok .dot { background:#6fc79a; }
+  .reply { margin-top:12px; padding:14px; border-radius:14px; background:rgba(0,0,0,.3); border:1px solid var(--line2); }
+  .reply .q { color:var(--muted); font-size:.9rem; }
+  .reply .a { margin-top:6px; font-size:1.05rem; }
+  .reply .e { color:var(--danger); margin-top:6px; }
+  details { margin-top:14px; }
+  summary { cursor:pointer; color:var(--muted); font-size:.9rem; }
+  .link { color:var(--gold); }
+
   /* Speichern + Hinweis */
   .savebar { position:fixed; inset:auto 0 0 0; padding:12px 16px calc(12px + env(safe-area-inset-bottom)); background:linear-gradient(180deg, transparent, rgba(5,10,8,.92) 35%); }
   .savebar button { display:block; width:100%; max-width:560px; margin:0 auto; background:var(--gold); color:#0b0f0d; border:0; font-weight:700; padding:14px; border-radius:14px; box-shadow:0 6px 20px rgba(201,164,92,.25); }
@@ -275,6 +289,40 @@
     <span class="label">نغمة المنبه</span>
     <div class="list" id="sounds"></div>
     <p class="hint">يرن المنبه في الأيام المختارة حتى تلمس الشاشة أو تضغط زر BOOT (بحد أقصى ١٠ دقائق).</p>
+  </section>
+
+  <section>
+    <h2><span class="ico"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></svg></span>المساعد الصوتي</h2>
+    <div class="keystate" id="keyState"><span class="dot"></span><span id="keyText"></span></div>
+    <label for="aiKey">مفتاح OpenAI (يُحفظ على الساعة فقط)</label>
+    <div class="keyrow">
+      <input id="aiKey" type="password" placeholder="sk-…" autocomplete="off">
+      <button id="saveKey">حفظ</button>
+    </div>
+    <p class="hint">احصل على المفتاح من <span class="link">platform.openai.com</span> ← API keys. يلزم رصيد في الحساب.</p>
+
+    <span class="label">جرّب المساعد</span>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <input id="aiQuestion" placeholder="مثال: متى صلاة المغرب؟" enterkeyhint="send">
+      <button id="aiAsk">اسأل</button>
+    </div>
+    <button class="chip" id="aiListen"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/></svg>تحدّث إلى الساعة الآن</button>
+    <div class="reply" id="aiReply" hidden><div class="q" id="aiQ"></div><div class="a" id="aiA"></div><div class="e" id="aiE"></div></div>
+    <p class="hint">على الساعة: المس رمز الميكروفون في الصفحة الرئيسية ثم اسأل بالعربية.</p>
+
+    <details>
+      <summary>إعدادات متقدمة</summary>
+      <label for="aiChat">نموذج الإجابة</label><input id="aiChat" class="ltr">
+      <label for="aiStt">نموذج التعرف على الكلام</label><input id="aiStt" class="ltr">
+      <label for="aiTts">نموذج النطق</label><input id="aiTts" class="ltr">
+      <label for="aiVoice">الصوت</label>
+      <select id="aiVoice">
+        <option>alloy</option><option>ash</option><option>coral</option><option>echo</option><option>fable</option>
+        <option>nova</option><option>onyx</option><option>sage</option><option>shimmer</option>
+      </select>
+      <button id="aiCfg" style="width:100%;margin-top:12px">حفظ الإعدادات المتقدمة</button>
+    </details>
   </section>
 
   <section>
@@ -489,6 +537,70 @@ $("addAlarm").onclick = () => {
   renderAlarms(); post({alarms});
 };
 
+/* ---------- Sprachassistent ---------- */
+const AI_STATE = { listening: "أستمع …", thinking: "لحظة من فضلك …", speaking: "", answer: "", error: "", idle: "" };
+let aiPoll;
+
+async function apiJson(url, body) {
+  const r = await fetch(url, body === undefined ? {} : { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) });
+  return { ok: r.ok, status: r.status, data: r.ok ? await r.json() : null };
+}
+
+function showAssistant(a) {
+  const ks = $("keyState");
+  ks.classList.toggle("ok", a.hasKey);
+  $("keyText").textContent = a.hasKey ? `المفتاح محفوظ (${a.keyHint})` : "لم يُحفظ مفتاح بعد";
+  if (!$("aiChat").value) {
+    $("aiChat").value = a.chatModel; $("aiStt").value = a.sttModel; $("aiTts").value = a.ttsModel; $("aiVoice").value = a.voice;
+  }
+  const active = a.state !== "idle";
+  $("aiReply").hidden = !active && !$("aiA").textContent;
+  if (active) {
+    $("aiQ").textContent = a.question || AI_STATE[a.state] || "";
+    $("aiA").textContent = a.state === "error" ? "" : (a.answer || (a.question ? AI_STATE[a.state] : ""));
+    $("aiE").textContent = a.state === "error" ? a.error : "";
+  }
+  return active && a.state !== "answer" && a.state !== "error";
+}
+
+function pollAssistant() {
+  clearInterval(aiPoll);
+  aiPoll = setInterval(async () => {
+    const r = await apiJson("/api/assistant");
+    if (r.ok && !showAssistant(r.data)) clearInterval(aiPoll);
+  }, 1000);
+}
+
+$("saveKey").onclick = async () => {
+  const key = $("aiKey").value.trim();
+  if (!key.startsWith("sk-")) { status("المفتاح يبدأ عادة بـ sk-", true); return; }
+  const r = await apiJson("/api/assistant/key", { key });
+  if (r.ok) { $("aiKey").value = ""; showAssistant(r.data); status("تم حفظ المفتاح ✓"); }
+  else status("تعذّر حفظ المفتاح", true);
+};
+$("aiAsk").onclick = async () => {
+  const text = $("aiQuestion").value.trim(); if (!text) return;
+  $("aiA").textContent = ""; $("aiE").textContent = "";
+  const r = await apiJson("/api/assistant/ask", { text });
+  if (r.ok) { showAssistant(r.data); pollAssistant(); }
+  else status(r.status === 409 ? "المساعد مشغول أو لا يوجد مفتاح/اتصال" : "تعذّر الإرسال", true);
+};
+$("aiQuestion").onkeydown = e => { if (e.key === "Enter") $("aiAsk").click(); };
+$("aiListen").onclick = async () => {
+  $("aiA").textContent = ""; $("aiE").textContent = "";
+  const r = await apiJson("/api/assistant/listen", {});
+  if (r.ok) { showAssistant(r.data); pollAssistant(); status("تحدّث الآن إلى الساعة"); }
+  else status("المساعد مشغول أو لا يوجد مفتاح/اتصال", true);
+};
+$("aiCfg").onclick = async () => {
+  const r = await apiJson("/api/assistant/config", { chatModel: $("aiChat").value.trim(), sttModel: $("aiStt").value.trim(),
+    ttsModel: $("aiTts").value.trim(), voice: $("aiVoice").value });
+  status(r.ok ? "تم الحفظ ✓" : "تعذّر الحفظ", !r.ok);
+};
+async function loadAssistant() {
+  try { const r = await apiJson("/api/assistant"); if (r.ok) showAssistant(r.data); } catch (e) { /* ältere Firmware */ }
+}
+
 /* ---------- Wecktöne ---------- */
 const SOUND_NAMES = { calm: "هادئة · أجراس متصاعدة", bells: "أجراس · لحن هادئ", classic: "تقليدية · صفير المنبه" };
 const PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
@@ -621,6 +733,7 @@ async function load() {
   Object.assign(AZAN, s.azan); renderAzan();
   alarms = s.alarms || []; renderAlarms();
   loadSounds();
+  loadAssistant();
   $("volume").value = s.volume; $("brightness").value = s.brightness;
   bindRange("volume", "volume"); bindRange("brightness", "brightness");
   background = s.background;

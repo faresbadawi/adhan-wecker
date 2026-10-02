@@ -15,6 +15,7 @@ extern "C"
     LV_IMG_DECLARE(img_ar_txt_azan_stop);
     extern const lv_img_dsc_t *const img_wifi_list[5];
     LV_IMG_DECLARE(img_alarm);
+    LV_IMG_DECLARE(img_mic);
 }
 
 namespace prayer_screen
@@ -31,6 +32,7 @@ namespace prayer_screen
     static lv_obj_t *s_wifi;
     static lv_obj_t *s_azan, *s_azanName;
     static void (*s_onAzanTap)() = nullptr;
+    static void (*s_onMicTap)() = nullptr;
     static lv_obj_t *s_wxIcon, *s_wxTemp, *s_city;
     static lv_obj_t *s_wifiIcon;
     static lv_obj_t *s_alarmRow, *s_alarmTime;
@@ -107,6 +109,14 @@ namespace prayer_screen
         lv_obj_add_event_cb(hit, [](lv_event_t *) { ui::showPage(ui::PAGE_SETTINGS); }, LV_EVENT_CLICKED, nullptr);
         s_wifiIcon = image(hit, img_wifi_list[0], Role::MUTED);
         lv_obj_align(s_wifiIcon, LV_ALIGN_TOP_LEFT, 4, 8);
+
+        // Mikrofon neben dem WLAN-Symbol: Frage an den Sprachassistenten
+        lv_obj_t *mic = box(scr);
+        lv_obj_add_flag(mic, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_pos(mic, 244, 14);
+        lv_obj_set_size(mic, 48, 44);
+        lv_obj_add_event_cb(mic, [](lv_event_t *) { if (s_onMicTap) s_onMicTap(); }, LV_EVENT_CLICKED, nullptr);
+        lv_obj_align(image(mic, &img_mic, Role::ACCENT), LV_ALIGN_TOP_LEFT, 4, 6);
 
         // Nächster Wecker (nur sichtbar, wenn einer aktiv ist)
         s_alarmRow = box(scr);
@@ -280,4 +290,6 @@ namespace prayer_screen
         lv_label_set_text_fmt(s_alarmTime, "%02d:%02d", minutes / 60, minutes % 60);
         lv_obj_clear_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
     }
+
+    void setMicCallback(void (*onTap)()) { s_onMicTap = onTap; }
 }

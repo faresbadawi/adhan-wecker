@@ -5,6 +5,7 @@
 #include "hal/display_port.h"
 #include "hal/lcd_st77922.h"
 #include "services/alarm_clock.h"
+#include "services/assistant.h"
 #include "services/audio_manager.h"
 #include "services/azan_controller.h"
 #include "services/prayer_times.h"
@@ -15,6 +16,7 @@
 #include "services/web_server.h"
 #include "services/wifi_manager.h"
 #include "ui/alarm_screen.h"
+#include "ui/assistant_screen.h"
 #include "ui/calendar_screen.h"
 #include "ui/clock_screen.h"
 #include "ui/prayer_screen.h"
@@ -146,6 +148,25 @@ static void refreshEverySecond(const struct tm &now)
     }
 }
 
+// Sprachassistent: Fenster nachführen, Antwort nach einiger Zeit ausblenden
+static void refreshAssistant()
+{
+    static uint32_t shown = 0;
+    static uint32_t answerSince = 0;
+    if (assistant::version() != shown)
+    {
+        shown = assistant::version();
+        const assistant::Status st = assistant::status();
+        assistant_screen::update(st);
+        answerSince = (st.state == assistant::State::ANSWER || st.state == assistant::State::ERROR) ? millis() : 0;
+    }
+    if (answerSince && millis() - answerSince > 15000)
+    {
+        answerSince = 0;
+        assistant::dismiss();
+    }
+}
+
 // Azan zur Gebetszeit starten und die Anzeige nachführen
 static void refreshAzan(const struct tm &now)
 {
@@ -169,7 +190,10 @@ static void refreshAzan(const struct tm &now)
     {
         shown = active;
         if (active)
+        {
+            assistant::dismiss(); // Azan hat Vorrang
             ui::showPage(ui::PAGE_PRAYER); // danach steht wieder die Hauptseite da
+        }
         prayer_screen::showAzan(active, st.prayer);
     }
 }
@@ -265,10 +289,16 @@ void setup()
 
     theme::begin(); // Farbgruppen vor dem Aufbau der Oberfläche
     ui::begin(settings::get().city);
+    prayer_screen::setMicCallback([] {
+        // nicht während Azan oder Wecker
+        if (azan::status().state == azan::State::IDLE && !alarmclock::ringing())
+            assistant::listen();
+    });
     alarm_screen::create([] {
         alarmclock::stop();
         alarm_screen::show(false, 0, 0);
     });
+    assistant_screen::create(assistant::dismiss);
     applySettings(); // Farben, Hintergrund, Helligkeit, Lautstärke
     prayer_screen::setAzanCallback(azan::skip);
     pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
@@ -278,6 +308,7 @@ void setup()
     wifimgr::begin(SETUP_AP_NAME);
     prayers::begin(DEMO_MODE);
     weather::begin();
+    assistant::begin();
     Serial.printf("RAM frei: intern %u kB (groesster Block %u kB), PSRAM %u kB\n",
                   heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024,
                   heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024,
@@ -304,6 +335,7 @@ void loop()
             refreshEverySecond(now);
         }
         refreshAzan(now);
+        refreshAssistant();
     }
 
     lv_timer_handler();

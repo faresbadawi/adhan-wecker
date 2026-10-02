@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include "assistant.h"
 #include "audio_manager.h"
 #include "azan_controller.h"
 #include "mawaqit.h"
@@ -313,8 +314,111 @@ namespace web
         sendSounds();
     }
 
+    // ---------- Sprachassistent
+
+    static const char *stateName(assistant::State st)
+    {
+        switch (st)
+        {
+        case assistant::State::LISTENING: return "listening";
+        case assistant::State::THINKING: return "thinking";
+        case assistant::State::SPEAKING: return "speaking";
+        case assistant::State::ANSWER: return "answer";
+        case assistant::State::ERROR: return "error";
+        default: return "idle";
+        }
+    }
+
+    // Status und Einstellungen; der Schlüssel selbst wird nie zurückgegeben
+    static void sendAssistant()
+    {
+        const assistant::Status st = assistant::status();
+        const assistant::Config c = assistant::config();
+        JsonDocument doc;
+        doc["hasKey"] = assistant::hasKey();
+        doc["keyHint"] = assistant::keyHint();
+        doc["chatModel"] = c.chatModel;
+        doc["sttModel"] = c.sttModel;
+        doc["ttsModel"] = c.ttsModel;
+        doc["voice"] = c.voice;
+        doc["state"] = stateName(st.state);
+        doc["question"] = st.question;
+        doc["answer"] = st.answer;
+        doc["error"] = st.error;
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+
+    static bool parseBody(JsonDocument &doc)
+    {
+        if (deserializeJson(doc, s_server.arg("plain")))
+        {
+            s_server.send(400, "application/json", "{\"error\":\"json\"}");
+            return false;
+        }
+        return true;
+    }
+
+    static void assistantKey()
+    {
+        JsonDocument doc;
+        if (!parseBody(doc))
+            return;
+        assistant::setKey(doc["key"] | "");
+        sendAssistant();
+    }
+
+    static void assistantConfig()
+    {
+        JsonDocument doc;
+        if (!parseBody(doc))
+            return;
+        assistant::Config c = assistant::config();
+        auto take = [&](const char *k, String &field) {
+            const char *v = doc[k] | "";
+            if (v[0] && strlen(v) < 48)
+                field = v;
+        };
+        take("chatModel", c.chatModel);
+        take("sttModel", c.sttModel);
+        take("ttsModel", c.ttsModel);
+        take("voice", c.voice);
+        assistant::setConfig(c);
+        sendAssistant();
+    }
+
+    static void assistantAsk()
+    {
+        JsonDocument doc;
+        if (!parseBody(doc))
+            return;
+        const String text = doc["text"] | "";
+        if (text.isEmpty() || !assistant::ask(text))
+        {
+            s_server.send(409, "application/json", "{\"error\":\"busy\"}");
+            return;
+        }
+        sendAssistant();
+    }
+
+    static void assistantListen()
+    {
+        if (!assistant::listen())
+        {
+            s_server.send(409, "application/json", "{\"error\":\"busy\"}");
+            return;
+        }
+        sendAssistant();
+    }
+
     static void start()
     {
+        s_server.on("/api/assistant", HTTP_GET, sendAssistant);
+        s_server.on("/api/assistant/key", HTTP_POST, assistantKey);
+        s_server.on("/api/assistant/config", HTTP_POST, assistantConfig);
+        s_server.on("/api/assistant/ask", HTTP_POST, assistantAsk);
+        s_server.on("/api/assistant/listen", HTTP_POST, assistantListen);
         s_server.on("/api/sounds", HTTP_GET, sendSounds);
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);

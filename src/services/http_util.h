@@ -1,6 +1,7 @@
 // Hilfen für HTTP-Abrufe aus Hintergrund-Tasks.
 #pragma once
 #include <HTTPClient.h>
+#include <FS.h>
 #include <WiFi.h>
 
 namespace httputil
@@ -41,5 +42,34 @@ namespace httputil
             }
         }
         return total < 0 || (int)out.length() == total;
+    }
+
+    // Wie readBody, schreibt aber direkt in eine Datei (für größere Binärdaten, z. B. MP3).
+    inline bool readBodyToFile(HTTPClient &http, File &file, uint32_t timeoutMs = 20000)
+    {
+        WiFiClient *stream = http.getStreamPtr();
+        const int total = http.getSize();
+        uint8_t buf[1024];
+        int written = 0;
+        uint32_t lastData = millis();
+        while (total < 0 || written < total)
+        {
+            const int avail = stream->available();
+            if (avail > 0)
+            {
+                const int n = stream->readBytes(buf, min(avail, (int)sizeof(buf)));
+                if (file.write(buf, n) != (size_t)n)
+                    return false;
+                written += n;
+                lastData = millis();
+            }
+            else if (!stream->connected())
+                break;
+            else if (millis() - lastData > timeoutMs)
+                return false;
+            else
+                vTaskDelay(pdMS_TO_TICKS(5));
+        }
+        return written > 0 && (total < 0 || written == total);
     }
 }
