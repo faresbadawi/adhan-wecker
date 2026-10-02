@@ -511,10 +511,11 @@ function installCard() {
   else if (installEvt) body = `<div class="actions" style="margin-top:0"><button class="btn gold" id="devInstall">${I.download}${t("install")}</button></div>`;
   else if (isIOS()) body = `<p class="hint" style="margin-top:0">${t("install_hint_ios")}</p>`;
   else if (window.isSecureContext) body = `<p class="hint" style="margin-top:0">${t("install_menu")}</p>`;
-  else body = `<p class="hint" style="margin-top:0">${t("install_why")}</p>
-    <ol class="steps"><li>${t("install_s1")}${copyField("cpFlag", FLAG_URL)}</li>
-      <li>${t("install_s2")}${copyField("cpOrigin", location.origin)}</li><li>${t("install_s3")}</li></ol>
-    <p class="hint">${t("install_ip")}</p>`;
+  else body = `<ol class="steps"><li>${t("sc_1")}</li><li>${t("sc_2")}</li><li>${t("sc_3")}</li></ol>
+    <p class="hint">${t("install_ip")}</p>
+    <details><summary>${t("sc_adv")}</summary><p class="hint">${t("install_why")}</p>
+      <ol class="steps"><li>${t("install_s1")}${copyField("cpFlag", FLAG_URL)}</li>
+        <li>${t("install_s2")}${copyField("cpOrigin", location.origin)}</li><li>${t("install_s3")}</li></ol></details>`;
   return card(window.isSecureContext || isIOS() || isStandalone() ? t("install") : t("install_android"), I.download, body);
 }
 
