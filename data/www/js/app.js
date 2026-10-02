@@ -14,7 +14,6 @@ const I = {
   location: svg('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>'),
   display: svg('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>'),
   audio: svg('<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>'),
-  ai: svg('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
   wifi: svg('<path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/>'),
   device: svg('<rect x="2" y="5" width="20" height="14" rx="3"/><circle cx="12" cy="12" r="3.2"/><path d="M12 10.5V12l1 .8"/>'),
   clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
@@ -34,8 +33,8 @@ const I = {
   search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>'), refresh: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>'),
   power: svg('<path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/>'), download: svg('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
+  lang: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
   globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
-  key: svg('<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/>'),
   palette: svg('<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.6-1-2.7 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="9.5" r="1.8"/><path d="m21 16-5-5-9 9"/>'),
   sliders: svg('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'),
@@ -44,7 +43,7 @@ const I = {
   info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>'),
 };
 
-const NAV = ["dashboard", "prayer", "location", "display", "audio", "ai", "wifi", "device"];
+const NAV = ["dashboard", "prayer", "location", "display", "audio", "lang", "wifi", "device"];
 const PAGE_ICON = { clock: I.clock, prayer: I.prayer, weather: I.cloud, calendar: I.calendar };
 const SKY_ICON = { clear: I.sun, partly_cloudy: I.partly, cloudy: I.cloud, fog: I.fog, drizzle: I.rain, rain: I.rain, snow: I.snow, thunder: I.thunder };
 
@@ -155,7 +154,7 @@ VIEWS.dashboard = () => {
   const p = ST && ST.prayer, wx = ST && ST.weather, loc = ST ? ST.location : (S ? { city: S.city, country: S.country } : {});
   const date = ST && ST.time ? new Date(ST.time.date + "T12:00:00").toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
   const next = p && p.next ? p.next.key : "";
-  return `
+  return `${installBanner()}
   <div class="pills" style="margin-bottom:14px"><span class="pill">${deviceState()}</span><span class="pill">${wifiState()}</span>
     <span class="pill">${I.location}<span dir="auto">${esc([loc.city, loc.country].filter(Boolean).join(", ")) || "—"}</span></span></div>
   <div class="grid">
@@ -173,7 +172,14 @@ VIEWS.dashboard = () => {
       <div class="kv"><span>${t("nav_wifi")}</span><span>${wifiState()}</span></div>`)}
   </div>`;
 };
-VIEWS.dashboard.bind = () => tick();
+VIEWS.dashboard.bind = () => {
+  tick();
+  if ($("bnInstall")) $("bnInstall").onclick = () => installEvt ? install() : go("device");
+  if ($("bnClose")) $("bnClose").onclick = () => {
+    try { localStorage.setItem("installBanner", "off"); } catch (e) { /* privat */ }
+    render();
+  };
+};
 
 // Uhr und Countdown laufen lokal weiter, der Status wird nur alle 20 s neu geholt
 function tick() {
@@ -407,41 +413,13 @@ VIEWS.audio.bind = () => {
   };
 };
 
-VIEWS.ai = () => `
-  ${card(t("language"), I.globe, `<div class="langs" id="langs">${Object.entries(LANGS).map(([k, n]) =>
-    `<button data-l="${k}" class="${k === lang() ? "on" : ""}" lang="${k}">${n}</button>`).join("")}</div><p class="hint">${t("language_hint")}</p>`)}
-  ${card(t("assistant"), I.ai, `<div class="keystate" id="keyState">${loading("")}</div>
-    <label class="f" for="aiKey">${t("key_label")}</label>
-    <div class="row"><input id="aiKey" type="password" class="grow ltr" autocomplete="off" placeholder="sk-…"><button class="btn gold" id="aiKeySave">${t("save")}</button></div>
-    <p class="hint">${t("key_hint")}</p><p class="hint">${t("ai_scope")}</p>
-    <details><summary>${t("advanced")}</summary>
-      <label class="f" for="aiChat">${t("model_chat")}</label><input id="aiChat" class="ltr">
-      <label class="f" for="aiStt">${t("model_stt")}</label><input id="aiStt" class="ltr">
-      <label class="f" for="aiTts">${t("model_tts")}</label><input id="aiTts" class="ltr">
-      <label class="f" for="aiVoice">${t("voice")}</label>
-      <select id="aiVoice" class="ltr">${["alloy", "ash", "coral", "echo", "fable", "nova", "onyx", "sage", "shimmer"].map(v => `<option>${v}</option>`).join("")}</select>
-      <div class="actions"><button class="btn" id="aiCfg">${t("save")}</button></div>
-    </details>`)}`;
-VIEWS.ai.bind = () => {
+VIEWS.lang = () => card(t("language"), I.globe, `<div class="langs" id="langs">${Object.entries(LANGS).map(([k, n]) =>
+    `<button data-l="${k}" class="${k === lang() ? "on" : ""}" lang="${k}">${n}</button>`).join("")}</div><p class="hint">${t("language_hint")}</p>`);
+VIEWS.lang.bind = () => {
   $("langs").onclick = async e => {
     const b = e.target.closest("button"); if (!b || b.dataset.l === lang()) return;
     applyLang(b.dataset.l);
     try { await api("/api/device/lang", { lang: b.dataset.l }); } catch (err) { /* lokal reicht */ }
-  };
-  const show = a => {
-    $("keyState").innerHTML = `<span class="dot ${a.hasKey ? "ok" : ""}"></span>${I.key}<span>${a.hasKey ? `${t("key_saved")} <span class="ltr">(…${esc(a.keyHint)})</span>` : t("key_missing")}</span>`;
-    $("aiChat").value = a.chatModel; $("aiStt").value = a.sttModel; $("aiTts").value = a.ttsModel; $("aiVoice").value = a.voice;
-  };
-  api("/api/assistant").then(r => r.data && show(r.data)).catch(() => { $("keyState").textContent = t("offline"); });
-  $("aiKeySave").onclick = async () => {
-    const key = $("aiKey").value.trim();
-    if (!key.startsWith("sk-")) { toast(t("key_bad"), true); return; }
-    const r = await api("/api/assistant/key", { key });
-    if (r.ok) { $("aiKey").value = ""; show(r.data); if (ST) ST.assistant = { hasKey: r.data.hasKey }; toast(t("saved")); } else toast(t("error"), true);
-  };
-  $("aiCfg").onclick = async () => {
-    const r = await api("/api/assistant/config", { chatModel: $("aiChat").value.trim(), sttModel: $("aiStt").value.trim(), ttsModel: $("aiTts").value.trim(), voice: $("aiVoice").value });
-    toast(r.ok ? t("saved") : t("error"), !r.ok);
   };
 };
 
@@ -494,8 +472,6 @@ VIEWS.wifi.bind = () => {
 
 VIEWS.device = () => {
   const d = ST && ST.device;
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const installHint = isStandalone() ? "" : ios ? t("install_hint_ios") : (!window.isSecureContext && !installEvt ? t("install_hint_http") : "");
   return `
   ${card(t("device"), I.device, `
     <div class="kv"><span>${t("dev_name")}</span><span>${esc(d ? d.name : "Smart Azan Clock")}</span></div>
@@ -505,8 +481,7 @@ VIEWS.device = () => {
     ${d ? `<div class="kv"><span>${t("ip")}</span><span class="ltr">${esc(d.ip)}</span></div>
     <div class="kv"><span>${t("host")}</span><span class="ltr">${esc(d.host)}</span></div>
     <div class="kv"><span>${t("uptime")}</span><span>${duration(d.uptime)}</span></div>` : ""}`)}
-  ${card(t("install"), I.download, `${installHint ? `<p class="hint" style="margin-top:0">${installHint}</p>` : ""}
-    <div class="actions"><button class="btn gold" id="devInstall" ${installEvt ? "" : "hidden"}>${I.download}${t("install")}</button></div>`)}
+  ${installCard()}
   ${card(t("firmware_update"), I.download, `<div class="actions" style="margin-top:0;justify-content:space-between;align-items:center">
     <span class="hint" style="margin:0">${t("soon")}</span><button class="btn" disabled>${t("firmware_update")}</button></div>`)}
   ${card(t("restart"), I.power, `<div class="actions" style="margin-top:0">
@@ -514,7 +489,7 @@ VIEWS.device = () => {
     <button class="btn danger" id="devReset">${t("factory_reset")}</button></div><p class="hint">${t("factory_hint")}</p>`)}`;
 };
 VIEWS.device.bind = () => {
-  $("devInstall").onclick = install;
+  bindInstall();
   $("devRestart").onclick = async () => {
     if (!await confirmBox(t("are_you_sure"), "", false)) return;
     try { await api("/api/device/restart", {}); toast(t("restarting")); } catch (e) { toast(t("offline"), true); }
@@ -525,13 +500,50 @@ VIEWS.device.bind = () => {
   };
 };
 
+// ---------- Installation: Knopf, sobald Chrome sie anbietet, sonst Anleitung
+const FLAG_URL = "chrome://flags/#unsafely-treat-insecure-origin-as-secure";
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const copyField = (id, value) => `<div class="copy"><input id="${id}" class="ltr" readonly value="${esc(value)}"><button class="btn" data-copy="${id}">${t("copy")}</button></div>`;
+
+function installCard() {
+  let body;
+  if (isStandalone()) body = `<p class="hint" style="margin-top:0">${t("installed")}</p>`;
+  else if (installEvt) body = `<div class="actions" style="margin-top:0"><button class="btn gold" id="devInstall">${I.download}${t("install")}</button></div>`;
+  else if (isIOS()) body = `<p class="hint" style="margin-top:0">${t("install_hint_ios")}</p>`;
+  else if (window.isSecureContext) body = `<p class="hint" style="margin-top:0">${t("install_menu")}</p>`;
+  else body = `<p class="hint" style="margin-top:0">${t("install_why")}</p>
+    <ol class="steps"><li>${t("install_s1")}${copyField("cpFlag", FLAG_URL)}</li>
+      <li>${t("install_s2")}${copyField("cpOrigin", location.origin)}</li><li>${t("install_s3")}</li></ol>
+    <p class="hint">${t("install_ip")}</p>`;
+  return card(window.isSecureContext || isIOS() || isStandalone() ? t("install") : t("install_android"), I.download, body);
+}
+
+function bindInstall() {
+  if ($("devInstall")) $("devInstall").onclick = install;
+  document.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => {
+    const el = $(b.dataset.copy);
+    try { await navigator.clipboard.writeText(el.value); }
+    catch (e) { el.select(); document.execCommand("copy"); } // ohne HTTPS gibt es keine Clipboard-API
+    toast(t("copied"));
+  });
+}
+
+// Hinweis auf dem Dashboard, solange die App nicht installiert ist (schließbar)
+function installBanner() {
+  let hidden = false;
+  try { hidden = localStorage.getItem("installBanner") === "off"; } catch (e) { /* privat */ }
+  if (hidden || isStandalone() || !(installEvt || /android/i.test(navigator.userAgent))) return "";
+  return `<section class="card banner">${I.download}<div class="t">${t("install_banner")}</div>
+    <button class="btn gold" id="bnInstall">${installEvt ? t("install") : t("install_how")}</button>
+    <button class="round" id="bnClose" aria-label="${t("close")}">${svg('<path d="M6 6l12 12M18 6 6 18"/>')}</button></section>`;
+}
+
 // ---------- Gerüst
 function renderNav() {
   const html = NAV.map(k => `<button class="navbtn ${k === current ? "on" : ""}" data-v="${k}">${I[k]}<span>${t("nav_" + k)}</span></button>`).join("");
   $("nav").innerHTML = html;
   $("tabs").innerHTML = html;
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
-  $("askText").placeholder = t("ask_ph");
   $("install").innerHTML = `${I.download}${t("install")}`;
   $("install").hidden = !installEvt;
   if (ST) $("sideHost").textContent = ST.device.host;
@@ -575,45 +587,10 @@ async function refreshStatus() {
   renderNav();
 }
 
-// ---------- Sprachleiste: Frage tippen oder an der Uhr sprechen
-let askPoll;
-function showAnswer(a) {
-  const box = $("answer");
-  box.hidden = false;
-  $("ansQ").textContent = a.question || (a.state === "listening" ? t("listening") : "");
-  const p = $("ansA");
-  p.classList.toggle("err", a.state === "error");
-  p.textContent = a.state === "error" ? a.error : (a.answer || (a.state === "listening" ? "" : t("thinking")));
-  $("askMic").classList.toggle("live", a.state === "listening");
-  return a.state !== "answer" && a.state !== "error" && a.state !== "idle" && !(a.state === "speaking" && a.answer);
-}
-function pollAnswer() {
-  clearInterval(askPoll);
-  askPoll = setInterval(async () => {
-    try { const r = await api("/api/assistant"); if (r.ok && !showAnswer(r.data)) { clearInterval(askPoll); $("askMic").classList.remove("live"); } }
-    catch (e) { clearInterval(askPoll); }
-  }, 1000);
-}
-async function startAsk(url, body) {
-  if (ST && ST.assistant && !ST.assistant.hasKey) { toast(t("need_key"), true); return; }
-  try {
-    const r = await api(url, body);
-    if (r.ok) { showAnswer(r.data); pollAnswer(); } else toast(t("busy"), true);
-  } catch (e) { toast(t("offline"), true); }
-}
-$("ask").onsubmit = e => {
-  e.preventDefault();
-  const text = $("askText").value.trim(); if (!text) return;
-  $("askText").value = "";
-  startAsk("/api/assistant/ask", { text });
-};
-$("askMic").onclick = () => { toast(t("listening")); startAsk("/api/assistant/listen", {}); };
-$("ansClose").onclick = () => { $("answer").hidden = true; clearInterval(askPoll); };
-
 // ---------- Installation (PWA)
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; renderNav(); if (current === "device") render(); });
-window.addEventListener("appinstalled", () => { installEvt = null; renderNav(); });
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; renderNav(); if (current === "device" || current === "dashboard") render(); });
+window.addEventListener("appinstalled", () => { installEvt = null; renderNav(); render(); });
 async function install() {
   if (!installEvt) return;
   installEvt.prompt();

@@ -7,7 +7,7 @@ const T = {
   ar: {
     app: "ساعة الأذان الذكية",
     nav_dashboard: "الرئيسية", nav_prayer: "أوقات الصلاة", nav_location: "الموقع", nav_display: "المظهر",
-    nav_audio: "الصوت", nav_ai: "اللغة والمساعد", nav_wifi: "الواي فاي", nav_device: "الجهاز",
+    nav_audio: "الصوت", nav_lang: "اللغة", nav_wifi: "الواي فاي", nav_device: "الجهاز",
     device_online: "الجهاز متصل", device_offline: "الجهاز غير متصل",
     wifi_on: "الواي فاي متصل", wifi_off: "غير متصل",
     next_prayer: "الصلاة القادمة", in: "بعد", today_times: "أوقات اليوم", weather_now: "الطقس الآن",
@@ -39,16 +39,10 @@ const T = {
     alarm_tone: "نغمة المنبه", tone_calm: "هادئة · أجراس متصاعدة", tone_bells: "أجراس · لحن هادئ", tone_classic: "تقليدية · صفير",
     tone_playing: "♪ تشغيل النغمة على الجهاز", day_min: "اختر يومًا واحدًا على الأقل",
     days: ["ح", "ن", "ث", "ر", "خ", "ج", "س"],
-    // Sprache & KI
+    // Sprache
     language: "اللغة", language_hint: "لغة هذا التطبيق. شاشة الساعة تبقى بالعربية.",
-    assistant: "المساعد الصوتي", key_saved: "المفتاح محفوظ", key_missing: "لم يُحفظ مفتاح بعد",
-    key_label: "مفتاح OpenAI (يُحفظ على الساعة فقط)", key_hint: "احصل على المفتاح من platform.openai.com ← API keys. يلزم رصيد في الحساب.",
-    key_bad: "المفتاح يبدأ عادة بـ sk-", advanced: "إعدادات متقدمة", model_chat: "نموذج الإجابة",
-    model_stt: "نموذج التعرف على الكلام", model_tts: "نموذج النطق", voice: "الصوت",
-    ai_scope: "المساعد مخصص لأسئلة الساعة: أوقات الصلاة، التاريخ، الوقت، الطقس، وأسئلة إسلامية قصيرة.",
-    // Sprachleiste
-    ask_ph: "اسأل ساعتك …", listening: "تحدّث الآن إلى الساعة …", thinking: "لحظة من فضلك …",
-    busy: "المساعد مشغول أو لا يوجد مفتاح/اتصال", need_key: "أدخل مفتاح OpenAI في «اللغة والمساعد»",
+    
+    
     // WLAN
     wifi_status: "حالة الاتصال", network: "الشبكة", networks: "الشبكات القريبة", scan: "بحث عن الشبكات",
     password: "كلمة المرور", connect: "اتصال", connecting: "جارٍ الاتصال … قد ينقطع هذا التطبيق لحظات",
@@ -59,14 +53,20 @@ const T = {
     factory_hint: "تُحذف كل الإعدادات والمفتاح وبيانات الواي فاي. ملفات الأذان والخلفيات تبقى.",
     firmware_update: "تحديث البرنامج الثابت", confirm: "تأكيد", cancel: "إلغاء", are_you_sure: "هل أنت متأكد؟",
     restarting: "جارٍ إعادة التشغيل …", install: "تثبيت التطبيق", install_hint_ios: "في Safari: زر المشاركة ← «إضافة إلى الشاشة الرئيسية».",
-    install_hint_http: "للتثبيت الكامل في Chrome يلزم اتصال آمن (HTTPS). راجع الشرح في دليل التثبيت.",
+    
+    installed: "التطبيق مثبّت ✓", install_menu: "في Chrome: القائمة ⋮ ← «تثبيت التطبيق».",
+    install_android: "التثبيت على أندرويد (Chrome)", install_why: "يسمح Chrome بتثبيت التطبيق فقط عبر اتصال آمن. الساعة تعمل داخل شبكتك المنزلية دون HTTPS، لذلك يلزم إعداد لمرة واحدة:",
+    install_s1: "انسخ هذا العنوان والصقه في شريط العنوان في Chrome:", install_s2: "اختر «Enabled» وأدخل في الحقل عنوان الساعة هذا:",
+    install_s3: "اضغط «Relaunch»، ثم افتح هذه الصفحة من جديد واضغط «تثبيت التطبيق».",
+    install_ip: "نصيحة: ثبّت عنوان IP للساعة في الراوتر (FRITZ!Box: الشبكة المنزلية ← الشبكة ← «تخصيص نفس عنوان IPv4 دائمًا»)، وإلا تغيّر العنوان وتوقف التطبيق.",
+    copy: "نسخ", copied: "تم النسخ ✓", install_banner: "ثبّت التطبيق على هاتفك", install_how: "الطريقة", close: "إغلاق",
     hours: "س", minutes: "د",
   },
 
   de: {
     app: "Smart Azan Clock",
     nav_dashboard: "Dashboard", nav_prayer: "Gebetszeiten", nav_location: "Standort", nav_display: "Darstellung",
-    nav_audio: "Audio", nav_ai: "Sprache & KI", nav_wifi: "WLAN", nav_device: "Gerät",
+    nav_audio: "Audio", nav_lang: "Sprache", nav_wifi: "WLAN", nav_device: "Gerät",
     device_online: "Gerät verbunden", device_offline: "Gerät nicht erreichbar",
     wifi_on: "WLAN verbunden", wifi_off: "Nicht verbunden",
     next_prayer: "Nächstes Gebet", in: "in", today_times: "Gebetszeiten heute", weather_now: "Wetter jetzt",
@@ -95,13 +95,13 @@ const T = {
     tone_playing: "♪ Ton wird auf der Uhr abgespielt", day_min: "Mindestens einen Tag wählen",
     days: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
     language: "Sprache", language_hint: "Sprache dieser App. Das Display der Uhr bleibt arabisch.",
-    assistant: "Sprachassistent", key_saved: "Schlüssel gespeichert", key_missing: "Noch kein Schlüssel gespeichert",
-    key_label: "OpenAI-Schlüssel (bleibt nur auf der Uhr)", key_hint: "Schlüssel unter platform.openai.com → API keys. Das Konto braucht Guthaben.",
-    key_bad: "Der Schlüssel beginnt meist mit sk-", advanced: "Erweitert", model_chat: "Antwort-Modell",
-    model_stt: "Spracherkennungs-Modell", model_tts: "Sprachausgabe-Modell", voice: "Stimme",
-    ai_scope: "Der Assistent ist für Fragen rund um die Uhr gedacht: Gebetszeiten, Datum, Uhrzeit, Wetter und kurze islamische Fragen.",
-    ask_ph: "Frage deine Smart Azan Clock …", listening: "Sprich jetzt zur Uhr …", thinking: "Einen Moment …",
-    busy: "Assistent beschäftigt oder kein Schlüssel/keine Verbindung", need_key: "OpenAI-Schlüssel unter „Sprache & KI“ eintragen",
+    
+    
+    
+    
+    
+    
+    
     wifi_status: "Verbindung", network: "Netzwerk", networks: "Netze in der Nähe", scan: "Netze suchen",
     password: "Passwort", connect: "Verbinden", connecting: "Verbinde … die App ist evtl. kurz getrennt",
     wifi_forget: "WLAN neu einrichten", wifi_forget_hint: "Die WLAN-Daten werden gelöscht, die Uhr startet im Einrichtungsmodus (Netz „Adhan-Wecker“).",
@@ -110,14 +110,20 @@ const T = {
     factory_hint: "Alle Einstellungen, der Schlüssel und die WLAN-Daten werden gelöscht. Azan-Dateien und Hintergründe bleiben.",
     firmware_update: "Firmware aktualisieren", confirm: "Bestätigen", cancel: "Abbrechen", are_you_sure: "Bist du sicher?",
     restarting: "Neustart …", install: "App installieren", install_hint_ios: "In Safari: Teilen → „Zum Home-Bildschirm“.",
-    install_hint_http: "Für die volle Installation in Chrome ist eine sichere Verbindung (HTTPS) nötig – siehe Installationsanleitung.",
+    
+    installed: "App ist installiert ✓", install_menu: "In Chrome: Menü ⋮ → „App installieren“.",
+    install_android: "Installation auf Android (Chrome)", install_why: "Chrome installiert Apps nur über eine sichere Verbindung. Die Uhr läuft in deinem Heimnetz ohne HTTPS, deshalb ist einmalig diese Einstellung nötig:",
+    install_s1: "Diese Adresse kopieren und in Chrome in die Adresszeile einfügen:", install_s2: "Auf „Enabled“ stellen und in das Feld diese Adresse der Uhr eintragen:",
+    install_s3: "„Relaunch“ tippen, diese Seite wieder öffnen und „App installieren“ tippen.",
+    install_ip: "Tipp: Die IP-Adresse der Uhr im Router festlegen (FRITZ!Box: Heimnetz → Netzwerk → „Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“), sonst ändert sie sich und die App findet die Uhr nicht mehr.",
+    copy: "Kopieren", copied: "Kopiert ✓", install_banner: "Installiere die App auf deinem Handy", install_how: "Anleitung", close: "Schließen",
     hours: "Std.", minutes: "Min.",
   },
 
   en: {
     app: "Smart Azan Clock",
     nav_dashboard: "Dashboard", nav_prayer: "Prayer times", nav_location: "Location", nav_display: "Appearance",
-    nav_audio: "Audio", nav_ai: "Language & AI", nav_wifi: "Wi-Fi", nav_device: "Device",
+    nav_audio: "Audio", nav_lang: "Language", nav_wifi: "Wi-Fi", nav_device: "Device",
     device_online: "Device connected", device_offline: "Device unreachable",
     wifi_on: "Wi-Fi connected", wifi_off: "Not connected",
     next_prayer: "Next prayer", in: "in", today_times: "Today's prayer times", weather_now: "Weather now",
@@ -146,13 +152,13 @@ const T = {
     tone_playing: "♪ Playing on the clock", day_min: "Select at least one day",
     days: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
     language: "Language", language_hint: "Language of this app. The clock's display stays Arabic.",
-    assistant: "Voice assistant", key_saved: "Key saved", key_missing: "No key saved yet",
-    key_label: "OpenAI key (stored on the clock only)", key_hint: "Get a key at platform.openai.com → API keys. The account needs credit.",
-    key_bad: "Keys usually start with sk-", advanced: "Advanced", model_chat: "Answer model",
-    model_stt: "Speech recognition model", model_tts: "Speech model", voice: "Voice",
-    ai_scope: "The assistant is meant for questions about the clock: prayer times, date, time, weather and short Islamic questions.",
-    ask_ph: "Ask your Smart Azan Clock …", listening: "Speak to the clock now …", thinking: "One moment …",
-    busy: "Assistant busy, or no key/connection", need_key: "Enter an OpenAI key under “Language & AI”",
+    
+    
+    
+    
+    
+    
+    
     wifi_status: "Connection", network: "Network", networks: "Nearby networks", scan: "Scan for networks",
     password: "Password", connect: "Connect", connecting: "Connecting … the app may disconnect briefly",
     wifi_forget: "Set up Wi-Fi again", wifi_forget_hint: "Wi-Fi credentials are deleted and the clock restarts in setup mode (network “Adhan-Wecker”).",
@@ -161,7 +167,13 @@ const T = {
     factory_hint: "All settings, the key and Wi-Fi credentials are deleted. Azan files and backgrounds remain.",
     firmware_update: "Update firmware", confirm: "Confirm", cancel: "Cancel", are_you_sure: "Are you sure?",
     restarting: "Restarting …", install: "Install app", install_hint_ios: "In Safari: Share → “Add to Home Screen”.",
-    install_hint_http: "Full installation in Chrome needs a secure connection (HTTPS) – see the installation guide.",
+    
+    installed: "App installed ✓", install_menu: "In Chrome: menu ⋮ → “Install app”.",
+    install_android: "Install on Android (Chrome)", install_why: "Chrome installs apps only over a secure connection. The clock runs in your home network without HTTPS, so this one-time setting is needed:",
+    install_s1: "Copy this address and paste it into Chrome's address bar:", install_s2: "Set it to “Enabled” and enter this address of the clock in the field:",
+    install_s3: "Tap “Relaunch”, open this page again and tap “Install app”.",
+    install_ip: "Tip: reserve the clock's IP address in your router (FRITZ!Box: Home Network → Network → “Always assign this network device the same IPv4 address”), otherwise it may change and the app loses the clock.",
+    copy: "Copy", copied: "Copied ✓", install_banner: "Install the app on your phone", install_how: "How to", close: "Close",
     hours: "h", minutes: "min",
   },
 };

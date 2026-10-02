@@ -234,7 +234,7 @@ def write_icon_image(name, codepoint, size, color):
 
 
 # Ersatzzeichen: U+2236 sieht aus wie ":" und gilt in LVGLs Bidi-Logik nicht als neutral.
-# So bleibt eine Uhrzeit wie "20:41" in arabischem Text zusammen (siehe ui/assistant_screen.cpp).
+# So bleibt eine Uhrzeit wie "20:41" in arabischem Text zusammen.
 # U+200E (LRM) bekommt eine leere Glyphe ohne Breite: unsichtbar, für LVGL aber "links nach rechts".
 ALIASES = {"\u2236": ":", "\u200e": ""}
 
@@ -354,7 +354,7 @@ ICONS = {
     "CLOUDY": 0xF0590, "FOG": 0xF0591, "RAINY": 0xF0597, "POURING": 0xF0596, "SNOWY": 0xF0598,
     "LIGHTNING": 0xF0593, "WINDY": 0xF059D,
     "THERMOMETER": 0xF050F, "HUMIDITY": 0xF058E, "ARROW_UP": 0xF19B2, "ARROW_DOWN": 0xF19B3,
-    "MOSQUE": 0xF1827, "VOLUME_OFF": 0xF0581, "SKIP_NEXT": 0xF04AD, "ALARM": 0xF0020, "MIC": 0xF036C,
+    "MOSQUE": 0xF1827, "VOLUME_OFF": 0xF0581, "SKIP_NEXT": 0xF04AD, "ALARM": 0xF0020,
 }
 WIFI = ["WIFI_1", "WIFI_2", "WIFI_3", "WIFI_4", "WIFI_OFF"]
 WEATHER = ["SUNNY", "NIGHT", "PARTLY_CLOUDY", "NIGHT_PARTLY_CLOUDY", "CLOUDY", "FOG", "RAINY", "POURING",
@@ -419,9 +419,6 @@ AR_TEXTS = {
     "img_ar_txt_tomorrow": ("غدًا", 20, MUTED, "Amiri-Regular.ttf"),
     "img_ar_txt_after": ("بعد غد", 20, MUTED, "Amiri-Regular.ttf"),
     "img_ar_txt_no_weather": ("جارٍ تحميل الطقس …", 22, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_listening": ("أنا أستمع …", 28, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_thinking": ("لحظة من فضلك …", 26, GOLD, "Amiri-Bold.ttf"),
-    "img_ar_txt_assistant": ("المساعد", 28, GOLD, "Amiri-Bold.ttf"),
     "img_ar_txt_alarm": ("المنبه", 30, GOLD, "Amiri-Bold.ttf"),
     "img_ar_txt_alarm_stop": ("المس الشاشة لإيقاف المنبه", 20, MUTED, "Amiri-Regular.ttf"),
     "img_ar_txt_settings": ("الإعدادات", 30, GOLD, "Amiri-Bold.ttf"),
@@ -429,7 +426,6 @@ AR_TEXTS = {
     "img_ar_txt_web": ("صفحة الإعدادات", 20, MUTED, "Amiri-Regular.ttf"),
     "img_ar_txt_setup": ("إعداد الجهاز", 28, GOLD, "Amiri-Bold.ttf"),
     "img_ar_txt_scan": ("امسح الرمز بهاتفك لفتح الإعدادات", 18, MUTED, "Amiri-Regular.ttf"),
-    "img_ar_txt_close": ("المس الشاشة للإغلاق", 17, MUTED, "Amiri-Regular.ttf"),
     "img_ar_txt_offline": ("غير متصل بالشبكة", 22, WHITE, "Amiri-Regular.ttf"),
     "img_ar_txt_wifi_title": ("إعداد الواي فاي", 28, GOLD, "Amiri-Bold.ttf"),
     "img_ar_txt_wifi_1": ("١. اتصل بالهاتف بشبكة Adhan-Wecker", 21, WHITE, "Amiri-Regular.ttf"),
@@ -521,8 +517,6 @@ def main():
         + "\nconst lv_img_dsc_t *const img_wifi_list[5] = {"
         + ", ".join(f"&img_wifi_{i}" for i in range(5)) + "};\n")
     write_icon_image("img_alarm", ICONS["ALARM"], 20, IMG_WHITE)
-    write_icon_image("img_mic", ICONS["MIC"], 24, IMG_WHITE)
-    write_icon_image("img_mic_lg", ICONS["MIC"], 56, IMG_WHITE)
     write_icon_image("img_alarm_lg", ICONS["ALARM"], 64, IMG_WHITE)
     for size, suffix in ((34, "sm"), (112, "lg")):
         for i, icon in enumerate(SKY_ICONS):
