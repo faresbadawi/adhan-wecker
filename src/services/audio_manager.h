@@ -15,6 +15,12 @@ namespace audio
     void setVolume(uint8_t volume); // 0..21
 
     bool isPlaying();
+
+    // Nimmt vom Mikrofon auf (16 kHz, 16 Bit, mono), bis nach dem Sprechen ~1 s Stille folgt.
+    // Blockiert den aufrufenden Task (nicht aus loop()/LVGL aufrufen). Gibt die Anzahl Samples zurück;
+    // speech = ob Sprache erkannt wurde. Eine laufende Wiedergabe wird dafür beendet.
+    size_t recordSpeech(int16_t *buf, size_t maxSamples, bool &speech);
+    bool isRecording();
     uint32_t elapsedSeconds();
     uint32_t durationSeconds(); // 0, solange unbekannt
 }

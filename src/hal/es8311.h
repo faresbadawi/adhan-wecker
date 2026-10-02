@@ -1,4 +1,4 @@
-// Audio-Codec ES8311 (I2C 0x18), nur Wiedergabe.
+// Audio-Codec ES8311 (I2C 0x18): Wiedergabe und Mikrofon (analog, Eingang 1).
 // Angepasst aus dem Espressif-Treiber (SPDX: Apache-2.0, (c) 2015-2022 Espressif Systems)
 // für Arduino-Wire, damit sich Codec und Touch den I2C-Bus (SDA 38, SCL 39) teilen können.
 #pragma once

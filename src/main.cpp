@@ -179,6 +179,7 @@ static void refreshAzan(const struct tm &now)
 //   A  Azan für das nächste Gebet sofort starten (zum Testen)
 //   1..5  Seite Uhr / Gebetszeiten / Wetter / Kalender / Einstellungen zeigen
 //   X  Wecker und Azan stoppen
+//   M  Mikrofon-Test: bis zu 6 s aufnehmen und als "REC <bytes>" + PCM (16 kHz, 16 Bit) senden
 static void handleSerial()
 {
     if (!Serial.available())
@@ -194,6 +195,21 @@ static void handleSerial()
             prayers::next(now, s_today, next, secondsLeft);
             azan::start(next, s_today.minutes[next]);
         }
+        return;
+    }
+    if (cmd == 'M')
+    {
+        xTaskCreatePinnedToCore([](void *) {
+            const size_t max = 16000 * 6;
+            auto *buf = (int16_t *)ps_malloc(max * 2);
+            bool speech = false;
+            const size_t n = buf ? audio::recordSpeech(buf, max, speech) : 0;
+            Serial.printf("REC %u\n", (unsigned)(n * 2));
+            Serial.write((uint8_t *)buf, n * 2);
+            Serial.flush();
+            free(buf);
+            vTaskDelete(nullptr);
+        }, "mictest", 4096, nullptr, 1, nullptr, 1);
         return;
     }
     if (cmd == 'X')

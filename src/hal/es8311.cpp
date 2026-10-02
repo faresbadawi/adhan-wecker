@@ -25,6 +25,9 @@ namespace es8311
         SYS_0E = 0x0E,
         SYS_12 = 0x12,
         SYS_13 = 0x13,
+        SYS_14 = 0x14,
+        ADC_16 = 0x16,
+        ADC_17 = 0x17,
         ADC_1C = 0x1C,
         DAC_31 = 0x31,
         DAC_32 = 0x32,
@@ -90,6 +93,11 @@ namespace es8311
         write(SYS_13, 0x10);
         write(ADC_1C, 0x6A);
         write(DAC_37, 0x08);
+
+        // Mikrofon (analog, wie im Espressif-Treiber): Eingang 1 wählen, PGA-Verstärkung, ADC-Lautstärke
+        write(SYS_14, 0x1A);
+        write(ADC_16, 0x07); // Mikrofonverstärkung 42 dB (Höchstwert; ab Werk 24 dB, zu leise)
+        write(ADC_17, 0xC8);
         return true;
     }
 
