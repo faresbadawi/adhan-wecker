@@ -20,6 +20,51 @@ namespace assistant_screen
     static lv_obj_t *s_root, *s_icon, *s_title, *s_question, *s_answer;
     static void (*s_onTap)() = nullptr;
 
+    // Text für die Anzeige aufbereiten (LVGL hat nur eine vereinfachte Bidi-Logik und setzt keine Vokalzeichen):
+    //  - arabische Vokalzeichen (U+064B..U+0652, U+0670) entfernen, sie erschienen sonst als eigene Zeichen
+    //  - Uhrzeiten "HH:MM" als Links-nach-rechts-Block: LRM (U+200E, leere Glyphe) davor und U+2236 statt ":"
+    //    (gleich gezeichnet, aber nicht "neutral"); sonst wird "17:36" im arabischen Satz zu "36:17"
+    static String displayText(const String &in)
+    {
+        static const char LRM[] = "\xE2\x80\x8E";
+        static const char RATIO[] = "\xE2\x88\xB6";
+        String out;
+        out.reserve(in.length() + 16);
+        const char *p = in.c_str();
+        while (*p)
+        {
+            const uint8_t c = *p;
+            // zweibytige UTF-8-Folge im Bereich U+0640..U+067F: D9 xx
+            if (c == 0xD9 && p[1])
+            {
+                const uint32_t cp = 0x640 + ((uint8_t)p[1] - 0x80);
+                if ((cp >= 0x64B && cp <= 0x652) || cp == 0x670)
+                {
+                    p += 2;
+                    continue;
+                }
+            }
+            // Beginn einer Uhrzeit: Ziffern, dann ":" und eine Ziffer
+            if (isdigit(c) && (p == in.c_str() || !isdigit((uint8_t)p[-1])))
+            {
+                const char *q = p;
+                while (isdigit((uint8_t)*q))
+                    q++;
+                if (*q == ':' && isdigit((uint8_t)q[1]))
+                    out += LRM;
+            }
+            if (c == ':' && p != in.c_str() && isdigit((uint8_t)p[-1]) && isdigit((uint8_t)p[1]))
+            {
+                out += RATIO;
+                p++;
+                continue;
+            }
+            out += (char)c;
+            p++;
+        }
+        return out;
+    }
+
     static lv_obj_t *textLabel(lv_obj_t *parent, const lv_font_t *font, Role role)
     {
         lv_obj_t *l = label(parent, font, role, "");
@@ -84,10 +129,10 @@ namespace assistant_screen
                                                                                     : &img_ar_txt_assistant));
         lv_obj_align(s_title, LV_ALIGN_TOP_MID, 0, listening ? 74 : 14);
 
-        lv_label_set_text(s_question, s.question.c_str());
+        lv_label_set_text(s_question, displayText(s.question).c_str());
         lv_obj_align(s_question, LV_ALIGN_TOP_MID, 0, listening ? 116 : 62);
         const bool error = s.state == State::ERROR;
-        lv_label_set_text(s_answer, error ? s.error.c_str() : s.answer.c_str());
+        lv_label_set_text(s_answer, displayText(error ? s.error : s.answer).c_str());
         setRole(s_answer, error ? Role::ACCENT : Role::MAIN);
         lv_obj_align_to(s_answer, s_question, LV_ALIGN_OUT_BOTTOM_MID, 0, s.question.isEmpty() ? 0 : 12);
     }

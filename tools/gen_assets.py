@@ -233,17 +233,26 @@ def write_icon_image(name, codepoint, size, color):
     return mask
 
 
+# Ersatzzeichen: U+2236 sieht aus wie ":" und gilt in LVGLs Bidi-Logik nicht als neutral.
+# So bleibt eine Uhrzeit wie "20:41" in arabischem Text zusammen (siehe ui/assistant_screen.cpp).
+# U+200E (LRM) bekommt eine leere Glyphe ohne Breite: unsichtbar, für LVGL aber "links nach rechts".
+ALIASES = {"\u2236": ":", "\u200e": ""}
+
+
 def write_font(name, font_file, size, chars, weight=None, tabular=False, fallback=None):
     """LVGL-Font (Format fmt_txt, 4 bpp, ohne Kerning).
     tabular=True: alle Ziffern gleich breit, damit die Uhr nicht springt.
-    fallback: Name eines weiteren Fonts für fehlende Zeichen (z. B. arabische Buchstaben)."""
+    fallback: Name eines weiteren Fonts für fehlende Zeichen (z. B. arabische Buchstaben).
+    Zeichen aus ALIASES werden mit dem Bild ihres Vorbilds gezeichnet."""
     font = ImageFont.truetype(str(FONTS / font_file), size)
     if weight is not None:
         font.set_variation_by_axes([weight])
     ascent, descent = font.getmetrics()
     # Zeilenhöhe so wählen, dass auch Umlaute und Unterlängen hineinpassen
     for c in chars:
-        x0, y0, x1, y1 = font.getbbox(c, anchor="ls")
+        if ALIASES.get(c) == "":
+            continue
+        x0, y0, x1, y1 = font.getbbox(ALIASES.get(c, c), anchor="ls")
         ascent, descent = max(ascent, -y0), max(descent, y1)
     digit_adv = max(font.getlength(d) for d in "0123456789")
 
@@ -251,9 +260,9 @@ def write_font(name, font_file, size, chars, weight=None, tabular=False, fallbac
     bitmap = bytearray()
     dscs = ["    {.bitmap_index = 0, .adv_w = 0, .box_w = 0, .box_h = 0, .ofs_x = 0, .ofs_y = 0} /* id 0 reserviert */"]
     for cp in codes:
-        ch = chr(cp)
-        x0, y0, x1, y1 = font.getbbox(ch, anchor="ls")
-        adv = font.getlength(ch)
+        ch = ALIASES.get(chr(cp), chr(cp))
+        x0, y0, x1, y1 = font.getbbox(ch, anchor="ls") if ch else (0, 0, 0, 0)
+        adv = font.getlength(ch) if ch else 0
         if tabular and ch.isdigit():
             shift = round((digit_adv - adv) / 2)
             x0, x1, adv = x0 + shift, x1 + shift, digit_adv
@@ -372,7 +381,7 @@ ARABIC_CHARS = "".join(chr(c) for c in (
     [0x060C, 0x061B, 0x061F] + list(range(0x0621, 0x063B)) + list(range(0x0640, 0x0653))
     + list(range(0x0660, 0x066A)) + [0x067E, 0x0686, 0x0698, 0x06A9, 0x06AF, 0x06CC]
     + [c for c in range(0xFE70, 0xFEFD) if c not in (0xFE73, 0xFE75)]))
-GERMAN = "äöüÄÖÜß·•–°"
+GERMAN = "äöüÄÖÜß·•–°\u2236\u200e"
 DIGITS = "0123456789:-"
 TEMP = "0123456789-°C"
 

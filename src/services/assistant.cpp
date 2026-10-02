@@ -74,6 +74,9 @@ namespace assistant
 
     static bool begin(HTTPClient &http, WiFiClientSecure &client, const char *path)
     {
+        Serial.printf("Assistent: %s, RAM intern frei %u kB (groesster Block %u kB)\n", path,
+                      heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024,
+                      heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024);
         client.setInsecure(); // TLS ohne hinterlegtes Zertifikat
         http.useHTTP10(true);
         http.setTimeout(30000);

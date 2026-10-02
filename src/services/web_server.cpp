@@ -415,6 +415,7 @@ namespace web
     static void start()
     {
         s_server.on("/api/assistant", HTTP_GET, sendAssistant);
+        s_server.serveStatic("/api/assistant/last.mp3", LittleFS, "/tts.mp3", "no-cache"); // letzte gesprochene Antwort
         s_server.on("/api/assistant/key", HTTP_POST, assistantKey);
         s_server.on("/api/assistant/config", HTTP_POST, assistantConfig);
         s_server.on("/api/assistant/ask", HTTP_POST, assistantAsk);

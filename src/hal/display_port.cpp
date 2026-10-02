@@ -80,8 +80,9 @@ namespace display
 
         static lv_disp_draw_buf_t drawBuf;
         const size_t bufPx = WIDTH * BUF_LINES;
-        // Ein Puffer genügt: die Übertragung ist synchron, ein zweiter brächte nichts.
-        auto *buf = (lv_color_t *)heap_caps_malloc(bufPx * sizeof(lv_color_t), MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+        // Ein Puffer genügt: die Übertragung ist synchron. Er liegt im PSRAM, damit der knappe
+        // interne RAM für TLS (OpenAI, Gebetszeiten) frei bleibt; gesendet wird aus s_rotBuf (intern, DMA).
+        auto *buf = (lv_color_t *)heap_caps_malloc(bufPx * sizeof(lv_color_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
         s_rotBuf = (uint16_t *)heap_caps_malloc(ROT_PX * sizeof(uint16_t), MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
         lv_disp_draw_buf_init(&drawBuf, buf, nullptr, bufPx);
 
