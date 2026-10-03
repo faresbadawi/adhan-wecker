@@ -241,15 +241,6 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
 .modal { position: fixed; inset: 0; z-index: 8; background: rgba(0, 0, 0, .6); display: flex; align-items: center; justify-content: center; padding: 16px; }
 .modal .card { max-width: 380px; width: 100%; background: var(--surface); border-radius: var(--radius); padding: 20px; }
 .modal p { margin: 0 0 6px; }
-.sheet { position: fixed; inset: 0; z-index: 6; background: rgba(0, 0, 0, .5); display: flex; align-items: flex-end; }
-.sheetcard { width: 100%; padding: 8px 12px calc(92px + env(safe-area-inset-bottom)); background: var(--surface); border-radius: 24px 24px 0 0; display: flex; flex-direction: column; }
-.sheetcard::before { content: ""; width: 40px; height: 4px; border-radius: 4px; background: var(--dim); margin: 4px auto 10px; }
-.sheetbtn { padding: 14px 12px; font-size: 16px; color: var(--text); }
-.sheetbtn + .sheetbtn { border-top: 1px solid var(--sep); border-radius: 0; }
-.sheetbtn span { flex: 1; }
-.sheetbtn svg:first-child { color: var(--gold); }
-.sheetbtn svg:last-child { width: 18px; height: 18px; color: var(--dim); }
-[dir=rtl] .sheetbtn svg:last-child { transform: scaleX(-1); }
 
 /* ---------- Handy */
 @media (max-width: 900px) {
@@ -272,7 +263,6 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
   .tabs .navbtn.on { color: var(--text); }
   .tabs .navbtn.on svg { background: rgba(201, 164, 92, .2); color: var(--gold2); }
 }
-@media (min-width: 901px) { .sheet { display: none !important; } }
 @media (display-mode: standalone) { .install { display: none !important; } }
 
 /* Arabisch: Amiri für Gebetsnamen und Titel */
@@ -282,3 +272,18 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
 [lang=ar] .top h1 { font-size: 30px; }
 [lang=ar] .sec > h2 { text-transform: none; letter-spacing: 0; font-size: 14px; }
 @media (max-width: 900px) { .group .actions .btn { flex: 1 1 auto; } }
+
+/* Einstellungs-Übersicht und Unterseiten */
+.item.link { width: 100%; border: 0; background: none; text-align: start; cursor: pointer; padding: 10px 0; }
+.item.link .ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(201, 164, 92, .14); color: var(--gold); display: inline-flex; align-items: center; justify-content: center; }
+.item.link .ico svg { width: 19px; height: 19px; }
+.item.link .val { color: var(--muted); font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.item.link .chev svg { width: 18px; height: 18px; color: var(--dim); }
+[dir=rtl] .item.link .chev svg, [dir=rtl] .backbtn svg { transform: scaleX(-1); }
+.backbtn { width: 38px; height: 38px; background: var(--surface); }
+.subnav { padding: 8px 12px 8px 26px; font-size: 14px; }
+[dir=rtl] .subnav { padding: 8px 26px 8px 12px; }
+.subnav svg { width: 18px; height: 18px; }
+.vol { display: flex; align-items: center; gap: 12px; }
+.vol > svg { color: var(--gold); }
+.vol .range { flex: 1; }

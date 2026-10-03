@@ -64,6 +64,8 @@ const T = {
     copy: "نسخ", copied: "تم النسخ ✓", install_banner: "ضع التطبيق على الشاشة الرئيسية لهاتفك", install_how: "الطريقة", close: "إغلاق",
     tab_home: "الرئيسية", more: "المزيد", azan_test: "تجربة الأذان", azan_test_normal: "الأذان", azan_test_fajr: "أذان الفجر",
     azan_test_hint: "يُشغَّل الأذان على الساعة كما في وقت الصلاة. المس الشاشة أو اضغط «إيقاف» لإنهائه.", stop: "إيقاف", azan_playing: "الأذان يعمل على الساعة …",
+    nav_settings: "الإعدادات", grp_prayer: "الصلاة", grp_clock: "الساعة", grp_conn: "الاتصال", back: "رجوع", listen: "استماع",
+    volume_hint: "يُشغَّل الأذان على الساعة لتسمع مستوى الصوت مباشرة أثناء الضبط.", azan_test_display: "تجربة الأذان مع العرض على الساعة",
     hours: "س", minutes: "د",
   },
 
@@ -125,6 +127,8 @@ const T = {
     copy: "Kopieren", copied: "Kopiert ✓", install_banner: "Leg die App auf deinen Startbildschirm", install_how: "Anleitung", close: "Schließen",
     tab_home: "Start", more: "Mehr", azan_test: "Azan testen", azan_test_normal: "Azan", azan_test_fajr: "Fajr-Azan",
     azan_test_hint: "Der Azan läuft auf der Uhr wie zur Gebetszeit. Bildschirm berühren oder „Stopp“ tippen, um ihn zu beenden.", stop: "Stopp", azan_playing: "Azan läuft auf der Uhr …",
+    nav_settings: "Einstellungen", grp_prayer: "Gebet", grp_clock: "Uhr", grp_conn: "Verbindung", back: "Zurück", listen: "Anhören",
+    volume_hint: "Spielt den Azan auf der Uhr ab – so hörst du die Lautstärke direkt beim Einstellen.", azan_test_display: "Azan-Test mit Anzeige auf der Uhr",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -186,6 +190,8 @@ const T = {
     copy: "Copy", copied: "Copied ✓", install_banner: "Put the app on your home screen", install_how: "How to", close: "Close",
     tab_home: "Home", more: "More", azan_test: "Test azan", azan_test_normal: "Azan", azan_test_fajr: "Fajr azan",
     azan_test_hint: "The azan plays on the clock just like at prayer time. Touch the screen or tap “Stop” to end it.", stop: "Stop", azan_playing: "Azan playing on the clock …",
+    nav_settings: "Settings", grp_prayer: "Prayer", grp_clock: "Clock", grp_conn: "Connection", back: "Back", listen: "Listen",
+    volume_hint: "Plays the azan on the clock so you hear the volume while adjusting it.", azan_test_display: "Azan test with display on the clock",
     hours: "h", minutes: "min",
   },
 };

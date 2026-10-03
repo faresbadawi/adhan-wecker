@@ -12,6 +12,7 @@
 #include "mawaqit.h"
 #include "prayer_times.h"
 #include "settings.h"
+#include "storage.h"
 #include "time_manager.h"
 #include "weather.h"
 #include "wifi_manager.h"
@@ -478,9 +479,26 @@ namespace web
         s_server.send(200, "application/json", "{}");
     }
 
+    // Lautstärke probehören: nur den Ton des Azans abspielen, ohne Anzeige auf der Uhr
+    static void azanPreview()
+    {
+        static char path[96];
+        fs::FS *fs = azan::status().state == azan::State::IDLE
+                         ? storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "azan.mp3", path, sizeof(path))
+                         : nullptr;
+        if (!fs)
+        {
+            s_server.send(409, "application/json", "{\"error\":\"azan\"}");
+            return;
+        }
+        audio::play(*fs, path);
+        s_server.send(200, "application/json", "{}");
+    }
+
     static void azanStop()
     {
         azan::skip();
+        audio::stop();
         s_server.send(200, "application/json", "{}");
     }
 
@@ -509,6 +527,7 @@ namespace web
         s_server.on("/api/device/lang", HTTP_POST, deviceLang);
         s_server.on("/api/azan/test", HTTP_POST, azanTest);
         s_server.on("/api/azan/stop", HTTP_POST, azanStop);
+        s_server.on("/api/azan/preview", HTTP_POST, azanPreview);
         s_server.on("/api/sounds", HTTP_GET, sendSounds);
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);
