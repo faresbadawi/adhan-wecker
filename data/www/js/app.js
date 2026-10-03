@@ -43,6 +43,8 @@ const I = {
   more: svg('<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'),
   chevron: svg('<path d="m9 6 6 6-6 6"/>'),
   stop: svg('<rect x="7" y="7" width="10" height="10" rx="1.5"/>'),
+  sunrise: svg('<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 6v3M5.6 10.6l1.4 1.4M18.4 10.6 17 12M8 21h8"/>'),
+  sunset: svg('<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 3v6M9 6l3 3 3-3M8 21h8"/>'),
   info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>'),
 };
 
@@ -137,7 +139,8 @@ const wifiState = () => {
   return `<span class="dot ${ok ? "ok" : ""}"></span>${t(ok ? "wifi_on" : "wifi_off")}${ok ? bars(w.bars) : ""}`;
 };
 const deviceState = () => `<span class="dot ${online ? "ok" : ""}"></span>${t(online ? "device_online" : "device_offline")}`;
-const card = (title, icon, body, cls = "") => `<section class="card ${cls}"><h2>${icon || ""}${esc(title)}</h2>${body}</section>`;
+// Abschnitt: Überschrift über einer abgerundeten Gruppe
+const card = (title, icon, body, cls = "") => `<section class="sec ${cls}"><h2>${esc(title)}</h2><div class="group">${body}</div></section>`;
 const toggle = (attrs, on) => `<label class="toggle"><input type="checkbox" ${attrs} ${on ? "checked" : ""}><span></span></label>`;
 const range = (id, v, min, max, suffix = "") =>
   `<div class="range"><input type="range" id="${id}" min="${min}" max="${max}" value="${v}"><output id="${id}Val">${v}${suffix}</output></div>`;
@@ -156,27 +159,40 @@ function hijri(h) {
 // ---------- Ansichten
 const VIEWS = {};
 
+const PRAYER_ICON = { fajr: I.sunrise, sunrise: I.sun, dhuhr: I.sun, asr: I.partly, maghrib: I.sunset, isha: I.moon };
+const toMin = hm => { const [h, m] = (hm || "0:0").split(":").map(Number); return h * 60 + m; };
+// aktuelle Uhrzeit der Uhr in Sekunden seit Mitternacht (lokal weitergezählt)
+const nowSec = () => {
+  const [h, m, s] = ST.time.clock.split(":").map(Number);
+  return (h * 3600 + m * 60 + s + Math.floor((performance.now() - stBase) / 1000)) % 86400;
+};
+
 VIEWS.dashboard = () => {
   const p = ST && ST.prayer, wx = ST && ST.weather, loc = ST ? ST.location : (S ? { city: S.city, country: S.country } : {});
-  const date = ST && ST.time ? new Date(ST.time.date + "T12:00:00").toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+  const date = ST && ST.time ? new Date(ST.time.date + "T12:00:00").toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "long" }) : "";
   const next = p && p.next ? p.next.key : "";
-  return `<div class="bism" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>${installBanner()}
-  <div class="pills" style="margin-bottom:14px"><span class="pill">${deviceState()}</span><span class="pill">${wifiState()}</span>
-    <span class="pill">${I.location}<span dir="auto">${esc([loc.city, loc.country].filter(Boolean).join(", ")) || "—"}</span></span></div>
-  <div class="grid">
-    <section class="card wide"><div class="hero">
-      <div><div class="clock num ltr" id="dClock">--:--</div><div class="date">${esc(date)}${p ? ` · <span class="hj">${esc(hijri(p.hijri))}</span>` : ""}</div></div>
-      ${next ? `<div class="next"><small>${t("next_prayer")}</small><b>${t(next)} <span class="num ltr">${esc(p.times[next])}</span></b>
-        <span class="cd">${t("in")} <span id="dCount" class="num"></span></span></div>` : ""}
-    </div></section>
-    ${card(t("today_times"), I.prayer, p ? `<div class="times">${ALL_TIMES.map(k =>
-      `<div class="time ${k === next ? "next-on" : ""}"><small>${t(k)}</small><b class="num ltr">${esc(p.times[k] || "--:--")}</b></div>`).join("")}</div>`
-      : `<div class="empty">—</div>`, "wide")}
-    ${card(t("weather_now"), I.cloud, wx ? `<div class="wx">${(!wx.day && (wx.sky === "clear" || wx.sky === "partly_cloudy")) ? I.moon : (SKY_ICON[wx.sky] || I.cloud)}
-      <div><b class="num ltr">${wx.temp}°</b><div class="date" style="margin:0">${t("sky_" + wx.sky)}</div></div></div>` : `<div class="empty">—</div>`)}
-    ${card(t("device"), I.device, `<div class="kv"><span>${t("connection")}</span><span>${deviceState()}</span></div>
-      <div class="kv"><span>${t("nav_wifi")}</span><span>${wifiState()}</span></div>`)}
-  </div>`;
+  const now = ST && ST.time ? nowSec() / 60 : 0;
+  const wxIcon = wx ? ((!wx.day && (wx.sky === "clear" || wx.sky === "partly_cloudy")) ? I.moon : (SKY_ICON[wx.sky] || I.cloud)) : I.cloud;
+  return `${installBanner()}
+  <section class="hero">
+    <div class="hero-top"><span class="loc">${I.location}<span dir="auto">${esc(loc.city || "—")}</span></span><span class="clock num ltr" id="dClock">--:--</span></div>
+    <div class="bism" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    ${next ? `<div class="hero-label">${t("next_prayer")}</div>
+      <div class="hero-name">${t(next)}</div>
+      <div class="hero-time num ltr">${esc(p.times[next])}</div>
+      <div class="hero-cd">${t("in")} <span id="dCount" class="num"></span></div>
+      <div class="progress"><i id="dProg"></i></div>` : `<div class="hero-label">${online ? "—" : t("offline")}</div>`}
+    <div class="hero-date">${esc(date)}${p ? ` · <span class="hj">${esc(hijri(p.hijri))}</span>` : ""}</div>
+  </section>
+  <div class="chips">
+    <button class="chip" data-go="location">${wxIcon}<div><b class="num ltr">${wx ? wx.temp + "°" : "—"}</b><small>${wx ? t("sky_" + wx.sky) : t("weather_now")}</small></div></button>
+    <button class="chip" data-go="wifi">${I.wifi}<div><b>${ST && online && ST.wifi.connected ? bars(ST.wifi.bars) : "—"}</b><small>${t(ST && online && ST.wifi.connected ? "wifi_on" : "wifi_off")}</small></div></button>
+  </div>
+  ${card(t("today_times"), I.prayer, p ? `<div class="list plist">${ALL_TIMES.map(k => {
+    const past = k !== next && toMin(p.times[k]) <= now && next !== "fajr";
+    return `<div class="prow ${k === next ? "next" : past ? "past" : ""}"><span class="pi">${PRAYER_ICON[k]}</span>
+      <span class="pn">${t(k)}</span><span class="pt num ltr">${esc(p.times[k] || "--:--")}</span></div>`;
+  }).join("")}</div>` : `<div class="empty">—</div>`)}`;
 };
 VIEWS.dashboard.bind = () => {
   tick();
@@ -197,6 +213,17 @@ function tick() {
   c.textContent = `${String(Math.floor(tot / 3600)).padStart(2, "0")}:${String(Math.floor(tot % 3600 / 60)).padStart(2, "0")}`;
   const cd = $("dCount");
   if (cd && ST.prayer && ST.prayer.next) cd.textContent = duration(Math.max(0, ST.prayer.next.seconds - el));
+  // Balken: Anteil der Zeit vom vorigen Gebet bis zum nächsten
+  const bar = $("dProg");
+  if (bar && ST.prayer && ST.prayer.times) {
+    const i = ALL_TIMES.indexOf(ST.prayer.next.key);
+    const nextMin = toMin(ST.prayer.times[ALL_TIMES[i]]);
+    let prevMin = i > 0 ? toMin(ST.prayer.times[ALL_TIMES[i - 1]]) : toMin(ST.prayer.times.isha) - 1440;
+    let now = tot / 60;
+    if (i === 0 && now > nextMin) now -= 1440; // nach Isha, vor Mitternacht
+    const span = nextMin - prevMin;
+    bar.style.width = span > 0 ? Math.max(0, Math.min(100, (now - prevMin) / span * 100)) + "%" : "0";
+  }
 }
 
 VIEWS.prayer = () => {
@@ -573,8 +600,10 @@ const sheet = open => $("sheet").hidden = !open;
 
 function render() {
   const v = VIEWS[current];
-  const head = `<div class="top"><span class="mobile-brand"><img src="/icons/icon-192.png" alt=""></span><h1>${t("nav_" + current)}</h1></div><div class="orn"><i></i></div>`;
-  if (!S && current !== "dashboard") { $("view").innerHTML = head + (online ? loading("") : `<div class="card empty">${t("offline")}</div>`); return; }
+  const ok = online && ST && ST.wifi && ST.wifi.connected;
+  const head = `<div class="top"><span class="mobile-brand"><img src="/icons/icon-192.png" alt=""></span><h1>${current === "dashboard" ? t("app") : t("nav_" + current)}</h1>
+    <button class="status" data-go="device"><span class="dot ${online ? "ok" : ""}"></span>${ok ? bars(ST.wifi.bars) : ""}<span class="lbl">${t(online ? "device_online" : "device_offline")}</span></button></div>`;
+  if (!S && current !== "dashboard") { $("view").innerHTML = head + (online ? loading("") : `<div class="group empty">${t("offline")}</div>`); return; }
   $("view").innerHTML = head + v();
   if (v.bind) v.bind();
 }
@@ -589,6 +618,7 @@ function go(view) {
 }
 document.addEventListener("click", e => {
   if (e.target.closest("#moreBtn")) { sheet($("sheet").hidden); return; }
+  const g = e.target.closest("[data-go]"); if (g) { go(g.dataset.go); return; }
   if (e.target === $("sheet")) { sheet(false); return; }
   const b = e.target.closest(".navbtn[data-v]"); if (b) go(b.dataset.v);
 });
