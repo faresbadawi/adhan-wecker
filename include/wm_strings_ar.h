@@ -40,10 +40,11 @@ const char HTTP_SCRIPT[]           PROGMEM = "<script>function c(l){"
 "function f() {var x = document.getElementById('p');x.type==='password'?x.type='text':x.type='password';}"
 "</script>"; // @todo add button states, disable on click , show ack , spinner etc
 
-const char HTTP_HEAD_END[]         PROGMEM = "</head><body class='{c}'><div class='wrap'>"; // {c} = _bodyclass
+// Kopf mit Emblem und Titel auf jeder Seite des Portals
+const char HTTP_HEAD_END[]         PROGMEM = "</head><body class='{c}'><div class='wrap'><svg class='emb' viewBox='0 0 100 100'><g fill='none' stroke='#c9a45c' stroke-width='3'><rect x='22' y='22' width='56' height='56'/><rect x='22' y='22' width='56' height='56' transform='rotate(45 50 50)'/><circle cx='50' cy='50' r='19'/></g><path fill='#c9a45c' d='M57 41a13 13 0 1 0 0 18a10 10 0 1 1 0-18z'/></svg><h1>ساعة الأذان الذكية</h1><h3>إعداد الواي فاي</h3>"; // {c} = _bodyclass
 // example of embedded logo, base64 encoded inline, No styling here
 // const char HTTP_ROOT_MAIN[]        PROGMEM = "<img title=' alt=' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADQElEQVRoQ+2YjW0VQQyE7Q6gAkgFkAogFUAqgFQAVACpAKiAUAFQAaECQgWECggVGH1PPrRvn3dv9/YkFOksoUhhfzwz9ngvKrc89JbnLxuA/63gpsCmwCADWwkNEji8fVNgotDM7osI/x777x5l9F6JyB8R4eeVql4P0y8yNsjM7KGIPBORp558T04A+CwiH1UVUItiUQmZ2XMReSEiAFgjAPBeVS96D+sCYGaUx4cFbLfmhSpnqnrZuqEJgJnd8cQplVLciAgX//Cf0ToIeOB9wpmloLQAwpnVmAXgdf6pwjpJIz+XNoeZQQZlODV9vhc1Tuf6owrAk/8qIhFbJH7eI3eEzsvydQEICqBEkZwiALfF70HyHPpqScPV5HFjeFu476SkRA0AzOfy4hYwstj2ZkDgaphE7m6XqnoS7Q0BOPs/sw0kDROzjdXcCMFCNwzIy0EcRcOvBACfh4k0wgOmBX4xjfmk4DKTS31hgNWIKBCI8gdzogTgjYjQWFMw+o9LzJoZ63GUmjWm2wGDc7EvDDOj/1IVMIyD9SUAL0WEhpriRlXv5je5S+U1i2N88zdPuoVkeB+ls4SyxCoP3kVm9jsjpEsBLoOBNC5U9SwpGdakFkviuFP1keblATkTENTYcxkzgxTKOI3jyDxqLkQT87pMA++H3XvJBYtsNbBN6vuXq5S737WqHkW1VgMQNXJ0RshMqbbT33sJ5kpHWymzcJjNTeJIymJZtSQd9NHQHS1vodoFoTMkfbJzpRnLzB2vi6BZAJxWaCr+62BC+jzAxVJb3dmmiLzLwZhZNPE5e880Suo2AZgB8e8idxherqUPnT3brBDTlPxO3Z66rVwIwySXugdNd+5ejhqp/+NmgIwGX3Py3QBmlEi54KlwmjkOytQ+iJrLJj23S4GkOeecg8G091no737qvRRdzE+HLALQoMTBbJgBsCj5RSWUlUVJiZ4SOljb05eLFWgoJ5oY6yTyJp62D39jDANoKKcSocPJD5dQYzlFAFZJflUArgTPZKZwLXAnHmerfJquUkKZEgyzqOb5TuDt1P3nwxobqwPocZA11m4A1mBx5IxNgRH21ti7KbAGiyNn3HoF/gJ0w05A8xclpwAAAABJRU5ErkJggg==' /><h1>{v}</h1><h3>WiFiManager</h3>";
-const char HTTP_ROOT_MAIN[]        PROGMEM = "<div class='star'>&#x06DE;</div><h1>ساعة الأذان الذكية</h1><h3>إعداد الواي فاي</h3><p class='lead'>اختر شبكتك المنزلية وأدخل كلمة المرور، ثم تتصل الساعة تلقائيًا.</p>";
+const char HTTP_ROOT_MAIN[]        PROGMEM = "<p class='lead'>اختر شبكتك المنزلية وأدخل كلمة المرور، ثم تتصل الساعة تلقائيًا.</p>";
 
 const char * const HTTP_PORTAL_MENU[] PROGMEM = {
 "<form action='/wifi'    method='get'><button>اختيار شبكة الواي فاي</button></form><br/>\n", // MENU_WIFI
@@ -62,7 +63,7 @@ const char * const HTTP_PORTAL_MENU[] PROGMEM = {
 const char HTTP_PORTAL_OPTIONS[]   PROGMEM = "";
 const char HTTP_ITEM_QI[]          PROGMEM = "<div role='img' aria-label='{r}%' title='{r}%' class='q q-{q} {i} {h}'></div>"; // rssi icons
 const char HTTP_ITEM_QP[]          PROGMEM = "<div class='q {h}'>{r}%</div>"; // rssi percentage {h} = hidden showperc pref
-const char HTTP_ITEM[]             PROGMEM = "<div><a href='#p' onclick='c(this)' data-ssid='{V}'>{v}</a>{qi}{qp}</div>"; // {q} = HTTP_ITEM_QI, {r} = HTTP_ITEM_QP
+const char HTTP_ITEM[]             PROGMEM = "<div class='net'><a href='#p' onclick='c(this)' data-ssid='{V}'>{v}</a>{qi}{qp}</div>"; // {q} = HTTP_ITEM_QI, {r} = HTTP_ITEM_QP
 // const char HTTP_ITEM[]            PROGMEM = "<div><a href='#p' onclick='c(this)'>{v}</a> {R} {r}% {q} {e}</div>"; // test all tokens
 
 const char HTTP_FORM_START[]       PROGMEM = "<form method='POST' action='{v}'>";
@@ -92,7 +93,7 @@ const char HTTP_BR[]               PROGMEM = "<br/>";
 
 const char HTTP_STYLE[]            PROGMEM = "<style>"
 // Design wie Uhr und App: dunkel, Gold, von rechts nach links
-"body{margin:0;background:#0b0c0c;color:#f2efe8;text-align:center;font-family:'Segoe UI',system-ui,Tahoma,sans-serif;font-size:16px;"
+"body{margin:0;min-height:100vh;background:#0b0c0c;color:#f2efe8;text-align:center;font-family:'Segoe UI',system-ui,Tahoma,sans-serif;font-size:16px;"
 "background-image:radial-gradient(ellipse at top,#10261d 0%,#0b0c0c 70%)}"
 "div,input,select{padding:6px;font-size:1em;margin:6px 0;box-sizing:border-box}"
 "input,button,select,.msg{border-radius:12px;width:100%}input[type=radio],input[type=checkbox]{width:auto;accent-color:#c9a45c}"
@@ -102,8 +103,12 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 "input[type='file']{border:1px solid #c9a45c}"
 ".wrap{text-align:right;display:inline-block;min-width:260px;max-width:440px;width:100%;padding:24px 18px}"
 "h1{color:#e2c48a;font-weight:600;font-size:1.6em;margin:6px 0}h3{color:#9a9f9b;font-weight:400;margin:0 0 10px}"
-".star{color:#c9a45c;font-size:44px;line-height:1;margin-top:10px}.lead{color:#9a9f9b;line-height:1.7}"
-"h1,h3,.star,.lead{text-align:center}hr{border:0;border-top:1px solid #2a2e2d}"
+".emb{width:72px;height:72px;display:block;margin:8px auto 4px}.lead{color:#9a9f9b;line-height:1.7}"
+"h1,h3,.lead{text-align:center}"
+".net{display:flex;align-items:center;justify-content:space-between;background:#161818;border:1px solid #2a2e2d;border-radius:12px;padding:12px 14px;margin:8px 0}"
+".net a{flex:1}.net:active{border-color:#c9a45c}.net .q{float:none}"
+"button[name=refresh],form[action='/'] button{background:none;color:#e2c48a;border:1px solid rgba(201,164,92,.45)}"
+"form{margin-top:14px}hr{border:0;border-top:1px solid #2a2e2d}"
 // links
 "a{color:#f2efe8;font-weight:600;text-decoration:none}a:hover{color:#e2c48a}"
 // quality icons
