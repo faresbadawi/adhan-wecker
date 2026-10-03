@@ -1,5 +1,6 @@
 #include "web_server.h"
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
 #include <Preferences.h>
 #include <ESPmDNS.h>
 #include <LittleFS.h>
@@ -553,6 +554,19 @@ namespace web
 
         if (MDNS.begin(HOSTNAME))
             MDNS.addService("http", "tcp", 80);
+
+        // Firmware und Dateisystem über WLAN aktualisieren (kein USB-Kabel nötig)
+        ArduinoOTA.setHostname(HOSTNAME);
+        ArduinoOTA.setPassword(OTA_PASSWORD);
+        ArduinoOTA.setMdnsEnabled(false); // mDNS läuft schon (oben)
+        ArduinoOTA.onStart([] {
+            audio::stop();
+            Serial.println("OTA: Update beginnt");
+        });
+        ArduinoOTA.onEnd([] { Serial.println("OTA: fertig, Neustart"); });
+        ArduinoOTA.onError([](ota_error_t e) { Serial.printf("OTA: Fehler %u\n", e); });
+        ArduinoOTA.begin();
+        MDNS.enableArduino(3232, true);
         snprintf(s_url, sizeof(s_url), "http://%s", WiFi.localIP().toString().c_str());
         s_running = true;
         Serial.printf("Web: Konfiguration unter http://%s.local oder %s\n", HOSTNAME, s_url);
@@ -569,6 +583,7 @@ namespace web
             return;
         }
         s_server.handleClient();
+        ArduinoOTA.handle();
         if (s_restartAt && (int32_t)(millis() - s_restartAt) > 0)
         {
             Serial.println("Web: Neustart");
