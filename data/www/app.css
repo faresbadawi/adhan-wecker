@@ -3,6 +3,7 @@
   --bg: #0b0c0c; --bg2: #111313; --card: #161818; --card2: #1d2020; --line: #2a2e2d;
   --text: #f2efe8; --muted: #9a9f9b; --dim: #6b706c; --gold: #c9a45c; --gold2: #e2c48a;
   --ok: #5fbf8a; --err: #e0705f; --radius: 16px; --nav: 248px;
+  --arabic: "Amiri", "Noto Naskh Arabic", "Geeza Pro", serif;
   --font: "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans Arabic", "Geeza Pro", sans-serif;
   color-scheme: dark;
 }
@@ -12,10 +13,15 @@ body {
   background: var(--bg); color: var(--text); font: 15px/1.5 var(--font);
   -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
 }
-/* dezentes Achtstern-Muster */
+/* Hintergrund: smaragdgrüner Schimmer oben wie auf der Uhr, darüber ein islamisches Achtstern-Gitter,
+   das nach unten ausläuft */
+body { background: radial-gradient(1100px 520px at 50% -120px, rgba(20, 58, 43, .55), transparent 70%) var(--bg) no-repeat; }
 body::before {
-  content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .05; z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23c9a45c' stroke-width='1'%3E%3Crect x='22' y='22' width='28' height='28'/%3E%3Crect x='22' y='22' width='28' height='28' transform='rotate(45 36 36)'/%3E%3Ccircle cx='36' cy='36' r='8'/%3E%3Cpath d='M0 0l14 14M72 0L58 14M0 72l14-14M72 72L58 58'/%3E%3C/g%3E%3C/svg%3E");
+  content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .09; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23c9a45c' stroke-width='0.8'%3E%3Cpath d='M74.0 48.0L48.0 74.0L22.0 48.0L48.0 22.0ZM66.4 66.4L29.6 66.4L29.6 29.6L66.4 29.6ZM26.0 0.0L0.0 26.0L-26.0 0.0L-0.0 -26.0ZM18.4 18.4L-18.4 18.4L-18.4 -18.4L18.4 -18.4ZM122.0 0.0L96.0 26.0L70.0 0.0L96.0 -26.0ZM114.4 18.4L77.6 18.4L77.6 -18.4L114.4 -18.4ZM26.0 96.0L0.0 122.0L-26.0 96.0L-0.0 70.0ZM18.4 114.4L-18.4 114.4L-18.4 77.6L18.4 77.6ZM122.0 96.0L96.0 122.0L70.0 96.0L96.0 70.0ZM114.4 114.4L77.6 114.4L77.6 77.6L114.4 77.6ZM74.0 48.0H96M22.0 48.0H0M48.0 74.0V96M48.0 22.0V0M66.4 66.4L77.6 77.6M29.6 29.6L18.4 18.4M66.4 29.6L77.6 18.4M29.6 66.4L18.4 77.6'/%3E%3Ccircle cx='48' cy='48' r='8.3'/%3E%3Ccircle cx='0' cy='0' r='8.3'/%3E%3Ccircle cx='96' cy='0' r='8.3'/%3E%3Ccircle cx='0' cy='96' r='8.3'/%3E%3Ccircle cx='96' cy='96' r='8.3'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px; background-position: center top;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .55) 45%, rgba(0, 0, 0, .15) 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .55) 45%, rgba(0, 0, 0, .15) 100%);
 }
 button, input, select { font: inherit; color: inherit; }
 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -222,12 +228,13 @@ details summary { cursor: pointer; color: var(--muted); margin-top: 14px; }
   .hero { flex-direction: column; align-items: stretch; }
   .next { text-align: start; padding-top: 14px; border-top: 1px solid var(--line); }
   .tabs {
-    display: flex; position: fixed; z-index: 6; bottom: 0; left: 0; right: 0; overflow-x: auto; scrollbar-width: none;
-    padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); background: rgba(11, 12, 12, .96); border-top: 1px solid var(--line);
+    display: flex; position: fixed; z-index: 7; bottom: 0; left: 0; right: 0; gap: 4px;
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); background: rgba(11, 12, 12, .97); border-top: 1px solid rgba(201, 164, 92, .18);
   }
   .tabs::-webkit-scrollbar { display: none; }
-  .tabs .navbtn { flex: 1 0 64px; flex-direction: column; gap: 3px; padding: 6px 4px; font-size: 11px; text-align: center; border-radius: 10px; white-space: nowrap; }
-  .tabs .navbtn.on { background: none; }
+  .tabs .navbtn { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 4px; padding: 7px 2px; font-size: 11.5px; text-align: center; border-radius: 12px; white-space: nowrap; }
+  .tabs .navbtn span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .tabs .navbtn.on { background: none; color: var(--gold2); }
   .two { grid-template-columns: 1fr; }
 }
 @media (display-mode: standalone) { .install { display: none !important; } }
@@ -238,3 +245,31 @@ details summary { cursor: pointer; color: var(--muted); margin-top: 14px; }
 .copy .btn { padding: 8px 12px; }
 .banner { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; border-color: rgba(201, 164, 92, .4); }
 .banner .t { flex: 1; min-width: 0; }
+
+/* Arabische Schrift (Amiri) für Überschriften und Gebetsnamen */
+[lang=ar] .top h1 { font-family: var(--arabic); font-size: 30px; font-weight: 700; }
+[lang=ar] .next b, [lang=ar] .time small, [lang=ar] .card h2 { font-family: var(--arabic); }
+[lang=ar] .next b { font-size: 30px; }
+[lang=ar] .time small { font-size: 15px; }
+[lang=ar] .card h2 { font-size: 16px; letter-spacing: 0; }
+.bism { font-family: var(--arabic); color: var(--gold2); text-align: center; font-size: 22px; line-height: 1.6; margin: -6px 0 14px; opacity: .9;
+  display: flex; align-items: center; gap: 14px; }
+.bism::before, .bism::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to var(--fade, left), rgba(201, 164, 92, .5), transparent); }
+.bism::after { --fade: right; }
+/* Ziertrenner unter dem Seitentitel: Linie mit kleiner Raute wie auf der Uhr */
+.orn { position: relative; height: 9px; margin: -12px 0 20px; }
+.orn::before { content: ""; position: absolute; top: 4px; inset-inline: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201, 164, 92, .45) 15%, rgba(201, 164, 92, .45) 85%, transparent); }
+.orn i { position: absolute; left: 50%; top: 0; width: 7px; height: 7px; margin-left: -4px; transform: rotate(45deg);
+  border: 1px solid var(--gold); background: var(--bg); }
+.card { background: linear-gradient(180deg, rgba(29, 32, 32, .92), rgba(22, 24, 24, .92)); }
+/* "Mehr"-Blatt am Handy */
+.sheet { position: fixed; inset: 0; z-index: 6; background: rgba(0, 0, 0, .5); display: flex; align-items: flex-end; }
+.sheetcard { width: 100%; padding: 10px 12px calc(84px + env(safe-area-inset-bottom)); background: #121414;
+  border-top: 1px solid rgba(201, 164, 92, .3); border-radius: 20px 20px 0 0; display: flex; flex-direction: column; gap: 2px; }
+.sheetbtn { padding: 14px; font-size: 16px; color: var(--text); }
+.sheetbtn span { flex: 1; }
+.sheetbtn svg:first-child { color: var(--gold); }
+.sheetbtn svg:last-child { width: 18px; height: 18px; color: var(--dim); }
+[dir=rtl] .sheetbtn svg:last-child { transform: scaleX(-1); }
+@media (min-width: 901px) { .sheet { display: none !important; } }

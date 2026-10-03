@@ -40,10 +40,16 @@ const I = {
   sliders: svg('<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'),
   bell: svg('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2ZM10 20a2 2 0 0 0 4 0"/>'),
   music: svg('<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>'),
+  more: svg('<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'),
+  chevron: svg('<path d="m9 6 6 6-6 6"/>'),
+  stop: svg('<rect x="7" y="7" width="10" height="10" rx="1.5"/>'),
   info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>'),
 };
 
 const NAV = ["dashboard", "prayer", "location", "display", "audio", "lang", "wifi", "device"];
+// Handy: vier Reiter unten, der Rest unter "Mehr"
+const TABS = ["dashboard", "prayer", "audio"];
+const MORE = NAV.filter(k => !TABS.includes(k));
 const PAGE_ICON = { clock: I.clock, prayer: I.prayer, weather: I.cloud, calendar: I.calendar };
 const SKY_ICON = { clear: I.sun, partly_cloudy: I.partly, cloudy: I.cloud, fog: I.fog, drizzle: I.rain, rain: I.rain, snow: I.snow, thunder: I.thunder };
 
@@ -154,7 +160,7 @@ VIEWS.dashboard = () => {
   const p = ST && ST.prayer, wx = ST && ST.weather, loc = ST ? ST.location : (S ? { city: S.city, country: S.country } : {});
   const date = ST && ST.time ? new Date(ST.time.date + "T12:00:00").toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
   const next = p && p.next ? p.next.key : "";
-  return `${installBanner()}
+  return `<div class="bism" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>${installBanner()}
   <div class="pills" style="margin-bottom:14px"><span class="pill">${deviceState()}</span><span class="pill">${wifiState()}</span>
     <span class="pill">${I.location}<span dir="auto">${esc([loc.city, loc.country].filter(Boolean).join(", ")) || "—"}</span></span></div>
   <div class="grid">
@@ -359,12 +365,22 @@ VIEWS.audio = () => `
   ${card(t("volume"), I.audio, range("volume", S.volume, 0, 21))}
   ${card(t("azan"), I.prayer, `<div class="list">${PRAYERS.map(k => `<div class="item"><span class="name">${t("azan_for")} ${t(k)}</span>
     ${toggle(`data-az="${k}"`, S.azan[k])}</div>`).join("")}</div>`)}
+  ${card(t("azan_test"), I.play, `<div class="actions" style="margin-top:0;justify-content:flex-start">
+      <button class="btn gold" data-test="dhuhr">${I.play}${t("azan_test_normal")}</button>
+      <button class="btn" data-test="fajr">${I.play}${t("azan_test_fajr")}</button>
+      <button class="btn danger" id="azanStop">${I.stop}${t("stop")}</button></div>
+    <p class="hint">${t("azan_test_hint")}</p>`)}
   ${card(t("alarms"), I.bell, `<div class="list" id="alarms"></div>
     <div class="actions"><button class="btn" id="alarmAdd">${I.plus}${t("alarm_add")}</button></div><p class="hint">${t("alarm_hint")}</p>`)}
   ${card(t("alarm_tone"), I.music, `<div class="list" id="sounds">${loading("")}</div>`)}`;
 VIEWS.audio.bind = () => {
   bindRange("volume", v => save({ volume: v }));
   document.querySelectorAll("[data-az]").forEach(c => c.onchange = () => save({ azan: { [c.dataset.az]: c.checked } }));
+  document.querySelectorAll("[data-test]").forEach(b => b.onclick = async () => {
+    try { const r = await api("/api/azan/test", { prayer: b.dataset.test }); toast(r.ok ? t("azan_playing") : t("error"), !r.ok); }
+    catch (e) { toast(t("offline"), true); }
+  });
+  $("azanStop").onclick = () => api("/api/azan/stop", {}).catch(() => toast(t("offline"), true));
 
   const alarms = (S.alarms || []).map(a => Object.assign({}, a));
   const days = t("days");
@@ -542,18 +558,22 @@ function installBanner() {
 
 // ---------- Gerüst
 function renderNav() {
-  const html = NAV.map(k => `<button class="navbtn ${k === current ? "on" : ""}" data-v="${k}">${I[k]}<span>${t("nav_" + k)}</span></button>`).join("");
-  $("nav").innerHTML = html;
-  $("tabs").innerHTML = html;
+  const btn = (k, label) => `<button class="navbtn ${k === current ? "on" : ""}" data-v="${k}">${I[k]}<span>${label || t("nav_" + k)}</span></button>`;
+  $("nav").innerHTML = NAV.map(k => btn(k)).join("");
+  $("tabs").innerHTML = TABS.map(k => btn(k, k === "dashboard" ? t("tab_home") : "")).join("") +
+    `<button class="navbtn ${MORE.includes(current) ? "on" : ""}" id="moreBtn">${I.more}<span>${t("more")}</span></button>`;
+  $("sheetList").innerHTML = MORE.map(k => `<button class="navbtn sheetbtn ${k === current ? "on" : ""}" data-v="${k}">${I[k]}<span>${t("nav_" + k)}</span>${I.chevron}</button>`).join("");
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
   $("install").innerHTML = `${I.download}${t("install")}`;
   $("install").hidden = !installEvt;
   if (ST) $("sideHost").textContent = ST.device.host;
 }
 
+const sheet = open => $("sheet").hidden = !open;
+
 function render() {
   const v = VIEWS[current];
-  const head = `<div class="top"><span class="mobile-brand"><img src="/icons/icon-192.png" alt=""></span><h1>${t("nav_" + current)}</h1></div>`;
+  const head = `<div class="top"><span class="mobile-brand"><img src="/icons/icon-192.png" alt=""></span><h1>${t("nav_" + current)}</h1></div><div class="orn"><i></i></div>`;
   if (!S && current !== "dashboard") { $("view").innerHTML = head + (online ? loading("") : `<div class="card empty">${t("offline")}</div>`); return; }
   $("view").innerHTML = head + v();
   if (v.bind) v.bind();
@@ -562,13 +582,16 @@ function render() {
 function go(view) {
   if (!VIEWS[view]) view = "dashboard";
   current = view;
+  sheet(false);
   if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
   renderNav(); render();
   window.scrollTo(0, 0);
-  const on = document.querySelector("#tabs .navbtn.on");
-  if (on) on.scrollIntoView({ inline: "center", block: "nearest" });
 }
-document.addEventListener("click", e => { const b = e.target.closest(".navbtn"); if (b) go(b.dataset.v); });
+document.addEventListener("click", e => {
+  if (e.target.closest("#moreBtn")) { sheet($("sheet").hidden); return; }
+  if (e.target === $("sheet")) { sheet(false); return; }
+  const b = e.target.closest(".navbtn[data-v]"); if (b) go(b.dataset.v);
+});
 window.addEventListener("hashchange", () => go(location.hash.slice(1)));
 
 function applyLang(l) {

@@ -62,6 +62,8 @@ const T = {
     install_s3: "اضغط «Relaunch»، ثم افتح هذه الصفحة من جديد واضغط «تثبيت التطبيق».",
     install_ip: "نصيحة: ثبّت عنوان IP للساعة في الراوتر (FRITZ!Box: الشبكة المنزلية ← الشبكة ← «تخصيص نفس عنوان IPv4 دائمًا»)، وإلا تغيّر العنوان وتوقف التطبيق.",
     copy: "نسخ", copied: "تم النسخ ✓", install_banner: "ضع التطبيق على الشاشة الرئيسية لهاتفك", install_how: "الطريقة", close: "إغلاق",
+    tab_home: "الرئيسية", more: "المزيد", azan_test: "تجربة الأذان", azan_test_normal: "الأذان", azan_test_fajr: "أذان الفجر",
+    azan_test_hint: "يُشغَّل الأذان على الساعة كما في وقت الصلاة. المس الشاشة أو اضغط «إيقاف» لإنهائه.", stop: "إيقاف", azan_playing: "الأذان يعمل على الساعة …",
     hours: "س", minutes: "د",
   },
 
@@ -121,6 +123,8 @@ const T = {
     install_s3: "„Relaunch“ tippen, diese Seite wieder öffnen und „App installieren“ tippen.",
     install_ip: "Tipp: Die IP-Adresse der Uhr im Router festlegen (FRITZ!Box: Heimnetz → Netzwerk → „Diesem Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen“), sonst ändert sie sich und die App findet die Uhr nicht mehr.",
     copy: "Kopieren", copied: "Kopiert ✓", install_banner: "Leg die App auf deinen Startbildschirm", install_how: "Anleitung", close: "Schließen",
+    tab_home: "Start", more: "Mehr", azan_test: "Azan testen", azan_test_normal: "Azan", azan_test_fajr: "Fajr-Azan",
+    azan_test_hint: "Der Azan läuft auf der Uhr wie zur Gebetszeit. Bildschirm berühren oder „Stopp“ tippen, um ihn zu beenden.", stop: "Stopp", azan_playing: "Azan läuft auf der Uhr …",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -180,6 +184,8 @@ const T = {
     install_s3: "Tap “Relaunch”, open this page again and tap “Install app”.",
     install_ip: "Tip: reserve the clock's IP address in your router (FRITZ!Box: Home Network → Network → “Always assign this network device the same IPv4 address”), otherwise it may change and the app loses the clock.",
     copy: "Copy", copied: "Copied ✓", install_banner: "Put the app on your home screen", install_how: "How to", close: "Close",
+    tab_home: "Home", more: "More", azan_test: "Test azan", azan_test_normal: "Azan", azan_test_fajr: "Fajr azan",
+    azan_test_hint: "The azan plays on the clock just like at prayer time. Touch the screen or tap “Stop” to end it.", stop: "Stop", azan_playing: "Azan playing on the clock …",
     hours: "h", minutes: "min",
   },
 };

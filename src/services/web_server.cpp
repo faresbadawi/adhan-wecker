@@ -391,6 +391,8 @@ namespace web
             }
         }
 
+        doc["azan"]["playing"] = azan::status().state == azan::State::PLAYING;
+
         model::Weather wx;
         if (weather::get(wx))
         {
@@ -464,6 +466,24 @@ namespace web
         s_restartAt = millis() + 800;
     }
 
+    // Azan-Test aus der App: läuft wie zur Gebetszeit (Anzeige auf der Uhr, Stopp durch Tippen oder App)
+    static void azanTest()
+    {
+        JsonDocument doc;
+        deserializeJson(doc, s_server.arg("plain"));
+        const bool fajr = strcmp(doc["prayer"] | "", "fajr") == 0;
+        struct tm now;
+        const uint16_t minutes = timemgr::now(now) ? now.tm_hour * 60 + now.tm_min : 0;
+        azan::start(fajr ? model::FAJR : model::DHUHR, minutes);
+        s_server.send(200, "application/json", "{}");
+    }
+
+    static void azanStop()
+    {
+        azan::skip();
+        s_server.send(200, "application/json", "{}");
+    }
+
     // Sprache von Web-App und Uhr; die Uhr startet neu, damit alle Seiten in der neuen Sprache entstehen
     static void deviceLang()
     {
@@ -487,6 +507,8 @@ namespace web
         s_server.on("/api/device/restart", HTTP_POST, deviceRestart);
         s_server.on("/api/device/reset", HTTP_POST, deviceReset);
         s_server.on("/api/device/lang", HTTP_POST, deviceLang);
+        s_server.on("/api/azan/test", HTTP_POST, azanTest);
+        s_server.on("/api/azan/stop", HTTP_POST, azanStop);
         s_server.on("/api/sounds", HTTP_GET, sendSounds);
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);
