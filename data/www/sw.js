@@ -1,5 +1,5 @@
 // Service Worker: hält die App-Hülle offline bereit. Gerätedaten (/api) kommen immer frisch vom Netz.
-const CACHE = "azan-clock-v7";
+const CACHE = "azan-clock-v8";
 const SHELL = ["/", "/app.css", "/js/app.js", "/js/i18n.js", "/manifest.json",
   "/icons/icon-192.png", "/icons/icon-512.png", "/icons/favicon.png", "/icons/apple-touch-icon.png"];
 

@@ -662,7 +662,7 @@ async function refreshStatus() {
 }
 
 // ---------- Installation (PWA)
-const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; renderNav(); if (current === "device" || current === "dashboard") render(); });
 window.addEventListener("appinstalled", () => { installEvt = null; renderNav(); render(); });
 async function install() {
@@ -672,6 +672,16 @@ async function install() {
   installEvt = null; renderNav();
 }
 $("install").onclick = install;
+// Vollbild am Handy/Tablet: als installierte App regelt das das Manifest ("fullscreen"). Öffnet die
+// Startbildschirm-Verknüpfung (Android ohne HTTPS) im Browser, wechselt die App beim ersten Antippen ins Vollbild.
+const touchDevice = matchMedia("(pointer: coarse)").matches;
+function enterFullscreen() {
+  const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!touchDevice || isStandalone() || document.fullscreenElement || document.webkitFullscreenElement || !req) return;
+  try { const r = req.call(el, { navigationUI: "hide" }); if (r && r.catch) r.catch(() => {}); } catch (e) { /* nicht erlaubt */ }
+}
+document.addEventListener("click", enterFullscreen, { capture: true });
+
 // Service Worker gibt es nur in sicheren Kontexten (HTTPS oder als sicher markierter Ursprung)
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 

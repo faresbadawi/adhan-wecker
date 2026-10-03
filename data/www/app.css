@@ -263,7 +263,7 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
   .tabs .navbtn.on { color: var(--text); }
   .tabs .navbtn.on svg { background: rgba(201, 164, 92, .2); color: var(--gold2); }
 }
-@media (display-mode: standalone) { .install { display: none !important; } }
+@media (display-mode: standalone), (display-mode: fullscreen) { .install { display: none !important; } }
 
 /* Arabisch: Amiri für Gebetsnamen und Titel */
 [lang=ar] .hero-name, [lang=ar] .prow .pn, [lang=ar] .top h1 { font-family: var(--arabic); }
@@ -287,3 +287,13 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
 .vol { display: flex; align-items: center; gap: 12px; }
 .vol > svg { color: var(--gold); }
 .vol .range { flex: 1; }
+
+/* Vollbild: Inhalt reicht bis an die Ränder, bleibt aber außerhalb von Kamera-Aussparung,
+   Statusleiste und abgerundeten Ecken (iPhone, iPad, Android) */
+html { background: var(--bg); }
+.side { padding-top: calc(22px + env(safe-area-inset-top)); padding-bottom: calc(22px + env(safe-area-inset-bottom)); padding-inline-start: calc(14px + env(safe-area-inset-left)); }
+main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(60px + env(safe-area-inset-bottom)); padding-right: calc(32px + env(safe-area-inset-right)); }
+@media (max-width: 900px) {
+  main { padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(100px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
+  .tabs { padding-left: calc(10px + env(safe-area-inset-left)); padding-right: calc(10px + env(safe-area-inset-right)); }
+}
