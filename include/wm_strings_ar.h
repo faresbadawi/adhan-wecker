@@ -2,6 +2,8 @@
  * wm_strings_ar.h – arabische Texte und eigenes Design für das WLAN-Einrichtungsportal
  * des Adhan-Weckers (Grundlage: wm_strings_en.h der Bibliothek WiFiManager 2.0.17).
  * Eingebunden über -DWM_STRINGS_FILE in platformio.ini.
+ * Achtung: Der Build erkennt Änderungen an dieser Datei nicht (Makro-Include). Danach die
+ * WiFiManager-Objekte löschen: find .pio/build -ipath '*wifimanager*' -name '*.o' -delete
  *
  * Original: english strings for
  * WiFiManager, a library for the ESP8266/Arduino platform
