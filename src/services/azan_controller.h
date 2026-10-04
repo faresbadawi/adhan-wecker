@@ -37,7 +37,7 @@ namespace azan
     Status status();
 
     // Azan-Stimme: Dateien /azans/<id>.mp3 und /azans/<id>_fajr.mp3 im LittleFS (z. B. "alafasy").
-    // Die Wahl wird im NVS gespeichert; "default" ist der ursprüngliche Azan.
+    // Die Wahl wird im NVS gespeichert; Standard ist "alafasy".
     String voice();
     bool setVoice(const String &id);
     bool voiceExists(const String &id);

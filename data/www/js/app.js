@@ -435,7 +435,7 @@ VIEWS.audio.bind = () => {
       <span class="mark">${id === voices.selected ? I.check : ""}</span><span class="name">${esc(voiceName(id))}</span>
       <button class="round" data-hear="${esc(id)}" aria-label="${t("listen")}">${I.play}</button></div>`).join("") || `<div class="empty">—</div>`;
   };
-  const sortVoices = d => { d.list.sort((a, b) => (a === "default" ? -1 : b === "default" ? 1 : a.localeCompare(b))); voices = d; renderVoices(); };
+  const sortVoices = d => { d.list.sort((a, b) => a.localeCompare(b)); voices = d; renderVoices(); };
   api("/api/azan/voices").then(r => r.data && sortVoices(r.data)).catch(() => { $("voices").innerHTML = `<div class="empty">${t("offline")}</div>`; });
   $("voices").onclick = async e => {
     const hear = e.target.closest("[data-hear]");

@@ -67,7 +67,7 @@ const T = {
     nav_settings: "الإعدادات", grp_prayer: "الصلاة", grp_clock: "الساعة", grp_conn: "الاتصال", back: "رجوع", listen: "استماع",
     volume_hint: "يُشغَّل الأذان على الساعة لتسمع مستوى الصوت مباشرة أثناء الضبط.", azan_test_display: "تجربة الأذان مع العرض على الساعة",
     azan_voice: "صوت المؤذن", azan_voice_hint: "يُستخدم الصوت المختار لكل الصلوات، وللفجر بنسخة أذان الفجر الخاصة به. اضغط ▶ للاستماع.",
-    voice_default: "الأذان الأصلي", voice_islam_sobhi: "الشيخ إسلام صبحي", voice_alafasy: "الشيخ مشاري راشد العفاسي",
+    voice_islam_sobhi: "الشيخ إسلام صبحي", voice_alafasy: "الشيخ مشاري راشد العفاسي",
     hours: "س", minutes: "د",
   },
 
@@ -132,7 +132,7 @@ const T = {
     nav_settings: "Einstellungen", grp_prayer: "Gebet", grp_clock: "Uhr", grp_conn: "Verbindung", back: "Zurück", listen: "Anhören",
     volume_hint: "Spielt den Azan auf der Uhr ab – so hörst du die Lautstärke direkt beim Einstellen.", azan_test_display: "Azan-Test mit Anzeige auf der Uhr",
     azan_voice: "Azan-Stimme", azan_voice_hint: "Die gewählte Stimme gilt für alle Gebete, zu Fajr mit ihrem eigenen Fajr-Azan. Mit ▶ probehören.",
-    voice_default: "Ursprünglicher Azan", voice_islam_sobhi: "Scheich Islam Sobhi", voice_alafasy: "Scheich Mishary Rashid Alafasy",
+    voice_islam_sobhi: "Scheich Islam Sobhi", voice_alafasy: "Scheich Mishary Rashid Alafasy",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -197,7 +197,7 @@ const T = {
     nav_settings: "Settings", grp_prayer: "Prayer", grp_clock: "Clock", grp_conn: "Connection", back: "Back", listen: "Listen",
     volume_hint: "Plays the azan on the clock so you hear the volume while adjusting it.", azan_test_display: "Azan test with display on the clock",
     azan_voice: "Azan voice", azan_voice_hint: "The chosen voice is used for all prayers, with its own Fajr azan at Fajr. Tap ▶ to listen.",
-    voice_default: "Original azan", voice_islam_sobhi: "Sheikh Islam Sobhi", voice_alafasy: "Sheikh Mishary Rashid Alafasy",
+    voice_islam_sobhi: "Sheikh Islam Sobhi", voice_alafasy: "Sheikh Mishary Rashid Alafasy",
     hours: "h", minutes: "min",
   },
 };

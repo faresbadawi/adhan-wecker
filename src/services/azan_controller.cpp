@@ -37,9 +37,9 @@ namespace azan
     {
         Preferences pr;
         pr.begin("audio", true);
-        String id = pr.getString("azan", "default");
+        String id = pr.getString("azan", "alafasy");
         pr.end();
-        return voiceExists(id) ? id : String("default");
+        return voiceExists(id) ? id : String("alafasy");
     }
 
     bool setVoice(const String &id)
@@ -81,7 +81,7 @@ namespace azan
         fs::FS *fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, fileName(p), path, sizeof(path));
         if (!fs)
             fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "azan.mp3", path, sizeof(path));
-        if (!fs && (voiceFile(voice(), p, path, sizeof(path)) || voiceFile("default", p, path, sizeof(path))))
+        if (!fs && (voiceFile(voice(), p, path, sizeof(path)) || voiceFile("alafasy", p, path, sizeof(path))))
             fs = &LittleFS;
         s_status.hasAudio = fs != nullptr;
         if (fs)
