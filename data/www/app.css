@@ -297,3 +297,4 @@ main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(
   main { padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(100px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); }
   .tabs { padding-left: calc(10px + env(safe-area-inset-left)); padding-right: calc(10px + env(safe-area-inset-right)); }
 }
+.btn { text-decoration: none; }

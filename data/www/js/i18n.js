@@ -55,8 +55,8 @@ const T = {
     restarting: "جارٍ إعادة التشغيل …", install: "تثبيت التطبيق", install_hint_ios: "في Safari: زر المشاركة ← «إضافة إلى الشاشة الرئيسية».",
     
     installed: "التطبيق مثبّت ✓", install_menu: "في Chrome: القائمة ⋮ ← «تثبيت التطبيق».",
-    install_android: "على أندرويد (Chrome)", sc_1: "افتح القائمة ⋮ في الأعلى.", sc_2: "اختر «إضافة إلى الشاشة الرئيسية» ثم «إضافة».",
-    sc_3: "تظهر أيقونة الساعة على الشاشة الرئيسية وتفتح التطبيق مباشرة.", sc_adv: "بدون شريط المتصفح (متقدم)",
+    install_android: "على أندرويد (Chrome)", sc_0: "افتح نسخة التطبيق أولًا:", sc_open: "فتح نسخة التطبيق", sc_1: "افتح القائمة ⋮ في الأعلى.", sc_2: "اختر «إضافة إلى الشاشة الرئيسية» ثم «إضافة».",
+    sc_3: "افتح الأيقونة من الشاشة الرئيسية واضغط مرة على الشاشة، فيعمل التطبيق بملء الشاشة.", sc_adv: "بدون شريط المتصفح (متقدم)",
     install_why: "يسمح Chrome بتثبيت التطبيق فقط عبر اتصال آمن. الساعة تعمل داخل شبكتك المنزلية دون HTTPS، لذلك يلزم إعداد لمرة واحدة:",
     install_s1: "انسخ هذا العنوان والصقه في شريط العنوان في Chrome:", install_s2: "اختر «Enabled» وأدخل في الحقل عنوان الساعة هذا:",
     install_s3: "اضغط «Relaunch»، ثم افتح هذه الصفحة من جديد واضغط «تثبيت التطبيق».",
@@ -68,11 +68,12 @@ const T = {
     volume_hint: "يُشغَّل الأذان على الساعة لتسمع مستوى الصوت مباشرة أثناء الضبط.", azan_test_display: "تجربة الأذان مع العرض على الساعة",
     azan_voice: "صوت المؤذن", azan_voice_hint: "يُستخدم الصوت المختار لكل الصلوات، وللفجر بنسخة أذان الفجر الخاصة به. اضغط ▶ للاستماع.",
     voice_islam_sobhi: "الشيخ إسلام صبحي", voice_alafasy: "الشيخ مشاري راشد العفاسي",
+    storage: "مساحة الملفات", free_of: "متاح من",
     hours: "س", minutes: "د",
   },
 
   de: {
-    app: "Smart Azan Clock",
+    app: "Smart Azan Wecker",
     nav_dashboard: "Dashboard", nav_prayer: "Gebetszeiten", nav_location: "Standort", nav_display: "Darstellung",
     nav_audio: "Audio", nav_lang: "Sprache", nav_wifi: "WLAN", nav_device: "Gerät",
     device_online: "Gerät verbunden", device_offline: "Gerät nicht erreichbar",
@@ -120,8 +121,8 @@ const T = {
     restarting: "Neustart …", install: "App installieren", install_hint_ios: "In Safari: Teilen → „Zum Home-Bildschirm“.",
     
     installed: "App ist installiert ✓", install_menu: "In Chrome: Menü ⋮ → „App installieren“.",
-    install_android: "Auf Android (Chrome)", sc_1: "Oben rechts das Menü ⋮ öffnen.", sc_2: "„Zum Startbildschirm hinzufügen“ wählen und „Hinzufügen“ tippen.",
-    sc_3: "Das Uhr-Symbol liegt jetzt auf dem Startbildschirm und öffnet die App direkt.", sc_adv: "Ohne Browserleiste (für Fortgeschrittene)",
+    install_android: "Auf Android (Chrome)", sc_0: "Zuerst die App-Version öffnen:", sc_open: "App-Version öffnen", sc_1: "Oben rechts das Menü ⋮ öffnen.", sc_2: "„Zum Startbildschirm hinzufügen“ wählen und „Hinzufügen“ tippen.",
+    sc_3: "Die App über das Symbol öffnen und einmal auf den Bildschirm tippen – dann läuft sie im Vollbild.", sc_adv: "Ohne Browserleiste (für Fortgeschrittene)",
     install_why: "Chrome installiert Apps nur über eine sichere Verbindung. Die Uhr läuft in deinem Heimnetz ohne HTTPS, deshalb ist einmalig diese Einstellung nötig:",
     install_s1: "Diese Adresse kopieren und in Chrome in die Adresszeile einfügen:", install_s2: "Auf „Enabled“ stellen und in das Feld diese Adresse der Uhr eintragen:",
     install_s3: "„Relaunch“ tippen, diese Seite wieder öffnen und „App installieren“ tippen.",
@@ -133,6 +134,7 @@ const T = {
     volume_hint: "Spielt den Azan auf der Uhr ab – so hörst du die Lautstärke direkt beim Einstellen.", azan_test_display: "Azan-Test mit Anzeige auf der Uhr",
     azan_voice: "Azan-Stimme", azan_voice_hint: "Die gewählte Stimme gilt für alle Gebete, zu Fajr mit ihrem eigenen Fajr-Azan. Mit ▶ probehören.",
     voice_islam_sobhi: "Scheich Islam Sobhi", voice_alafasy: "Scheich Mishary Rashid Alafasy",
+    storage: "Speicher (Dateien)", free_of: "frei von",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -185,8 +187,8 @@ const T = {
     restarting: "Restarting …", install: "Install app", install_hint_ios: "In Safari: Share → “Add to Home Screen”.",
     
     installed: "App installed ✓", install_menu: "In Chrome: menu ⋮ → “Install app”.",
-    install_android: "On Android (Chrome)", sc_1: "Open the menu ⋮ at the top right.", sc_2: "Choose “Add to Home screen” and tap “Add”.",
-    sc_3: "The clock icon is now on your home screen and opens the app directly.", sc_adv: "Without browser bar (advanced)",
+    install_android: "On Android (Chrome)", sc_0: "First open the app version:", sc_open: "Open app version", sc_1: "Open the menu ⋮ at the top right.", sc_2: "Choose “Add to Home screen” and tap “Add”.",
+    sc_3: "Open the app from its icon and tap the screen once – it then runs full screen.", sc_adv: "Without browser bar (advanced)",
     install_why: "Chrome installs apps only over a secure connection. The clock runs in your home network without HTTPS, so this one-time setting is needed:",
     install_s1: "Copy this address and paste it into Chrome's address bar:", install_s2: "Set it to “Enabled” and enter this address of the clock in the field:",
     install_s3: "Tap “Relaunch”, open this page again and tap “Install app”.",
@@ -198,6 +200,7 @@ const T = {
     volume_hint: "Plays the azan on the clock so you hear the volume while adjusting it.", azan_test_display: "Azan test with display on the clock",
     azan_voice: "Azan voice", azan_voice_hint: "The chosen voice is used for all prayers, with its own Fajr azan at Fajr. Tap ▶ to listen.",
     voice_islam_sobhi: "Sheikh Islam Sobhi", voice_alafasy: "Sheikh Mishary Rashid Alafasy",
+    storage: "Storage (files)", free_of: "free of",
     hours: "h", minutes: "min",
   },
 };

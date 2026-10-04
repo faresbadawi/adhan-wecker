@@ -151,6 +151,8 @@ const range = (id, v, min, max, suffix = "") =>
 const loading = text => `<div class="loading"><span class="spinner"></span>${esc(text)}</div>`;
 const locale = () => ({ ar: "ar-u-nu-latn", de: "de-DE", en: "en-GB" }[lang()]);
 
+const mb = b => (b / 1048576).toFixed(1).replace(".", lang() === "de" ? "," : ".") + " MB";
+
 function duration(sec) {
   const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60);
   return h ? `${h} ${t("hours")} ${m} ${t("minutes")}` : `${m} ${t("minutes")}`;
@@ -572,7 +574,8 @@ VIEWS.device = () => {
     <div class="kv"><span>${t("firmware")}</span><span class="ltr">${esc(d ? d.firmware : "1.0.0")}</span></div>
     ${d ? `<div class="kv"><span>${t("ip")}</span><span class="ltr">${esc(d.ip)}</span></div>
     <div class="kv"><span>${t("host")}</span><span class="ltr">${esc(d.host)}</span></div>
-    <div class="kv"><span>${t("uptime")}</span><span>${duration(d.uptime)}</span></div>` : ""}`)}
+    <div class="kv"><span>${t("uptime")}</span><span>${duration(d.uptime)}</span></div>
+    ${d.fsTotal ? `<div class="kv"><span>${t("storage")}</span><span><span class="ltr">${mb(d.fsTotal - d.fsUsed)}</span> ${t("free_of")} <span class="ltr">${mb(d.fsTotal)}</span></span></div>` : ""}` : ""}`)}
   ${installCard()}
   ${card(t("firmware_update"), I.download, `<div class="actions" style="margin-top:0;justify-content:space-between;align-items:center">
     <span class="hint" style="margin:0">${t("soon")}</span><button class="btn" disabled>${t("firmware_update")}</button></div>`)}
@@ -603,7 +606,9 @@ function installCard() {
   else if (installEvt) body = `<div class="actions" style="margin-top:0"><button class="btn gold" id="devInstall">${I.download}${t("install")}</button></div>`;
   else if (isIOS()) body = `<p class="hint" style="margin-top:0">${t("install_hint_ios")}</p>`;
   else if (window.isSecureContext) body = `<p class="hint" style="margin-top:0">${t("install_menu")}</p>`;
-  else body = `<ol class="steps"><li>${t("sc_1")}</li><li>${t("sc_2")}</li><li>${t("sc_3")}</li></ol>
+  else if (appMode()) body = `<ol class="steps"><li>${t("sc_1")}</li><li>${t("sc_2")}</li><li>${t("sc_3")}</li></ol>`;
+  else body = `<ol class="steps"><li>${t("sc_0")}<div class="actions" style="justify-content:flex-start;margin:10px 0 0">
+      <a class="btn gold" href="/?app=1#device">${I.download}${t("sc_open")}</a></div></li><li>${t("sc_1")}</li><li>${t("sc_2")}</li><li>${t("sc_3")}</li></ol>
     <p class="hint">${t("install_ip")}</p>
     <details><summary>${t("sc_adv")}</summary><p class="hint">${t("install_why")}</p>
       <ol class="steps"><li>${t("install_s1")}${copyField("cpFlag", FLAG_URL)}</li>
@@ -697,14 +702,17 @@ async function install() {
   installEvt = null; renderNav();
 }
 $("install").onclick = install;
-// Vollbild am Handy/Tablet: als installierte App regelt das das Manifest ("fullscreen"). Öffnet die
-// Startbildschirm-Verknüpfung (Android ohne HTTPS) im Browser, wechselt die App beim ersten Antippen ins Vollbild.
-const touchDevice = matchMedia("(pointer: coarse)").matches;
+// Vollbild nur in der gespeicherten App, nie im normalen Browser-Tab.
+// Installiert (iOS, Chrome mit HTTPS) regelt das Manifest/iOS selbst. Die Android-Verknüpfung ohne HTTPS
+// öffnet in Chrome; sie startet mit "?app=1" und wechselt beim ersten Antippen ins Vollbild.
+const appMode = () => new URLSearchParams(location.search).has("app");
+const inFullscreen = () => document.fullscreenElement || document.webkitFullscreenElement;
 function enterFullscreen() {
   const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
-  if (!touchDevice || isStandalone() || document.fullscreenElement || document.webkitFullscreenElement || !req) return;
+  if (!appMode() || isStandalone() || inFullscreen() || !req) return;
   try { const r = req.call(el, { navigationUI: "hide" }); if (r && r.catch) r.catch(() => {}); } catch (e) { /* nicht erlaubt */ }
 }
+document.addEventListener("pointerup", enterFullscreen, { capture: true });
 document.addEventListener("click", enterFullscreen, { capture: true });
 
 // Service Worker gibt es nur in sicheren Kontexten (HTTPS oder als sicher markierter Ursprung)

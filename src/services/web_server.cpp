@@ -353,6 +353,10 @@ namespace web
         dev["host"] = String(HOSTNAME) + ".local";
         dev["ip"] = WiFi.localIP().toString();
         dev["uptime"] = millis() / 1000;
+        dev["fsUsed"] = LittleFS.usedBytes();   // Dateien (Azan, Hintergründe, App)
+        dev["fsTotal"] = LittleFS.totalBytes();
+        dev["appUsed"] = ESP.getSketchSize();    // Programm
+        dev["appTotal"] = ESP.getFreeSketchSpace(); // Größe einer App-Partition (die andere ist gleich groß)
 
         const model::WifiInfo w = wifimgr::info();
         JsonObject wifi = doc["wifi"].to<JsonObject>();

@@ -1,9 +1,9 @@
 {
   "id": "/",
-  "name": "Smart Azan Clock",
-  "short_name": "Azan Clock",
-  "description": "Smart Azan Clock – Gebetszeiten, Azan und Einstellungen der Uhr",
-  "start_url": "/#dashboard",
+  "name": "Smart Azan Wecker",
+  "short_name": "Azan Wecker",
+  "description": "Smart Azan Wecker – Gebetszeiten, Azan und Einstellungen der Uhr",
+  "start_url": "/?app=1#dashboard",
   "scope": "/",
   "display": "fullscreen",
   "display_override": [

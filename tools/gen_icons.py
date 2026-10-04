@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Erzeugt die App-Icons der Web-App (PWA) nach data/www/icons/.
 
-Motiv: goldener achtzackiger Stern (Rub el Hizb) mit Halbmond auf dunklem Grund,
-passend zur Uhr. Benötigt pillow und numpy.
+Motiv: achtzackiger Stern (Rub el Hizb) mit Halbmond in Roségold auf dem schwarzen
+Gittermuster des Standard-Hintergrunds (tools/backgrounds/noir.png). Benötigt pillow und numpy.
 """
 import math
 from pathlib import Path
@@ -11,17 +11,23 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 OUT = Path(__file__).resolve().parent.parent / "data" / "www" / "icons"
-GOLD = (201, 164, 92)
+GOLD = (233, 162, 124)  # Roségold wie die Akzentfarbe der Uhr
+PATTERN = Path(__file__).resolve().parent / "backgrounds" / "noir.png"
 BG_IN = (14, 36, 28)
 BG_OUT = (5, 10, 8)
 
 
 def background(size):
+    """Quadratischer Ausschnitt des Hintergrundmusters, zur Mitte hin etwas abgedunkelt (Emblem bleibt klar)."""
+    im = Image.open(PATTERN).convert("RGB")
+    side = int(min(im.size) * 0.62)  # Ausschnitt: Muster bleibt im Symbol erkennbar
+    left, top = (im.width - side) // 2, (im.height - side) // 2
+    im = im.crop((left, top, left + side, top + side)).resize((size, size), Image.LANCZOS)
     yy, xx = np.mgrid[0:size, 0:size].astype(np.float32)
-    d = np.sqrt((xx - size / 2) ** 2 + (yy - size * 0.42) ** 2) / (size * 0.75)
-    t = np.clip(d, 0, 1)[..., None]
-    img = np.array(BG_IN, np.float32) * (1 - t) + np.array(BG_OUT, np.float32) * t
-    return Image.fromarray(img.astype(np.uint8), "RGB")
+    d = np.sqrt((xx - size / 2) ** 2 + (yy - size / 2) ** 2) / (size * 0.5)
+    shade = 0.45 + 0.55 * np.clip(d, 0, 1)  # Mitte dunkler
+    img = np.asarray(im, np.float32) * 1.25 * shade[..., None]
+    return Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB")
 
 
 def star_points(cx, cy, r, rot):
@@ -54,6 +60,11 @@ def emblem(size, scale):
 
 def icon(size, scale, rounded):
     img = background(size)
+    # dunkle, weich auslaufende Fläche hinter dem Emblem, damit es sich vom Muster abhebt
+    yy, xx = np.mgrid[0:size, 0:size].astype(np.float32)
+    d = np.sqrt((xx - size / 2) ** 2 + (yy - size / 2) ** 2) / (size * scale / 2)
+    veil = Image.fromarray((np.clip(1.25 - d, 0, 1) * 235).astype(np.uint8), "L")
+    img.paste(Image.new("RGB", (size, size), (8, 8, 9)), (0, 0), veil)
     gold = Image.new("RGB", (size, size), GOLD)
     img.paste(gold, (0, 0), emblem(size, scale))
     if rounded:  # abgerundete Ecken für Favicon / Desktop

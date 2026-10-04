@@ -2,7 +2,7 @@
 #pragma once
 
 // Gerät und Firmware (angezeigt in der Web-App)
-#define DEVICE_NAME "Smart Azan Clock"
+#define DEVICE_NAME "Smart Azan Wecker"
 #define FW_VERSION "1.0.0"
 
 // Updates über WLAN (ArduinoOTA, Port 3232): pio run -e ota -t upload / -t uploadfs
