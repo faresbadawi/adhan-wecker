@@ -10,7 +10,7 @@ namespace alarm_screen
 {
     using namespace theme;
 
-    static lv_obj_t *s_root, *s_time;
+    static lv_obj_t *s_root, *s_time, *s_title, *s_name;
     static void (*s_onStop)() = nullptr;
 
     void create(void (*onStop)())
@@ -36,17 +36,37 @@ namespace alarm_screen
         lv_obj_set_style_border_width(card, 1, 0);
 
         lv_obj_align(image(card, &img_alarm_lg, Role::ACCENT), LV_ALIGN_TOP_MID, 0, 18);
-        lv_obj_align(image(card, lang::text(TXT_ALARM), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 86);
+        s_title = image(card, lang::text(TXT_ALARM), Role::ACCENT);
+        lv_obj_align(s_title, LV_ALIGN_TOP_MID, 0, 86);
+        // eigener Name statt "Wecker" (Schrift mit arabischer Ersatzschrift)
+        s_name = label(card, &font_josefin_18, Role::ACCENT, "");
+        lv_obj_set_width(s_name, 340);
+        lv_label_set_long_mode(s_name, LV_LABEL_LONG_DOT);
+        lv_obj_set_style_text_align(s_name, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_base_dir(s_name, LV_BASE_DIR_AUTO, 0);
+        lv_obj_align(s_name, LV_ALIGN_TOP_MID, 0, 92);
         s_time = label(card, &font_count_52, Role::MAIN, "");
         lv_obj_align(s_time, LV_ALIGN_TOP_MID, 0, 128);
         divider(card, 190, 192, 140);
         lv_obj_align(image(card, lang::text(TXT_ALARM_STOP), Role::MUTED), LV_ALIGN_TOP_MID, 0, 204);
     }
 
-    void show(bool on, int hour, int minute)
+    void show(bool on, int hour, int minute, const char *name)
     {
         if (on)
         {
+            const bool named = name && name[0];
+            lv_label_set_text(s_name, named ? name : "");
+            if (named)
+            {
+                lv_obj_add_flag(s_title, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(s_name, LV_OBJ_FLAG_HIDDEN);
+            }
+            else
+            {
+                lv_obj_clear_flag(s_title, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(s_name, LV_OBJ_FLAG_HIDDEN);
+            }
             lv_label_set_text_fmt(s_time, "%02d:%02d", hour, minute);
             lv_obj_align(s_time, LV_ALIGN_TOP_MID, 0, 128);
             lv_obj_clear_flag(s_root, LV_OBJ_FLAG_HIDDEN);

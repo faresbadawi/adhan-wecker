@@ -9,6 +9,7 @@ namespace alarmclock
     static constexpr uint32_t MAX_RING_MS = 10 * 60 * 1000; // spätestens nach 10 Minuten aufhören
 
     static bool s_ringing = false;
+    static int s_index = -1;
     static uint32_t s_startedMs = 0;
     static int32_t s_lastKey = -1; // zuletzt ausgelöster Wecker (Datum + Index)
     static fs::FS *s_fs = nullptr;
@@ -45,6 +46,7 @@ namespace alarmclock
             {
                 s_lastKey = key;
                 s_ringing = true;
+                s_index = i;
                 s_startedMs = millis();
                 s_fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "alarm.mp3", s_path, sizeof(s_path));
                 Serial.printf("Wecker %02d:%02d: %s\n", a.hour, a.minute, s_fs ? s_path : "keine alarm.mp3");
@@ -63,6 +65,7 @@ namespace alarmclock
     }
 
     bool ringing() { return s_ringing; }
+    int ringingIndex() { return s_ringing ? s_index : -1; }
 
     int nextAlarmMinutes(const struct tm &now, const settings::Settings &st)
     {

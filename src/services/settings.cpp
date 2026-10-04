@@ -1,4 +1,5 @@
 #include "settings.h"
+#include <Preferences.h>
 #include <Arduino.h>
 #include "config.h"
 #include "storage.h"
@@ -213,4 +214,21 @@ namespace settings
     }
 
     uint32_t version() { return s_version; }
+
+    String alarmName(int i)
+    {
+        Preferences p;
+        p.begin("alarms", true);
+        String n = p.getString(("n" + String(i)).c_str(), "");
+        p.end();
+        return n;
+    }
+
+    void setAlarmName(int i, const String &name)
+    {
+        Preferences p;
+        p.begin("alarms", false);
+        p.putString(("n" + String(i)).c_str(), name.substring(0, 40));
+        p.end();
+    }
 }

@@ -103,6 +103,7 @@ namespace web
             snprintf(t, sizeof(t), "%02d:%02d", st.alarms[i].hour, st.alarms[i].minute);
             JsonObject a = alarms.add<JsonObject>();
             a["on"] = st.alarms[i].enabled;
+            a["name"] = settings::alarmName(i);
             a["time"] = t;
             a["days"] = st.alarms[i].days;
         }
@@ -179,6 +180,7 @@ namespace web
                 st.alarms[i].hour = atoi(t);
                 st.alarms[i].minute = strlen(t) >= 5 ? atoi(t + 3) : 0;
                 st.alarms[i].days = alarms[i]["days"] | 0x7F;
+                settings::setAlarmName(i, alarms[i]["name"] | "");
             }
         }
 

@@ -11,6 +11,7 @@ namespace alarmclock
 
     void stop();
     bool ringing();
+    int ringingIndex(); // Nummer des klingelnden Weckers, -1 wenn keiner
 
     // Nächste aktive Weckzeit ab jetzt (Minuten seit Mitternacht), -1 wenn keiner aktiv ist
     int nextAlarmMinutes(const struct tm &now, const settings::Settings &st);

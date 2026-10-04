@@ -1,12 +1,13 @@
 /* Smart Azan Clock – Web-App. Modernes, ruhiges App-Design: dunkle Flächen, ein Akzent in Gold,
    Smaragdgrün nur in der großen Gebetskarte. Für das Handy gebaut, am PC mit Seitenleiste. */
 :root {
-  --bg: #0a0b0b; --surface: #141615; --surface2: #1b1e1d; --sep: rgba(255, 255, 255, .07);
-  --text: #f3f1ec; --muted: #9aa09c; --dim: #666c68; --gold: #c9a45c; --gold2: #e3c58b;
+  --bg: #0a0a0a; --surface: #1a1b1b; --surface2: #272a29; --sep: rgba(255, 255, 255, .1);
+  --text: #ffffff; --muted: #b9bdba; --dim: #8b908d; --gold: #e9a27c; --gold2: #f4c7ae;
+  --accent-soft: rgba(233, 162, 124, .18);
   --ok: #5fc08b; --err: #e2735f; --radius: 20px; --nav: 248px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Geeza Pro", sans-serif;
   --arabic: "Amiri", "Noto Naskh Arabic", "Geeza Pro", serif;
-  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23e3c58b' stroke-width='.8'%3E%3Crect x='18' y='18' width='28' height='28'/%3E%3Crect x='18' y='18' width='28' height='28' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M0 32h12M52 32h12M32 0v12M32 52v12'/%3E%3C/g%3E%3C/svg%3E");
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='.8'%3E%3Crect x='18' y='18' width='28' height='28'/%3E%3Crect x='18' y='18' width='28' height='28' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M0 32h12M52 32h12M32 0v12M32 52v12'/%3E%3C/g%3E%3C/svg%3E");
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -41,7 +42,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .side .grow { flex: 1; }
 .install {
   display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 8px; padding: 11px;
-  border: 1px solid rgba(201, 164, 92, .4); border-radius: 14px; background: none; color: var(--gold2); cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); border-radius: 14px; background: none; color: var(--gold2); cursor: pointer;
 }
 
 main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
@@ -65,10 +66,10 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 /* ---------- Abschnitte: Überschrift über einer abgerundeten Gruppe (wie Einstellungen am Handy) */
 .sec { margin-bottom: 24px; }
 .sec > h2 {
-  margin: 0 6px 8px; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .6px;
+  margin: 0 6px 8px; font-size: 13px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .6px;
 }
 .sec > h2 svg { display: none; }
-.group { background: var(--surface); border-radius: var(--radius); padding: 6px 16px; }
+.group { background: var(--surface); border: 1px solid rgba(255, 255, 255, .06); border-radius: var(--radius); padding: 6px 16px; }
 .group > :first-child:not(.list):not(.kv):not(.item) { margin-top: 12px; }
 .group > :last-child:not(.list):not(.kv):not(.item) { margin-bottom: 12px; }
 .group > .range:only-child { margin: 14px 0; }
@@ -80,7 +81,8 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 /* ---------- Startseite */
 .hero {
   position: relative; overflow: hidden; border-radius: 26px; padding: 20px 22px 18px; margin-bottom: 14px;
-  background: radial-gradient(120% 90% at 50% 0%, #17473a 0%, #0f2a22 55%, #0c1d18 100%);
+  background: radial-gradient(120% 95% at 50% 0%, color-mix(in srgb, var(--gold) 30%, #141414) 0%, #151515 58%, #0d0d0d 100%);
+  border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent);
   box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
 }
 .hero::before { content: ""; position: absolute; inset: 0; background: var(--pattern); background-size: 64px; opacity: .08; pointer-events: none; }
@@ -117,7 +119,7 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 .prow .pn { flex: 1; font-size: 17px; }
 .prow .pt { font-size: 18px; font-weight: 600; }
 .prow.past { opacity: .42; }
-.prow.next { background: rgba(201, 164, 92, .13); }
+.prow.next { background: color-mix(in srgb, var(--gold) 13%, transparent); }
 .prow.next, .prow.next + .prow { border-top-color: transparent; }
 .prow.next .pn, .prow.next .pt { color: var(--gold2); }
 .prow.next .pi { background: var(--gold); color: #17140e; }
@@ -143,7 +145,7 @@ label.f { display: block; color: var(--muted); font-size: 13px; margin: 14px 0 6
 input[type=text], input[type=password], input[type=number], input:not([type]), select {
   width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid transparent; background: var(--surface2); outline: none;
 }
-input:focus, select:focus { border-color: rgba(201, 164, 92, .6); }
+input:focus, select:focus { border-color: color-mix(in srgb, var(--gold) 60%, transparent); }
 select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
   background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; padding-inline-end: 34px; }
 [dir=rtl] select { background-position: 13px 50%, 18px 50%; }
@@ -169,7 +171,7 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 .result b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .result small { color: var(--muted); }
 .badge { font-size: 12px; color: var(--muted); padding: 3px 8px; border-radius: 999px; background: var(--surface); white-space: nowrap; }
-.chosen { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; background: rgba(201, 164, 92, .1); margin: 12px 0; }
+.chosen { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; background: color-mix(in srgb, var(--gold) 10%, transparent); margin: 12px 0; }
 .chosen.none { background: var(--surface2); color: var(--muted); }
 .chosen svg { color: var(--gold); }
 .chosen small { display: block; color: var(--muted); }
@@ -261,7 +263,7 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
   .tabs .navbtn svg { width: 56px; height: 30px; padding: 4px 16px; border-radius: 999px; transition: background .2s; }
   .tabs .navbtn span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .tabs .navbtn.on { color: var(--text); }
-  .tabs .navbtn.on svg { background: rgba(201, 164, 92, .2); color: var(--gold2); }
+  .tabs .navbtn.on svg { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold2); }
 }
 @media (display-mode: standalone), (display-mode: fullscreen) { .install { display: none !important; } }
 
@@ -275,7 +277,7 @@ details summary { cursor: pointer; color: var(--muted); padding: 12px 0; }
 
 /* Einstellungs-Übersicht und Unterseiten */
 .item.link { width: 100%; border: 0; background: none; text-align: start; cursor: pointer; padding: 10px 0; }
-.item.link .ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(201, 164, 92, .14); color: var(--gold); display: inline-flex; align-items: center; justify-content: center; }
+.item.link .ico { width: 34px; height: 34px; border-radius: 10px; background: color-mix(in srgb, var(--gold) 14%, transparent); color: var(--gold); display: inline-flex; align-items: center; justify-content: center; }
 .item.link .ico svg { width: 19px; height: 19px; }
 .item.link .val { color: var(--muted); font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
 .item.link .chev svg { width: 18px; height: 18px; color: var(--dim); }
@@ -298,3 +300,14 @@ main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(
   .tabs { padding-left: calc(10px + env(safe-area-inset-left)); padding-right: calc(10px + env(safe-area-inset-right)); }
 }
 .btn { text-decoration: none; }
+
+/* Wecker: Karte je Wecker mit großer Zeitauswahl und Name */
+.alarmbox { padding: 14px 0; }
+.alarmbox + .alarmbox { border-top: 1px solid var(--sep); }
+.alarmbox.off .tsel, .alarmbox.off .aname { opacity: .45; }
+.arow { display: flex; align-items: center; gap: 10px; }
+.tsel { display: inline-flex; align-items: center; gap: 4px; background: var(--surface2); border-radius: 14px; padding: 4px 6px; }
+.tsel select { width: auto; background: none; border: 0; padding: 4px 6px; font-size: 30px; font-weight: 700; color: var(--text);
+  text-align: center; text-align-last: center; font-variant-numeric: tabular-nums; cursor: pointer; }
+.tsel b { font-size: 26px; color: var(--gold); }
+.aname { margin: 12px 0 10px; }

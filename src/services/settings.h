@@ -1,6 +1,7 @@
 // Zentrale Einstellungen: dauerhaft im NVS gespeichert, von Weboberfläche und Display gemeinsam genutzt.
 // Thread-sicher: get() liefert eine Kopie, set() speichert und erhöht version().
 #pragma once
+#include <Arduino.h>
 #include <stdint.h>
 
 namespace settings
@@ -96,6 +97,10 @@ namespace settings
     Settings get();
     // Prüft, speichert dauerhaft und erhöht version(). false bei ungültigen Werten.
     bool set(const Settings &s);
+
+    // Name eines Weckers (frei wählbar, z. B. "Arbeit"); eigener NVS-Bereich "alarms"
+    String alarmName(int i);
+    void setAlarmName(int i, const String &name);
 
     // Steigt bei jeder Änderung; Dienste vergleichen damit, ob sie neu laden müssen.
     uint32_t version();

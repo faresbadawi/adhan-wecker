@@ -100,7 +100,7 @@ let saveTimer;
 async function save(part, quiet) {
   try {
     const r = await api("/api/settings", part);
-    if (r.ok && r.data) S = r.data;
+    if (r.ok && r.data) { S = r.data; applyTheme(S.colors); }
     if (!quiet || !r.ok) toast(r.ok ? t("saved") : t("invalid"), !r.ok);
     return r.ok;
   } catch (e) { toast(t("offline"), true); return false; }
@@ -461,12 +461,19 @@ VIEWS.audio.bind = () => {
 
   const alarms = (S.alarms || []).map(a => Object.assign({}, a));
   const days = t("days");
+  const two = n => String(n).padStart(2, "0");
+  const opts = (max, sel) => Array.from({ length: max }, (_, v) => `<option value="${v}" ${v === sel ? "selected" : ""}>${two(v)}</option>`).join("");
+  // Weckzeit über zwei Auswahlfelder (Stunde, Minute) – am Handy das gewohnte Drehrad
   const render = () => {
-    $("alarms").innerHTML = alarms.map((a, i) => `<div class="item alarm ${a.on ? "" : "off"}">
-      <input type="time" value="${esc(a.time)}" data-i="${i}" class="ltr"><span class="name"></span>
-      <button class="round" data-del="${i}">${I.trash}</button>${toggle(`data-on="${i}"`, a.on)}
+    $("alarms").innerHTML = alarms.map((a, i) => {
+      const [h, m] = a.time.split(":").map(Number);
+      return `<div class="alarmbox ${a.on ? "" : "off"}">
+      <div class="arow"><div class="tsel ltr"><select data-h="${i}" aria-label="h">${opts(24, h)}</select><b>:</b><select data-m="${i}" aria-label="min">${opts(60, m)}</select></div>
+        <span class="grow"></span>${toggle(`data-on="${i}"`, a.on)}<button class="round" data-del="${i}" aria-label="del">${I.trash}</button></div>
+      <input class="aname" data-name="${i}" value="${esc(a.name || "")}" placeholder="${t("alarm_name_ph")}" maxlength="40" dir="auto">
       <div class="days">${DAY_ORDER.map(bit => `<button data-i="${i}" data-bit="${bit}" class="${a.days & (1 << bit) ? "on" : ""}">${days[bit]}</button>`).join("")}</div>
-    </div>`).join("") || `<div class="empty">${t("alarm_none")}</div>`;
+    </div>`;
+    }).join("") || `<div class="empty">${t("alarm_none")}</div>`;
     $("alarmAdd").disabled = alarms.length >= MAX_ALARMS;
   };
   render();
@@ -481,13 +488,21 @@ VIEWS.audio.bind = () => {
     render(); save({ alarms });
   };
   $("alarms").onchange = e => {
-    const el = e.target;
-    if (el.type === "time" && el.value) alarms[el.dataset.i].time = el.value;
-    else if (el.dataset.on !== undefined) alarms[el.dataset.on].on = el.checked;
+    const el = e.target, d = el.dataset;
+    if (d.h !== undefined || d.m !== undefined) {
+      const i = d.h ?? d.m, [h, m] = alarms[i].time.split(":");
+      alarms[i].time = d.h !== undefined ? `${two(el.value)}:${m}` : `${h}:${two(el.value)}`;
+    } else if (d.on !== undefined) { alarms[d.on].on = el.checked; render(); }
     else return;
-    render(); save({ alarms });
+    save({ alarms });
   };
-  $("alarmAdd").onclick = () => { alarms.push({ on: true, time: "06:00", days: 127 }); render(); save({ alarms }); };
+  // Name: beim Tippen speichern, ohne neu zu zeichnen (Tastatur bleibt offen)
+  $("alarms").oninput = e => {
+    const el = e.target; if (el.dataset.name === undefined) return;
+    alarms[el.dataset.name].name = el.value;
+    saveLater({ alarms });
+  };
+  $("alarmAdd").onclick = () => { alarms.push({ on: true, time: "06:00", days: 127, name: "" }); render(); save({ alarms }); };
 
   let sounds = { list: [], selected: "" };
   const renderSounds = () => {
@@ -636,6 +651,18 @@ function installBanner() {
     <button class="round" id="bnClose" aria-label="${t("close")}">${svg('<path d="M6 6l12 12M18 6 6 18"/>')}</button></section>`;
 }
 
+// ---------- Farben der Uhr übernehmen (Akzent, Schrift, Nebenschrift)
+function applyTheme(c) {
+  if (!c || !/^#[0-9a-f]{6}$/i.test(c.accent || "")) return;
+  const r = document.documentElement.style;
+  r.setProperty("--gold", c.accent);
+  r.setProperty("--gold2", `color-mix(in srgb, ${c.accent} 75%, #fff)`);
+  r.setProperty("--accent-soft", `color-mix(in srgb, ${c.accent} 18%, transparent)`);
+  if (/^#[0-9a-f]{6}$/i.test(c.main || "")) r.setProperty("--text", c.main);
+  try { localStorage.setItem("colors", JSON.stringify(c)); } catch (e) { /* privat */ }
+}
+try { applyTheme(JSON.parse(localStorage.getItem("colors") || "null")); } catch (e) { /* privat */ }
+
 // ---------- Gerüst
 function renderNav() {
   const btn = k => `<button class="navbtn ${parentOf(current) === k ? "on" : ""}" data-v="${k}">${I[k]}<span>${t(k === "dashboard" ? "tab_home" : "nav_" + k)}</span></button>`;
@@ -732,7 +759,7 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").cat
 
   await refreshStatus();
   if (ST && ST.lang && online && ST.lang !== lang()) applyLang(ST.lang);
-  try { const r = await api("/api/settings"); if (r.ok) { S = r.data; if (current !== "dashboard") render(); } } catch (e) { /* offline */ }
+  try { const r = await api("/api/settings"); if (r.ok) { S = r.data; applyTheme(S.colors); if (current !== "dashboard") render(); } } catch (e) { /* offline */ }
   setInterval(tick, 1000);
   setInterval(() => { if (!document.hidden) refreshStatus(); }, 20000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshStatus(); });

@@ -120,7 +120,8 @@ static void refreshEverySecond(const struct tm &now)
         const bool wasRinging = alarmclock::ringing();
         alarmclock::update(now, st, azan::status().state != azan::State::IDLE);
         if (alarmclock::ringing() != wasRinging)
-            alarm_screen::show(alarmclock::ringing(), now.tm_hour, now.tm_min);
+            alarm_screen::show(alarmclock::ringing(), now.tm_hour, now.tm_min,
+                               settings::alarmName(alarmclock::ringingIndex()).c_str());
         const int next = alarmclock::nextAlarmMinutes(now, st);
         prayer_screen::setAlarm(next);
         clock_screen::setAlarm(next);

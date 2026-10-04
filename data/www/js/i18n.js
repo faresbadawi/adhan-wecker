@@ -69,6 +69,7 @@ const T = {
     azan_voice: "صوت المؤذن", azan_voice_hint: "يُستخدم الصوت المختار لكل الصلوات، وللفجر بنسخة أذان الفجر الخاصة به. اضغط ▶ للاستماع.",
     voice_islam_sobhi: "الشيخ إسلام صبحي", voice_alafasy: "الشيخ مشاري راشد العفاسي",
     storage: "مساحة الملفات", free_of: "متاح من",
+    alarm_name_ph: "اسم المنبه، مثلًا: العمل",
     hours: "س", minutes: "د",
   },
 
@@ -135,6 +136,7 @@ const T = {
     azan_voice: "Azan-Stimme", azan_voice_hint: "Die gewählte Stimme gilt für alle Gebete, zu Fajr mit ihrem eigenen Fajr-Azan. Mit ▶ probehören.",
     voice_islam_sobhi: "Scheich Islam Sobhi", voice_alafasy: "Scheich Mishary Rashid Alafasy",
     storage: "Speicher (Dateien)", free_of: "frei von",
+    alarm_name_ph: "Name, z. B. Arbeit",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -201,6 +203,7 @@ const T = {
     azan_voice: "Azan voice", azan_voice_hint: "The chosen voice is used for all prayers, with its own Fajr azan at Fajr. Tap ▶ to listen.",
     voice_islam_sobhi: "Sheikh Islam Sobhi", voice_alafasy: "Sheikh Mishary Rashid Alafasy",
     storage: "Storage (files)", free_of: "free of",
+    alarm_name_ph: "Name, e.g. Work",
     hours: "h", minutes: "min",
   },
 };
