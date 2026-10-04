@@ -75,6 +75,13 @@ const PRESETS = [
   ["preset_emerald", "#F1F5EC", "#6FC79A", "#869A8E"], ["preset_turquoise", "#EAF6F6", "#5EC4CC", "#86A0A3"],
   ["preset_amber", "#FFF4E6", "#E8A04E", "#A08E7C"],
 ];
+const LED_PRESETS = ["#FF0000", "#FF6A00", "#FFD000", "#00FF00", "#00FFB0", "#00C8FF", "#0000FF", "#A000FF", "#FF00A0", "#FFFFFF"];
+// Passende Farbfelder je Rolle: Hauptschrift hell, Akzent kräftig, Nebenschrift gedämpft
+const THEME_SWATCHES = {
+  main: ["#FFFFFF", "#F4F1EA", "#FFF4E6", "#FDEDEE", "#F1F5EC", "#EAF6F6", "#EEF0FF", "#E2E2E2"],
+  accent: ["#E9A27C", "#C9A45C", "#E8A04E", "#FFD54F", "#6FC79A", "#4DB6AC", "#5EC4CC", "#6FA8F5", "#BA8CF0", "#F06292", "#E57373", "#C3CAD3"],
+  muted: ["#C4B6AE", "#A08E7C", "#8C978F", "#869A8E", "#86A0A3", "#8A929C", "#B0A8C0", "#9E9E9E"],
+};
 const MAX_ALARMS = 4;
 const DAY_ORDER = [6, 0, 1, 2, 3, 4, 5]; // Samstag zuerst; Bit = tm_wday
 
@@ -352,13 +359,120 @@ VIEWS.location.bind = () => {
 VIEWS.display = () => `
   ${card(t("pages"), I.display, `<div class="list" id="pages"></div><p class="hint">${t("pages_hint")}</p>`)}
   ${card(t("background"), I.image, `<div class="bgs" id="bgs">${loading("")}</div>`)}
-  ${card(t("presets"), I.palette, `<div class="presets" id="presets">${PRESETS.map(([k, , a], i) =>
-    `<button data-i="${i}"><i style="background:${a}"></i>${t(k)}</button>`).join("")}</div>
-    <label class="f">${t("custom_colors")}</label>
-    <div class="colors"><label>${t("col_main")}<input type="color" id="colMain" value="${S.colors.main}"></label>
-      <label>${t("col_accent")}<input type="color" id="colAccent" value="${S.colors.accent}"></label>
-      <label>${t("col_muted")}<input type="color" id="colMuted" value="${S.colors.muted}"></label></div>`)}
-  ${card(t("brightness"), I.sun, range("brightness", S.brightness, 5, 100, "%"))}`;
+  ${card(t("presets"), I.palette, `<div class="themes" id="presets"></div>`)}
+  ${card(t("custom_colors"), I.palette, `<div class="list" id="customCols"></div>`)}
+  ${card(t("brightness"), I.sun, range("brightness", S.brightness, 5, 100, "%"))}
+  ${card(t("led"), I.palette, `<div class="item"><span class="ledglow" id="ledGlow"></span><span class="name">${t("led_on")}</span>${toggle(`id="ledOn"`, led.on)}</div>
+    <div class="swatches big" id="ledSw">${LED_PRESETS.map(c => `<button data-c="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
+    <label class="f">${t("hue")}</label><input type="range" class="slider hue" id="ledHue" min="0" max="359" value="0">
+    <label class="f">${t("led_bri")}</label><div class="range"><input type="range" class="slider" id="ledBri" min="5" max="100" value="${led.bri}"><output id="ledBriVal">${led.bri}%</output></div>
+    <p class="hint">${t("led_hint")}</p>`)}`;
+
+// ---------- Farben umrechnen
+function hex2hsl(hex) {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const sat = d / (1 - Math.abs(2 * l - 1));
+  const h = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h * 60, sat, l];
+}
+function hsl2hex(h, sat, l) {
+  const f = k => { const a = sat * Math.min(l, 1 - l), x = (k + h / 30) % 12; return l - a * Math.max(-1, Math.min(x - 3, 9 - x, 1)); };
+  return "#" + [0, 8, 4].map(k => Math.round(f(k) * 255).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+// ---------- Auswahlfenster von unten
+function sheet(html, onClose) {
+  const m = document.createElement("div");
+  m.className = "modal sheetwrap";
+  m.innerHTML = `<div class="sheet">${html}</div>`;
+  m.addEventListener("click", e => { if (e.target === m) { m.remove(); onClose(); } });
+  document.body.appendChild(m);
+  return m;
+}
+
+// Uhrzeit in zwei Schritten: Stunde antippen, dann Minute (5er-Raster, ±1 für Feinheiten)
+function pickTime(time) {
+  return new Promise(res => {
+    let [h, m] = time.split(":").map(Number), step = "h";
+    const two = n => String(n).padStart(2, "0");
+    const el = sheet(`<div class="tbig ltr"><button data-s="h"></button><b>:</b><button data-s="m"></button></div>
+      <p class="tlabel" id="tlabel"></p><div id="tgrid"></div>
+      <div class="actions"><button class="btn" data-a="0">${t("cancel")}</button><button class="btn gold" data-a="1">${t("done")}</button></div>`, () => res(null));
+    const draw = () => {
+      el.querySelector('[data-s="h"]').textContent = two(h);
+      el.querySelector('[data-s="m"]').textContent = two(m);
+      el.querySelectorAll("[data-s]").forEach(b => b.classList.toggle("on", b.dataset.s === step));
+      el.querySelector("#tlabel").textContent = t(step === "h" ? "hour_pick" : "minute_pick");
+      const g = el.querySelector("#tgrid");
+      g.className = "tgrid ltr " + step;
+      g.innerHTML = step === "h"
+        ? Array.from({ length: 24 }, (_, v) => `<button data-h="${v}" class="${v === h ? "on" : ""}">${two(v)}</button>`).join("")
+        : Array.from({ length: 12 }, (_, k) => k * 5).map(v => `<button data-m="${v}" class="${v === m ? "on" : ""}">${two(v)}</button>`).join("")
+          + `<div class="fine"><button class="round" data-d="-1">−</button><span>${two(m)} ${t("minutes")}</span><button class="round" data-d="1">+</button></div>`;
+    };
+    draw();
+    el.querySelector(".sheet").onclick = e => {
+      const b = e.target.closest("button"); if (!b) return;
+      const d = b.dataset;
+      if (d.s) step = d.s;
+      else if (d.h !== undefined) { h = Number(d.h); step = "m"; }
+      else if (d.m !== undefined) m = Number(d.m);
+      else if (d.d) m = (m + Number(d.d) + 60) % 60;
+      else if (d.a) { el.remove(); res(d.a === "1" ? `${two(h)}:${two(m)}` : null); return; }
+      draw();
+    };
+  });
+}
+
+// Farbe wählen: passende Farbfelder, dazu Farbton und Hell/Dunkel; live() zeigt jede Änderung sofort
+function pickColor(title, value, swatches, live) {
+  return new Promise(res => {
+    let [h, sat, l] = hex2hsl(value), cur = value.toUpperCase();
+    const el = sheet(`<div class="cphead"><span class="cpdot" id="cpDot"></span><div><b>${esc(title)}</b><small class="ltr" id="cpHex"></small></div></div>
+      <div class="swatches" id="cpSw">${swatches.map(c => `<button data-c="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
+      <label class="f">${t("hue")}</label><input type="range" class="slider hue" id="cpHue" min="0" max="359">
+      <label class="f">${t("lightness")}</label><input type="range" class="slider" id="cpLight" min="15" max="97">
+      <div class="actions"><button class="btn" data-a="0">${t("cancel")}</button><button class="btn gold" data-a="1">${t("done")}</button></div>`,
+      () => { live(value); res(null); });
+    const q = id => el.querySelector("#" + id);
+    const draw = moved => {
+      if (moved !== "hue") q("cpHue").value = Math.round(h);
+      if (moved !== "light") q("cpLight").value = Math.round(l * 100);
+      q("cpLight").style.setProperty("--track", `linear-gradient(90deg, ${hsl2hex(h, sat, .15)}, ${hsl2hex(h, sat, .5)}, ${hsl2hex(h, sat, .97)})`);
+      q("cpDot").style.background = cur; q("cpHex").textContent = cur;
+      el.querySelectorAll("#cpSw button").forEach(b => b.classList.toggle("on", b.dataset.c === cur));
+      live(cur);
+    };
+    draw();
+    q("cpSw").onclick = e => { const b = e.target.closest("button"); if (!b) return; cur = b.dataset.c; [h, sat, l] = hex2hsl(cur); draw(); };
+    q("cpHue").oninput = () => { h = Number(q("cpHue").value); if (sat < .15) sat = .6; cur = hsl2hex(h, sat, l); draw("hue"); };
+    q("cpLight").oninput = () => { l = Number(q("cpLight").value) / 100; cur = hsl2hex(h, sat, l); draw("light"); };
+    el.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
+      el.remove();
+      if (b.dataset.a === "1") res(cur); else { live(value); res(null); }
+    });
+  });
+}
+
+// ---------- RGB-LED: jede Änderung geht sofort an die Uhr; Farbe und Helligkeit merkt sich das Handy
+const led = (() => {
+  try { return Object.assign({ color: "#FF0000", bri: 100, on: true }, JSON.parse(localStorage.getItem("led") || "{}")); }
+  catch (e) { return { color: "#FF0000", bri: 100, on: true }; }
+})();
+let ledBusy = false, ledNext = false;
+async function ledSend() {
+  try { localStorage.setItem("led", JSON.stringify(led)); } catch (e) { /* privat */ }
+  if (ledBusy) { ledNext = true; return; }
+  ledBusy = true;
+  const n = parseInt(led.color.slice(1), 16), k = led.on ? led.bri / 100 : 0;
+  try { await api("/api/led", { r: Math.round((n >> 16 & 255) * k), g: Math.round((n >> 8 & 255) * k), b: Math.round((n & 255) * k) }); }
+  catch (e) { toast(t("offline"), true); }
+  ledBusy = false;
+  if (ledNext) { ledNext = false; ledSend(); }
+}
+
 VIEWS.display.bind = () => {
   const pages = S.pages.map(p => Object.assign({}, p));
   const render = () => {
@@ -388,15 +502,44 @@ VIEWS.display.bind = () => {
     };
   }).catch(() => { $("bgs").innerHTML = `<div class="empty">${t("offline")}</div>`; });
 
-  const colors = () => ({ main: $("colMain").value, accent: $("colAccent").value, muted: $("colMuted").value });
-  $("presets").onclick = e => {
-    const b = e.target.closest("button"); if (!b) return;
-    const [, m, a, mu] = PRESETS[b.dataset.i];
-    $("colMain").value = m; $("colAccent").value = a; $("colMuted").value = mu;
-    save({ colors: colors() });
+  // Farbvorlagen als Kacheln mit kleiner Vorschau
+  const same = (a, b) => a.toUpperCase() === b.toUpperCase();
+  const drawThemes = () => {
+    const c = S.colors;
+    $("presets").innerHTML = PRESETS.map(([k, m, a, mu], i) => `<button data-i="${i}" class="${same(c.main, m) && same(c.accent, a) && same(c.muted, mu) ? "on" : ""}">
+      <span class="tprev"><b style="color:${m}">12:30</b><i style="background:${a}"></i><small style="color:${mu}">${t("fajr")}</small></span>
+      <span class="tname">${t(k)}</span></button>`).join("");
+    $("customCols").innerHTML = ["main", "accent", "muted"].map(r => `<button class="item link" data-col="${r}">
+      <span class="sw" style="background:${c[r]}"></span><span class="name">${t("col_" + r)}</span>
+      <span class="val ltr">${esc(c[r].toUpperCase())}</span><span class="chev">${I.chevron}</span></button>`).join("");
   };
-  ["colMain", "colAccent", "colMuted"].forEach(id => $(id).onchange = () => save({ colors: colors() }));
+  drawThemes();
+  $("presets").onclick = async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const [, main, accent, muted] = PRESETS[b.dataset.i];
+    if (await save({ colors: { main, accent, muted } })) drawThemes();
+  };
+  $("customCols").onclick = async e => {
+    const b = e.target.closest("[data-col]"); if (!b) return;
+    const role = b.dataset.col, base = Object.assign({}, S.colors);
+    const v = await pickColor(t("col_" + role), base[role], THEME_SWATCHES[role], hex => applyTheme(Object.assign({}, base, { [role]: hex })));
+    if (v && !same(v, base[role]) && await save({ colors: Object.assign(base, { [role]: v }) })) drawThemes();
+    else applyTheme(S.colors);
+  };
   bindRange("brightness", v => save({ brightness: v }), "%");
+
+  const drawLed = () => {
+    $("ledGlow").style.setProperty("--c", led.on ? led.color : "transparent");
+    $("ledHue").value = Math.round(hex2hsl(led.color)[0]);
+    $("ledBriVal").textContent = led.bri + "%";
+    document.querySelectorAll("#ledSw button").forEach(b => b.classList.toggle("on", same(b.dataset.c, led.color)));
+  };
+  drawLed();
+  const ledSet = part => { Object.assign(led, part); drawLed(); ledSend(); };
+  $("ledSw").onclick = e => { const b = e.target.closest("button"); if (b) ledSet({ color: b.dataset.c, on: true }); };
+  $("ledHue").oninput = () => ledSet({ color: hsl2hex(Number($("ledHue").value), 1, .5), on: true });
+  $("ledBri").oninput = () => ledSet({ bri: Number($("ledBri").value), on: true });
+  $("ledOn").onchange = () => ledSet({ on: $("ledOn").checked });
 };
 
 function bindRange(id, onSet, suffix = "") {
@@ -461,14 +604,11 @@ VIEWS.audio.bind = () => {
 
   const alarms = (S.alarms || []).map(a => Object.assign({}, a));
   const days = t("days");
-  const two = n => String(n).padStart(2, "0");
-  const opts = (max, sel) => Array.from({ length: max }, (_, v) => `<option value="${v}" ${v === sel ? "selected" : ""}>${two(v)}</option>`).join("");
-  // Weckzeit über zwei Auswahlfelder (Stunde, Minute) – am Handy das gewohnte Drehrad
+  // Weckzeit: große Uhrzeit antippen, im Fenster erst Stunde, dann Minute wählen
   const render = () => {
     $("alarms").innerHTML = alarms.map((a, i) => {
-      const [h, m] = a.time.split(":").map(Number);
       return `<div class="alarmbox ${a.on ? "" : "off"}">
-      <div class="arow"><div class="tsel ltr"><select data-h="${i}" aria-label="h">${opts(24, h)}</select><b>:</b><select data-m="${i}" aria-label="min">${opts(60, m)}</select></div>
+      <div class="arow"><button class="tbtn ltr" data-time="${i}">${esc(a.time)}</button>
         <span class="grow"></span>${toggle(`data-on="${i}"`, a.on)}<button class="round" data-del="${i}" aria-label="del">${I.trash}</button></div>
       <input class="aname" data-name="${i}" value="${esc(a.name || "")}" placeholder="${t("alarm_name_ph")}" maxlength="40" dir="auto">
       <div class="days">${DAY_ORDER.map(bit => `<button data-i="${i}" data-bit="${bit}" class="${a.days & (1 << bit) ? "on" : ""}">${days[bit]}</button>`).join("")}</div>
@@ -477,9 +617,13 @@ VIEWS.audio.bind = () => {
     $("alarmAdd").disabled = alarms.length >= MAX_ALARMS;
   };
   render();
-  $("alarms").onclick = e => {
+  $("alarms").onclick = async e => {
     const b = e.target.closest("button"); if (!b) return;
-    if (b.dataset.del !== undefined) alarms.splice(Number(b.dataset.del), 1);
+    if (b.dataset.time !== undefined) {
+      const v = await pickTime(alarms[b.dataset.time].time);
+      if (!v || v === alarms[b.dataset.time].time) return;
+      alarms[b.dataset.time].time = v;
+    } else if (b.dataset.del !== undefined) alarms.splice(Number(b.dataset.del), 1);
     else if (b.dataset.bit !== undefined) {
       const a = alarms[b.dataset.i], m = a.days ^ (1 << b.dataset.bit);
       if (!m) { toast(t("day_min"), true); return; }
@@ -489,10 +633,7 @@ VIEWS.audio.bind = () => {
   };
   $("alarms").onchange = e => {
     const el = e.target, d = el.dataset;
-    if (d.h !== undefined || d.m !== undefined) {
-      const i = d.h ?? d.m, [h, m] = alarms[i].time.split(":");
-      alarms[i].time = d.h !== undefined ? `${two(el.value)}:${m}` : `${h}:${two(el.value)}`;
-    } else if (d.on !== undefined) { alarms[d.on].on = el.checked; render(); }
+    if (d.on !== undefined) { alarms[d.on].on = el.checked; render(); }
     else return;
     save({ alarms });
   };

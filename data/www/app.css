@@ -304,10 +304,61 @@ main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(
 /* Wecker: Karte je Wecker mit großer Zeitauswahl und Name */
 .alarmbox { padding: 14px 0; }
 .alarmbox + .alarmbox { border-top: 1px solid var(--sep); }
-.alarmbox.off .tsel, .alarmbox.off .aname { opacity: .45; }
+.alarmbox.off .tbtn, .alarmbox.off .aname { opacity: .45; }
 .arow { display: flex; align-items: center; gap: 10px; }
-.tsel { display: inline-flex; align-items: center; gap: 4px; background: var(--surface2); border-radius: 14px; padding: 4px 6px; }
-.tsel select { width: auto; background: none; border: 0; padding: 4px 6px; font-size: 30px; font-weight: 700; color: var(--text);
-  text-align: center; text-align-last: center; font-variant-numeric: tabular-nums; cursor: pointer; }
-.tsel b { font-size: 26px; color: var(--gold); }
+.tbtn { border: 0; background: var(--surface2); border-radius: 14px; padding: 6px 16px; font-size: 32px; font-weight: 700;
+  font-variant-numeric: tabular-nums; cursor: pointer; letter-spacing: .5px; }
+.tbtn:active { background: var(--accent-soft); }
 .aname { margin: 12px 0 10px; }
+
+/* Auswahlfenster von unten (Uhrzeit, Farbe) */
+.sheetwrap { align-items: flex-end; padding: 0; animation: fade .15s; }
+.sheet { width: 100%; max-width: 460px; max-height: 92vh; overflow: auto; background: var(--surface); border-radius: 24px 24px 0 0;
+  padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); animation: up .2s ease-out; }
+.sheet .actions { margin-top: 18px; display: flex; gap: 10px; }
+.sheet .actions .btn { flex: 1; justify-content: center; }
+@media (min-width: 901px) { .sheetwrap { align-items: center; } .sheet { border-radius: var(--radius); } }
+@keyframes up { from { transform: translateY(40px); opacity: 0; } }
+@keyframes fade { from { opacity: 0; } }
+
+/* Uhrzeit */
+.tbig { display: flex; justify-content: center; align-items: center; gap: 4px; }
+.tbig button { border: 0; background: none; font-size: 54px; font-weight: 700; font-variant-numeric: tabular-nums; padding: 2px 12px;
+  border-radius: 16px; color: var(--dim); cursor: pointer; }
+.tbig button.on { color: var(--text); background: var(--accent-soft); }
+.tbig b { font-size: 44px; color: var(--gold); }
+.tlabel { text-align: center; color: var(--muted); margin: 6px 0 14px; font-size: 14px; }
+.tgrid { display: grid; gap: 8px; }
+.tgrid.h { grid-template-columns: repeat(6, 1fr); }
+.tgrid.m { grid-template-columns: repeat(4, 1fr); }
+.tgrid > button { border: 0; background: var(--surface2); border-radius: 14px; padding: 13px 0; font-size: 18px; font-variant-numeric: tabular-nums; cursor: pointer; }
+.tgrid > button.on { background: var(--gold); color: #17140e; font-weight: 700; }
+.fine { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 6px; color: var(--muted); }
+.fine .round { width: 44px; height: 44px; font-size: 22px; }
+
+/* Farben */
+.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin: 12px 0; }
+.themes button { border: 2px solid transparent; background: var(--surface2); border-radius: 16px; padding: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+.themes button.on { border-color: var(--gold); }
+.tprev { display: flex; flex-direction: column; align-items: center; gap: 4px; background: #0a0a0a; border-radius: 10px; padding: 10px 4px; }
+.tprev b { font-size: 20px; font-variant-numeric: tabular-nums; direction: ltr; }
+.tprev i { width: 28px; height: 3px; border-radius: 2px; }
+.tprev small { font-size: 11px; }
+.tname { font-size: 13px; text-align: center; }
+.sw, .cpdot, .ledglow { width: 30px; height: 30px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); }
+.ledglow { background: var(--c); box-shadow: 0 0 14px var(--c), inset 0 0 0 1px rgba(255, 255, 255, .2); transition: background .15s, box-shadow .15s; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 10px; margin: 14px 0 6px; }
+.swatches.big { grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.swatches button { aspect-ratio: 1; border: 0; border-radius: 50%; background: var(--c); cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); transition: transform .1s; }
+.swatches button.on { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--gold); transform: scale(.92); }
+.cphead { display: flex; align-items: center; gap: 14px; }
+.cphead .cpdot { width: 48px; height: 48px; }
+.cphead small { display: block; color: var(--muted); }
+.slider { width: 100%; height: 30px; -webkit-appearance: none; appearance: none; background: none; margin: 4px 0; direction: ltr; --track: var(--surface2); }
+.slider::-webkit-slider-runnable-track { height: 14px; border-radius: 999px; background: var(--track); }
+.slider::-moz-range-track { height: 14px; border-radius: 999px; background: var(--track); }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -6px; border-radius: 50%; background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, .5); }
+.slider::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, .5); }
+.slider.hue { --track: linear-gradient(90deg, #f00, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00); }
+#ledBri { --track: linear-gradient(90deg, #222, #fff); }
