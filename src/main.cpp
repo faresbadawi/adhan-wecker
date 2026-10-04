@@ -5,6 +5,7 @@
 #include "config.h"
 #include "hal/display_port.h"
 #include "hal/lcd_st77922.h"
+#include "hal/rgb_led.h"
 #include "services/alarm_clock.h"
 #include "services/audio_manager.h"
 #include "services/azan_controller.h"
@@ -259,6 +260,7 @@ void setup()
     applySettings(); // Farben, Hintergrund, Helligkeit, Lautstärke
     prayer_screen::setAzanCallback(azan::skip);
     pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
+    rgbled::begin();
     lv_timer_handler();
 
     timemgr::begin(DEMO_MODE);

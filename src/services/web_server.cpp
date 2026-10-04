@@ -11,6 +11,7 @@
 #include "config.h"
 #include "ui/lang.h"
 #include "ui/ui.h"
+#include "hal/rgb_led.h"
 #include "mawaqit.h"
 #include "prayer_times.h"
 #include "settings.h"
@@ -593,6 +594,16 @@ namespace web
         free(buf);
     }
 
+    // RGB-LED testen: {"r":255,"g":0,"b":0,"w":0,"rgbw":false}
+    static void ledSet()
+    {
+        JsonDocument doc;
+        deserializeJson(doc, s_server.arg("plain"));
+        rgbled::setFormat(doc["rgbw"] | false);
+        rgbled::set(doc["r"] | 0, doc["g"] | 0, doc["b"] | 0, doc["w"] | 0);
+        s_server.send(200, "application/json", "{}");
+    }
+
     // Sprache von Web-App und Uhr; die Uhr startet neu, damit alle Seiten in der neuen Sprache entstehen
     static void deviceLang()
     {
@@ -618,6 +629,7 @@ namespace web
         s_server.on("/api/device/lang", HTTP_POST, deviceLang);
         s_server.on("/api/azan/test", HTTP_POST, azanTest);
         s_server.on("/api/screenshot", HTTP_GET, sendScreenshot);
+        s_server.on("/api/led", HTTP_POST, ledSet);
         s_server.on("/api/azan/stop", HTTP_POST, azanStop);
         s_server.on("/api/azan/preview", HTTP_POST, azanPreview);
         s_server.on("/api/azan/voices", HTTP_GET, sendVoices);
