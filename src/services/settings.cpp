@@ -42,10 +42,10 @@ namespace settings
     // Standardwerte der mit Fassung 2 hinzugekommenen Felder (entspricht dem bisherigen Aussehen)
     static void setNewDefaults(Settings &s)
     {
-        s.colorMain = 0xF4F1EA;
-        s.colorAccent = 0xC9A45C;
-        s.colorMuted = 0x8C978F;
-        strlcpy(s.background, "islamic", sizeof(s.background));
+        s.colorMain = 0xFFFFFF;   // Schrift weiß
+        s.colorAccent = 0xE9A27C; // Roségold (Gold, Orange, etwas Rosa)
+        s.colorMuted = 0xC4B6AE;  // warmes helles Grau
+        strlcpy(s.background, "noir", sizeof(s.background));
         for (bool &on : s.azanEnabled)
             on = true;
         s.volume = AZAN_VOLUME;

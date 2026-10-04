@@ -1,6 +1,7 @@
 // Azan-Logik: erkennt den Beginn einer Gebetszeit, startet die passende MP3
 // und verwaltet die Zustände (läuft / stumm / beendet). Kennt keine Oberfläche.
 #pragma once
+#include <Arduino.h>
 #include <time.h>
 #include "model.h"
 
@@ -34,4 +35,12 @@ namespace azan
     void skip(); // Ton aus, sofort beenden
 
     Status status();
+
+    // Azan-Stimme: Dateien /azans/<id>.mp3 und /azans/<id>_fajr.mp3 im LittleFS (z. B. "alafasy").
+    // Die Wahl wird im NVS gespeichert; "default" ist der ursprüngliche Azan.
+    String voice();
+    bool setVoice(const String &id);
+    bool voiceExists(const String &id);
+    // Datei der Stimme für ein Gebet (Fajr: eigene Fassung, falls vorhanden); false, wenn keine da ist
+    bool voiceFile(const String &id, model::Prayer p, char *path, size_t len);
 }

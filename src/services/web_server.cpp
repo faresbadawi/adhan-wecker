@@ -10,6 +10,7 @@
 #include "azan_controller.h"
 #include "config.h"
 #include "ui/lang.h"
+#include "ui/ui.h"
 #include "mawaqit.h"
 #include "prayer_times.h"
 #include "settings.h"
@@ -480,20 +481,56 @@ namespace web
         s_server.send(200, "application/json", "{}");
     }
 
-    // Lautstärke probehören: nur den Ton des Azans abspielen, ohne Anzeige auf der Uhr
+    // Probehören (Lautstärke, Stimme): nur den Ton abspielen, ohne Anzeige auf der Uhr.
+    // Body optional {"id": "<stimme>"}; ohne id die gewählte Stimme.
     static void azanPreview()
     {
+        JsonDocument doc;
+        deserializeJson(doc, s_server.arg("plain"));
+        String id = doc["id"] | "";
+        if (id.isEmpty())
+            id = azan::voice();
         static char path[96];
-        fs::FS *fs = azan::status().state == azan::State::IDLE
-                         ? storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "azan.mp3", path, sizeof(path))
-                         : nullptr;
-        if (!fs)
+        if (azan::status().state != azan::State::IDLE || !azan::voiceFile(id, model::DHUHR, path, sizeof(path)))
         {
             s_server.send(409, "application/json", "{\"error\":\"azan\"}");
             return;
         }
-        audio::play(*fs, path);
+        audio::play(LittleFS, path);
         s_server.send(200, "application/json", "{}");
+    }
+
+    // Verfügbare Azan-Stimmen (Dateien in /azans ohne _fajr) und die gewählte
+    static void sendVoices()
+    {
+        JsonDocument doc;
+        JsonArray list = doc["list"].to<JsonArray>();
+        File dir = LittleFS.open("/azans");
+        for (File f = dir.openNextFile(); f; f = dir.openNextFile())
+        {
+            String n = f.name();
+            if (n.endsWith(".mp3") && !n.endsWith("_fajr.mp3"))
+            {
+                n.remove(n.length() - 4);
+                list.add(n);
+            }
+        }
+        doc["selected"] = azan::voice();
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+
+    static void selectVoice()
+    {
+        JsonDocument doc;
+        deserializeJson(doc, s_server.arg("plain"));
+        if (!azan::setVoice(doc["id"] | ""))
+        {
+            s_server.send(400, "application/json", "{\"error\":\"voice\"}");
+            return;
+        }
+        sendVoices();
     }
 
     static void azanStop()
@@ -501,6 +538,53 @@ namespace web
         azan::skip();
         audio::stop();
         s_server.send(200, "application/json", "{}");
+    }
+
+    // Bildschirmfoto der Uhr als BMP (16 Bit, RGB565), z. B. zur Kontrolle ohne USB-Kabel.
+    // ?page=1..5 zeigt vorher die Seite Uhr/Gebetszeiten/Wetter/Kalender/Einstellungen.
+    static void sendScreenshot()
+    {
+        const int page = s_server.arg("page").toInt();
+        if (page >= 1 && page <= 5)
+        {
+            ui::showPage((ui::Page)(page - 1));
+            for (int i = 0; i < 40; i++) // Wischanimation abwarten
+            {
+                lv_timer_handler();
+                delay(10);
+            }
+        }
+        uint32_t size;
+        uint16_t w, h;
+        uint8_t *buf = ui::snapshot(size, w, h);
+        if (!buf)
+        {
+            s_server.send(500, "text/plain", "snapshot");
+            return;
+        }
+        // BMP mit BI_BITFIELDS (RGB565), Zeilen von unten nach oben, little-endian
+        const uint32_t rowBytes = w * 2, dataOff = 14 + 40 + 12, fileSize = dataOff + rowBytes * h;
+        uint8_t hdr[66] = {'B', 'M'};
+        auto put32 = [&](int at, uint32_t v) { for (int i = 0; i < 4; i++) hdr[at + i] = v >> (8 * i); };
+        auto put16 = [&](int at, uint16_t v) { hdr[at] = v; hdr[at + 1] = v >> 8; };
+        put32(2, fileSize); put32(10, dataOff); put32(14, 40); put32(18, w); put32(22, h);
+        put16(26, 1); put16(28, 16); put32(30, 3); put32(34, rowBytes * h);
+        put32(54, 0xF800); put32(58, 0x07E0); put32(62, 0x001F);
+        s_server.setContentLength(fileSize);
+        s_server.send(200, "image/bmp", "");
+        s_server.sendContent((const char *)hdr, sizeof(hdr));
+        static uint8_t row[480 * 2];
+        for (int y = h - 1; y >= 0; y--)
+        {
+            const uint8_t *src = buf + y * rowBytes;
+            for (uint32_t x = 0; x < rowBytes; x += 2) // big-endian (LV_COLOR_16_SWAP) -> little-endian
+            {
+                row[x] = src[x + 1];
+                row[x + 1] = src[x];
+            }
+            s_server.sendContent((const char *)row, rowBytes);
+        }
+        free(buf);
     }
 
     // Sprache von Web-App und Uhr; die Uhr startet neu, damit alle Seiten in der neuen Sprache entstehen
@@ -527,8 +611,11 @@ namespace web
         s_server.on("/api/device/reset", HTTP_POST, deviceReset);
         s_server.on("/api/device/lang", HTTP_POST, deviceLang);
         s_server.on("/api/azan/test", HTTP_POST, azanTest);
+        s_server.on("/api/screenshot", HTTP_GET, sendScreenshot);
         s_server.on("/api/azan/stop", HTTP_POST, azanStop);
         s_server.on("/api/azan/preview", HTTP_POST, azanPreview);
+        s_server.on("/api/azan/voices", HTTP_GET, sendVoices);
+        s_server.on("/api/azan/voice", HTTP_POST, selectVoice);
         s_server.on("/api/sounds", HTTP_GET, sendSounds);
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);

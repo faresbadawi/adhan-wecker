@@ -1,5 +1,7 @@
 #include "azan_controller.h"
 #include <Arduino.h>
+#include <LittleFS.h>
+#include <Preferences.h>
 #include "audio_manager.h"
 #include "config.h"
 #include "storage.h"
@@ -24,6 +26,47 @@ namespace azan
         }
     }
 
+    static bool validId(const String &id)
+    {
+        return !id.isEmpty() && id.length() <= 24 && id.indexOf('/') < 0 && id.indexOf('.') < 0;
+    }
+
+    bool voiceExists(const String &id) { return validId(id) && LittleFS.exists("/azans/" + id + ".mp3"); }
+
+    String voice()
+    {
+        Preferences pr;
+        pr.begin("audio", true);
+        String id = pr.getString("azan", "default");
+        pr.end();
+        return voiceExists(id) ? id : String("default");
+    }
+
+    bool setVoice(const String &id)
+    {
+        if (!voiceExists(id))
+            return false;
+        Preferences pr;
+        pr.begin("audio", false);
+        pr.putString("azan", id);
+        pr.end();
+        return true;
+    }
+
+    bool voiceFile(const String &id, model::Prayer p, char *path, size_t len)
+    {
+        if (!validId(id))
+            return false;
+        if (p == model::FAJR)
+        {
+            snprintf(path, len, "/azans/%s_fajr.mp3", id.c_str());
+            if (LittleFS.exists(path))
+                return true;
+        }
+        snprintf(path, len, "/azans/%s.mp3", id.c_str());
+        return LittleFS.exists(path);
+    }
+
     void start(model::Prayer p, uint16_t minutes)
     {
         s_status = {};
@@ -32,11 +75,14 @@ namespace azan
         s_status.minutes = minutes;
         s_startedMs = millis();
 
-        // Eigene Datei pro Gebet (z. B. azan_fajr.mp3), sonst die gemeinsame azan.mp3
+        // Eigene Dateien auf der SD-Karte haben Vorrang (z. B. azan_fajr.mp3, azan.mp3),
+        // sonst die gewählte Azan-Stimme aus dem LittleFS
         char path[96];
         fs::FS *fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, fileName(p), path, sizeof(path));
         if (!fs)
             fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "azan.mp3", path, sizeof(path));
+        if (!fs && (voiceFile(voice(), p, path, sizeof(path)) || voiceFile("default", p, path, sizeof(path))))
+            fs = &LittleFS;
         s_status.hasAudio = fs != nullptr;
         if (fs)
             audio::play(*fs, path);

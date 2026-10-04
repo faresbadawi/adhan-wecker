@@ -70,6 +70,7 @@ const METHODS = [
   [19, "الجزائر", "Algeria"], [20, "إندونيسيا", "KEMENAG (Indonesia)"], [21, "المغرب", "Morocco"], [23, "الأردن", "Jordan"],
 ];
 const PRESETS = [
+  ["preset_rosegold", "#FFFFFF", "#E9A27C", "#C4B6AE"],
   ["preset_gold", "#F4F1EA", "#C9A45C", "#8C978F"], ["preset_silver", "#FFFFFF", "#C3CAD3", "#8A929C"],
   ["preset_emerald", "#F1F5EC", "#6FC79A", "#869A8E"], ["preset_turquoise", "#EAF6F6", "#5EC4CC", "#86A0A3"],
   ["preset_amber", "#FFF4E6", "#E8A04E", "#A08E7C"],
@@ -407,6 +408,7 @@ VIEWS.audio = () => `
     <div class="actions"><button class="btn gold" id="volListen">${I.play}${t("listen")}</button>
       <button class="btn" data-stop>${I.stop}${t("stop")}</button></div>
     <p class="hint">${t("volume_hint")}</p>`)}
+  ${card(t("azan_voice"), I.music, `<div class="list" id="voices">${loading("")}</div><p class="hint">${t("azan_voice_hint")}</p>`)}
   ${card(t("azan"), I.prayer, `<div class="list">${PRAYERS.map(k => `<div class="item"><span class="name">${t("azan_for")} ${t(k)}</span>
     ${toggle(`data-az="${k}"`, S.azan[k])}</div>`).join("")}</div>`)}
   ${card(t("azan_test_display"), I.play, `<div class="actions">
@@ -424,6 +426,29 @@ VIEWS.audio.bind = () => {
   $("volListen").onclick = async () => {
     try { const r = await api("/api/azan/preview", {}); toast(r.ok ? t("azan_playing") : t("error"), !r.ok); }
     catch (e) { toast(t("offline"), true); }
+  };
+  // Azan-Stimme wählen und probehören
+  let voices = { list: [], selected: "" };
+  const voiceName = id => { const k = "voice_" + id; return t(k) === k ? id : t(k); };
+  const renderVoices = () => {
+    $("voices").innerHTML = voices.list.map(id => `<div class="item" data-voice="${esc(id)}" style="cursor:pointer">
+      <span class="mark">${id === voices.selected ? I.check : ""}</span><span class="name">${esc(voiceName(id))}</span>
+      <button class="round" data-hear="${esc(id)}" aria-label="${t("listen")}">${I.play}</button></div>`).join("") || `<div class="empty">—</div>`;
+  };
+  const sortVoices = d => { d.list.sort((a, b) => (a === "default" ? -1 : b === "default" ? 1 : a.localeCompare(b))); voices = d; renderVoices(); };
+  api("/api/azan/voices").then(r => r.data && sortVoices(r.data)).catch(() => { $("voices").innerHTML = `<div class="empty">${t("offline")}</div>`; });
+  $("voices").onclick = async e => {
+    const hear = e.target.closest("[data-hear]");
+    if (hear) {
+      try { const r = await api("/api/azan/preview", { id: hear.dataset.hear }); toast(r.ok ? t("azan_playing") : t("error"), !r.ok); }
+      catch (err) { toast(t("offline"), true); }
+      return;
+    }
+    const row = e.target.closest("[data-voice]"); if (!row || row.dataset.voice === voices.selected) return;
+    try {
+      const r = await api("/api/azan/voice", { id: row.dataset.voice });
+      if (r.ok) { sortVoices(r.data); toast(t("saved")); } else toast(t("error"), true);
+    } catch (err) { toast(t("offline"), true); }
   };
   document.querySelectorAll("[data-az]").forEach(c => c.onchange = () => save({ azan: { [c.dataset.az]: c.checked } }));
   document.querySelectorAll("[data-test]").forEach(b => b.onclick = async () => {

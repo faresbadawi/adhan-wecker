@@ -125,4 +125,34 @@ namespace ui
         lv_obj_set_tile(s_tiles, s_page[p], LV_ANIM_OFF);
         updateDots();
     }
+
+    uint8_t *snapshot(uint32_t &size, uint16_t &w, uint16_t &h)
+    {
+        // lv_snapshot erfasst nur den Bildschirm, nicht lv_layer_top (Overlays, Seitenpunkte):
+        // deren Objekte werden dafür kurz auf den Bildschirm umgehängt.
+        lv_obj_t *top = lv_layer_top(), *scr = lv_scr_act();
+        lv_obj_t *moved[16];
+        uint32_t n = 0;
+        while (lv_obj_get_child_cnt(top) && n < 16)
+        {
+            moved[n] = lv_obj_get_child(top, 0);
+            lv_obj_set_parent(moved[n++], scr);
+        }
+        size = lv_snapshot_buf_size_needed(scr, LV_IMG_CF_TRUE_COLOR);
+        uint8_t *buf = (uint8_t *)ps_malloc(size);
+        lv_img_dsc_t img;
+        if (buf && lv_snapshot_take_to_buf(scr, LV_IMG_CF_TRUE_COLOR, &img, buf, size) == LV_RES_OK)
+        {
+            w = img.header.w;
+            h = img.header.h;
+        }
+        else
+        {
+            free(buf);
+            buf = nullptr;
+        }
+        for (uint32_t i = 0; i < n; i++)
+            lv_obj_set_parent(moved[i], top);
+        return buf;
+    }
 }

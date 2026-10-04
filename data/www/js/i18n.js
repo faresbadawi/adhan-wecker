@@ -32,7 +32,7 @@ const T = {
     page_clock: "الساعة", page_prayer: "أوقات الصلاة", page_weather: "الطقس", page_calendar: "التقويم", page_settings: "الإعدادات",
     background: "الخلفية", presets: "ألوان جاهزة", custom_colors: "ألوان مخصصة", col_main: "الخط الرئيسي",
     col_accent: "الرموز والعناوين", col_muted: "النصوص الثانوية", brightness: "سطوع الشاشة",
-    preset_gold: "ذهبي", preset_silver: "فضي", preset_emerald: "زمردي", preset_turquoise: "فيروزي", preset_amber: "عنبري",
+    preset_rosegold: "ذهبي وردي", preset_gold: "ذهبي", preset_silver: "فضي", preset_emerald: "زمردي", preset_turquoise: "فيروزي", preset_amber: "عنبري",
     // Audio
     volume: "مستوى الصوت", azan: "الأذان", azan_for: "أذان", alarms: "المنبه", alarm_add: "إضافة منبه",
     alarm_none: "لا يوجد منبه بعد", alarm_hint: "يرن المنبه في الأيام المختارة حتى تلمس الشاشة أو تضغط زر BOOT (بحد أقصى ١٠ دقائق).",
@@ -66,6 +66,8 @@ const T = {
     azan_test_hint: "يُشغَّل الأذان على الساعة كما في وقت الصلاة. المس الشاشة أو اضغط «إيقاف» لإنهائه.", stop: "إيقاف", azan_playing: "الأذان يعمل على الساعة …",
     nav_settings: "الإعدادات", grp_prayer: "الصلاة", grp_clock: "الساعة", grp_conn: "الاتصال", back: "رجوع", listen: "استماع",
     volume_hint: "يُشغَّل الأذان على الساعة لتسمع مستوى الصوت مباشرة أثناء الضبط.", azan_test_display: "تجربة الأذان مع العرض على الساعة",
+    azan_voice: "صوت المؤذن", azan_voice_hint: "يُستخدم الصوت المختار لكل الصلوات، وللفجر بنسخة أذان الفجر الخاصة به. اضغط ▶ للاستماع.",
+    voice_default: "الأذان الأصلي", voice_islam_sobhi: "الشيخ إسلام صبحي", voice_alafasy: "الشيخ مشاري راشد العفاسي",
     hours: "س", minutes: "د",
   },
 
@@ -94,7 +96,7 @@ const T = {
     page_clock: "Uhr", page_prayer: "Gebetszeiten", page_weather: "Wetter", page_calendar: "Kalender", page_settings: "Einstellungen",
     background: "Hintergrund", presets: "Farbvorlagen", custom_colors: "Eigene Farben", col_main: "Hauptschrift",
     col_accent: "Symbole und Titel", col_muted: "Nebenschrift", brightness: "Display-Helligkeit",
-    preset_gold: "Gold", preset_silver: "Silber", preset_emerald: "Smaragd", preset_turquoise: "Türkis", preset_amber: "Bernstein",
+    preset_rosegold: "Roségold", preset_gold: "Gold", preset_silver: "Silber", preset_emerald: "Smaragd", preset_turquoise: "Türkis", preset_amber: "Bernstein",
     volume: "Lautstärke", azan: "Azan", azan_for: "Azan", alarms: "Wecker", alarm_add: "Wecker hinzufügen",
     alarm_none: "Noch kein Wecker", alarm_hint: "Der Wecker klingelt an den gewählten Tagen, bis du den Bildschirm berührst oder BOOT drückst (höchstens 10 Minuten).",
     alarm_tone: "Weckton", tone_calm: "Ruhig · aufsteigende Glocken", tone_bells: "Glocken · sanfte Melodie", tone_classic: "Klassisch · Piepen",
@@ -129,6 +131,8 @@ const T = {
     azan_test_hint: "Der Azan läuft auf der Uhr wie zur Gebetszeit. Bildschirm berühren oder „Stopp“ tippen, um ihn zu beenden.", stop: "Stopp", azan_playing: "Azan läuft auf der Uhr …",
     nav_settings: "Einstellungen", grp_prayer: "Gebet", grp_clock: "Uhr", grp_conn: "Verbindung", back: "Zurück", listen: "Anhören",
     volume_hint: "Spielt den Azan auf der Uhr ab – so hörst du die Lautstärke direkt beim Einstellen.", azan_test_display: "Azan-Test mit Anzeige auf der Uhr",
+    azan_voice: "Azan-Stimme", azan_voice_hint: "Die gewählte Stimme gilt für alle Gebete, zu Fajr mit ihrem eigenen Fajr-Azan. Mit ▶ probehören.",
+    voice_default: "Ursprünglicher Azan", voice_islam_sobhi: "Scheich Islam Sobhi", voice_alafasy: "Scheich Mishary Rashid Alafasy",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -157,7 +161,7 @@ const T = {
     page_clock: "Clock", page_prayer: "Prayer times", page_weather: "Weather", page_calendar: "Calendar", page_settings: "Settings",
     background: "Background", presets: "Colour presets", custom_colors: "Custom colours", col_main: "Main text",
     col_accent: "Icons and titles", col_muted: "Secondary text", brightness: "Display brightness",
-    preset_gold: "Gold", preset_silver: "Silver", preset_emerald: "Emerald", preset_turquoise: "Turquoise", preset_amber: "Amber",
+    preset_rosegold: "Rose gold", preset_gold: "Gold", preset_silver: "Silver", preset_emerald: "Emerald", preset_turquoise: "Turquoise", preset_amber: "Amber",
     volume: "Volume", azan: "Azan", azan_for: "Azan", alarms: "Alarms", alarm_add: "Add alarm",
     alarm_none: "No alarm yet", alarm_hint: "The alarm rings on the selected days until you touch the screen or press BOOT (10 minutes at most).",
     alarm_tone: "Alarm tone", tone_calm: "Calm · rising bells", tone_bells: "Bells · gentle melody", tone_classic: "Classic · beeping",
@@ -192,6 +196,8 @@ const T = {
     azan_test_hint: "The azan plays on the clock just like at prayer time. Touch the screen or tap “Stop” to end it.", stop: "Stop", azan_playing: "Azan playing on the clock …",
     nav_settings: "Settings", grp_prayer: "Prayer", grp_clock: "Clock", grp_conn: "Connection", back: "Back", listen: "Listen",
     volume_hint: "Plays the azan on the clock so you hear the volume while adjusting it.", azan_test_display: "Azan test with display on the clock",
+    azan_voice: "Azan voice", azan_voice_hint: "The chosen voice is used for all prayers, with its own Fajr azan at Fajr. Tap ▶ to listen.",
+    voice_default: "Original azan", voice_islam_sobhi: "Sheikh Islam Sobhi", voice_alafasy: "Sheikh Mishary Rashid Alafasy",
     hours: "h", minutes: "min",
   },
 };

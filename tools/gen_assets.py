@@ -118,6 +118,7 @@ def make_background():
 BACKGROUND_DIR = ROOT / "tools" / "backgrounds"
 DATA = ROOT / "data"
 BACKGROUND_BRIGHTNESS = 0.55  # abdunkeln, damit die Schrift lesbar bleibt
+BACKGROUND_BRIGHTNESS_FOR = {"noir": 0.95}  # Bilder, die schon dunkel sind
 
 
 def load_background(path):
@@ -129,7 +130,7 @@ def load_background(path):
     img = np.asarray(im.crop((left, top, left + W, top + H)), np.float32)
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
     dist = np.sqrt(((xx - W / 2) / W) ** 2 + ((yy - H / 2) / H) ** 2)
-    shade = BACKGROUND_BRIGHTNESS * (0.85 + 0.3 * np.clip(dist / 0.7, 0, 1))
+    shade = BACKGROUND_BRIGHTNESS_FOR.get(Path(path).stem, BACKGROUND_BRIGHTNESS) * (0.85 + 0.3 * np.clip(dist / 0.7, 0, 1))
     return img * shade[..., None]
 
 

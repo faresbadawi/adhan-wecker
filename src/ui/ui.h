@@ -24,4 +24,8 @@ namespace ui
 
     // Zeigt die Seite, falls sichtbar
     void showPage(Page p);
+
+    // Bildschirmfoto inkl. Overlays als RGB565 (big-endian, LV_COLOR_16_SWAP) in einen PSRAM-Puffer.
+    // Der Aufrufer gibt buf mit free() frei. Nur aus dem LVGL-Task (loop) aufrufen.
+    uint8_t *snapshot(uint32_t &size, uint16_t &w, uint16_t &h);
 }
