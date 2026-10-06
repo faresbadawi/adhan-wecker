@@ -47,13 +47,14 @@ const I = {
   stop: svg('<rect x="7" y="7" width="10" height="10" rx="1.5"/>'),
   sunrise: svg('<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 6v3M5.6 10.6l1.4 1.4M18.4 10.6 17 12M8 21h8"/>'),
   sunset: svg('<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 3v6M9 6l3 3 3-3M8 21h8"/>'),
+  alarm: svg('<circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.2 1.6M4.5 5.5 7 3.2M19.5 5.5 17 3.2"/>'),
   info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>'),
 };
 
-// Vier Hauptbereiche; "Einstellungen" ist eine Übersicht mit den Unterseiten
-const TABS = ["dashboard", "prayer", "audio", "settings"];
+// Vier Hauptbereiche unten; die Einstellungen (Übersicht mit Unterseiten) öffnet das Zahnrad oben
+const TABS = ["dashboard", "prayer", "alarm", "audio"];
 const SUB = ["location", "display", "lang", "wifi", "device"];
-const NAV = [...TABS, ...SUB];
+const NAV = [...TABS, "settings", ...SUB];
 const parentOf = k => SUB.includes(k) ? "settings" : k;
 const PAGE_ICON = { clock: I.clock, prayer: I.prayer, weather: I.cloud, calendar: I.calendar };
 const SKY_ICON = { clear: I.sun, partly_cloudy: I.partly, cloudy: I.cloud, fog: I.fog, drizzle: I.rain, rain: I.rain, snow: I.snow, thunder: I.thunder };
@@ -387,6 +388,102 @@ function hsl2hex(h, sat, l) {
   return "#" + [0, 8, 4].map(k => Math.round(f(k) * 255).toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
+// ---------- Eigenes Hintergrundbild zuschneiden (480 x 320 wie das Display)
+// Verschieben mit einem Finger/der Maus, Zoomen mit zwei Fingern, Mausrad oder Regler.
+const DISPLAY_W = 480, DISPLAY_H = 320;
+function cropImage(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); toast(t("error"), true); resolve(null); };
+    img.onload = () => {
+      const m = document.createElement("div");
+      m.className = "cropper";
+      const sample = (S && S.colors) || { main: "#ffffff", accent: "#e9a27c" };
+      m.innerHTML = `<div class="crophead"><button class="btn" data-a="0">${t("cancel")}</button><b>${t("bg_crop")}</b><button class="btn gold" data-a="1">${t("bg_use")}</button></div>
+        <div class="cropframe" id="cframe"><img id="cimg" draggable="false" alt="">
+          <div class="cropsample ltr"><span style="color:${sample.main}">12:30</span><small style="color:${sample.accent}">${t("next_prayer")}</small></div></div>
+        <p class="hint" style="text-align:center">${t("bg_crop_hint")}</p>
+        <div class="cropctl"><label class="f">${t("zoom")}</label><input type="range" id="czoom" min="1" max="4" step="0.01" value="1">
+          <label class="f">${t("bg_brightness")}</label><input type="range" id="cbri" min="30" max="100" value="70"></div>`;
+      document.body.appendChild(m);
+      const frame = m.querySelector("#cframe"), el = m.querySelector("#cimg");
+      el.src = url;
+      let zoom = 1, x = 0, y = 0, bri = 70; // x/y: Verschiebung in Rahmen-Pixeln
+      const fw = () => frame.clientWidth, fh = () => frame.clientHeight;
+      const base = () => Math.max(fw() / img.naturalWidth, fh() / img.naturalHeight); // füllt den Rahmen
+      const clamp = () => {
+        const w = img.naturalWidth * base() * zoom, h = img.naturalHeight * base() * zoom;
+        x = Math.min(0, Math.max(fw() - w, x)); y = Math.min(0, Math.max(fh() - h, y));
+      };
+      const draw = () => {
+        clamp();
+        const sc = base() * zoom;
+        el.style.width = img.naturalWidth * sc + "px";
+        el.style.height = img.naturalHeight * sc + "px";
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        el.style.filter = `brightness(${bri}%)`;
+      };
+      // Start: mittig
+      const center = () => { const sc = base() * zoom; x = (fw() - img.naturalWidth * sc) / 2; y = (fh() - img.naturalHeight * sc) / 2; draw(); };
+      center();
+      const zoomAt = (nz, cx, cy) => {
+        nz = Math.min(4, Math.max(1, nz));
+        x = cx - (cx - x) * nz / zoom; y = cy - (cy - y) * nz / zoom; zoom = nz;
+        m.querySelector("#czoom").value = zoom; draw();
+      };
+      const pts = new Map();
+      let last = null;
+      frame.addEventListener("pointerdown", e => { frame.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); last = null; });
+      frame.addEventListener("pointermove", e => {
+        if (!pts.has(e.pointerId)) return;
+        const prev = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+        if (pts.size === 1) { x += e.clientX - prev[0]; y += e.clientY - prev[1]; draw(); return; }
+        const [a, b] = [...pts.values()], r = frame.getBoundingClientRect();
+        const dist = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        if (last) zoomAt(zoom * dist / last, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+        last = dist;
+      });
+      const up = e => { pts.delete(e.pointerId); last = null; };
+      frame.addEventListener("pointerup", up); frame.addEventListener("pointercancel", up);
+      frame.addEventListener("wheel", e => { e.preventDefault(); const r = frame.getBoundingClientRect(); zoomAt(zoom * (e.deltaY < 0 ? 1.1 : 0.9), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+      m.querySelector("#czoom").oninput = e => zoomAt(Number(e.target.value), fw() / 2, fh() / 2);
+      m.querySelector("#cbri").oninput = e => { bri = Number(e.target.value); draw(); };
+      const close = v => { m.remove(); URL.revokeObjectURL(url); resolve(v); };
+      m.querySelector('[data-a="0"]').onclick = () => close(null);
+      m.querySelector('[data-a="1"]').onclick = async () => {
+        // Ausschnitt in Bild-Pixeln
+        const sc = base() * zoom, sx = -x / sc, sy = -y / sc, sw = fw() / sc, sh = fh() / sc;
+        const c = document.createElement("canvas"); c.width = DISPLAY_W; c.height = DISPLAY_H;
+        const ctx = c.getContext("2d");
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, DISPLAY_W, DISPLAY_H);
+        const d = ctx.getImageData(0, 0, DISPLAY_W, DISPLAY_H).data;
+        // Helligkeit, leichtes Dithering gegen Streifen, RGB565 big-endian (wie das Display)
+        const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+        const out = new Uint8Array(DISPLAY_W * DISPLAY_H * 2), f = bri / 100;
+        for (let p = 0, o = 0, i = 0; p < d.length; p += 4, o += 2, i++) {
+          const th = BAYER[((i / DISPLAY_W | 0) & 3) * 4 + (i % DISPLAY_W & 3)] / 16;
+          const q = (v, st) => Math.min(255, Math.floor(v * f / st + th) * st);
+          const r = q(d[p], 8), g = q(d[p + 1], 4), b = q(d[p + 2], 8);
+          const v = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
+          out[o] = v >> 8; out[o + 1] = v & 255;
+        }
+        // Vorschaubild für die App
+        const tc = document.createElement("canvas"); tc.width = 160; tc.height = 107;
+        const tctx = tc.getContext("2d");
+        tctx.filter = `brightness(${bri}%)`;
+        tctx.drawImage(c, 0, 0, 160, 107);
+        if (tctx.filter === "none") { tctx.fillStyle = `rgba(0,0,0,${1 - f})`; tctx.fillRect(0, 0, 160, 107); } // ohne Canvas-Filter
+        const jpg = await new Promise(r => tc.toBlob(r, "image/jpeg", 0.8));
+        close({ bin: new Blob([out], { type: "application/octet-stream" }), jpg });
+      };
+      window.addEventListener("resize", draw, { once: true });
+    };
+    img.src = url;
+  });
+}
+
 // ---------- Auswahlfenster von unten
 function sheet(html, onClose) {
   const m = document.createElement("div");
@@ -497,15 +594,46 @@ VIEWS.display.bind = () => {
   };
   $("pages").onchange = e => { const c = e.target; if (c.dataset.on === undefined) return; pages[c.dataset.on].on = c.checked; render(); save({ pages }); };
 
-  api("/api/backgrounds").then(r => {
-    const names = r.data || [];
-    $("bgs").innerHTML = names.map(n => `<button data-n="${esc(n)}" class="${n === S.background ? "sel" : ""}"><img src="/bg/${encodeURIComponent(n)}.jpg" alt="${esc(n)}" loading="lazy"></button>`).join("");
-    $("bgs").onclick = e => {
-      const b = e.target.closest("button"); if (!b) return;
-      document.querySelectorAll("#bgs button").forEach(x => x.classList.toggle("sel", x === b));
-      save({ background: b.dataset.n });
-    };
-  }).catch(() => { $("bgs").innerHTML = `<div class="empty">${t("offline")}</div>`; });
+  // Hintergründe; das eigene Bild ("custom") steht vorne, die Kachel "+" lädt ein neues hoch (ersetzt das alte)
+  const drawBgs = names => {
+    names = names.slice().sort((a, b) => (a === "custom" ? -1 : b === "custom" ? 1 : 0));
+    const v = Date.now();
+    $("bgs").innerHTML = `<button class="bgadd" id="bgAdd">${I.plus}<span>${t(names.includes("custom") ? "bg_replace" : "bg_own")}</span></button>` +
+      names.map(n => `<div class="bgwrap"><button data-n="${esc(n)}" class="${n === S.background ? "sel" : ""}"><img src="/bg/${encodeURIComponent(n)}.jpg?v=${v}" alt="${esc(n)}" loading="lazy"></button>
+        ${n === "custom" ? `<button class="bgdel" data-del aria-label="${t("delete")}">${I.trash}</button>` : ""}</div>`).join("") +
+      `<input type="file" id="bgFile" accept="image/*" hidden>`;
+  };
+  const loadBgs = () => api("/api/backgrounds").then(r => drawBgs(r.data || [])).catch(() => { $("bgs").innerHTML = `<div class="empty">${t("offline")}</div>`; });
+  loadBgs();
+  $("bgs").onclick = async e => {
+    if (e.target.closest("#bgAdd")) { $("bgFile").click(); return; }
+    if (e.target.closest("[data-del]")) {
+      if (!await confirmBox(t("bg_delete_q"), "", true)) return;
+      const r = await api("/api/background/delete", {});
+      if (r.ok) { S.background = S.background === "custom" ? "noir" : S.background; drawBgs(r.data || []); toast(t("saved")); }
+      return;
+    }
+    const b = e.target.closest("[data-n]"); if (!b) return;
+    document.querySelectorAll("#bgs [data-n]").forEach(x => x.classList.toggle("sel", x === b));
+    save({ background: b.dataset.n });
+  };
+  $("bgs").onchange = async e => {
+    if (e.target.id !== "bgFile" || !e.target.files[0]) return;
+    const out = await cropImage(e.target.files[0]);
+    e.target.value = "";
+    if (!out) return;
+    toast(t("bg_uploading"));
+    try {
+      const fd = new FormData();
+      fd.append("bin", out.bin, "custom.bin");
+      fd.append("jpg", out.jpg, "custom.jpg");
+      const r = await fetch("/api/background/upload", { method: "POST", body: fd });
+      if (!r.ok) throw new Error();
+      S.background = "custom";
+      drawBgs(await r.json());
+      await save({ background: "custom" });
+    } catch (err) { toast(t("error"), true); }
+  };
 
   // Farbvorlagen als Kacheln mit kleiner Vorschau
   const same = (a, b) => a.toUpperCase() === b.toUpperCase();
@@ -557,22 +685,17 @@ function bindRange(id, onSet, suffix = "") {
 
 const volPct = v => Math.round(v * 100 / 21); // Wecker: Decoder 0..21 <-> Prozent
 VIEWS.audio = () => `
+  ${card(t("azan_voice"), I.music, `<div class="list" id="voices">${loading("")}</div><p class="hint">${t("azan_voice_hint")}</p>`)}
   ${card(t("azan"), I.prayer, `<div class="list">${PRAYERS.map(k => `<div class="pvol ${S.azan[k] ? "" : "off"}">
       <div class="item"><span class="pico">${PRAYER_ICON[k]}</span><span class="name">${t(k)}</span>${toggle(`data-az="${k}"`, S.azan[k])}</div>
       <div class="vol">${I.audio}${range("pv_" + k, S.azanVolume[k], 0, 100, "%")}<button class="round" data-pplay="${k}" aria-label="${t("listen")}">${I.play}</button></div></div>`).join("")}</div>
     <p class="hint">${t("azan_volume_hint")}</p>
     <div class="actions"><button class="btn danger" data-stop>${I.stop}${t("stop")}</button></div>`)}
-  ${card(t("azan_voice"), I.music, `<div class="list" id="voices">${loading("")}</div><p class="hint">${t("azan_voice_hint")}</p>`)}
   ${card(t("azan_test_display"), I.play, `<div class="actions">
       <button class="btn" data-test="dhuhr">${I.play}${t("azan_test_normal")}</button>
       <button class="btn" data-test="fajr">${I.play}${t("azan_test_fajr")}</button>
       <button class="btn danger" data-stop>${I.stop}${t("stop")}</button></div>
-    <p class="hint">${t("azan_test_hint")}</p>`)}
-  ${card(t("alarms"), I.bell, `<div class="list" id="alarms"></div>
-    <div class="actions"><button class="btn" id="alarmAdd">${I.plus}${t("alarm_add")}</button></div><p class="hint">${t("alarm_hint")}</p>`)}
-  ${card(t("alarm_tone"), I.music, `<div class="list" id="sounds">${loading("")}</div>
-    <div class="vol">${I.audio}${range("volume", volPct(S.volume), 0, 100, "%")}</div>
-    <p class="hint">${t("alarm_volume_hint")}</p>`)}`;
+    <p class="hint">${t("azan_test_hint")}</p>`)}`;
 VIEWS.audio.bind = () => {
   // Lautstärke je Gebet: beim Loslassen speichern, ▶ spielt den Azan des Gebets in dieser Lautstärke
   PRAYERS.forEach(k => {
@@ -588,12 +711,6 @@ VIEWS.audio.bind = () => {
       toast(r.ok ? t("azan_playing") : t("error"), !r.ok);
     } catch (e) { toast(t("offline"), true); }
   });
-  // Wecker-Lautstärke: beim Loslassen speichern und den gewählten Weckton abspielen
-  $("volume").oninput = () => $("volumeVal").textContent = $("volume").value + "%";
-  $("volume").onchange = async () => {
-    const ok = await save({ volume: Math.round(Number($("volume").value) * 21 / 100) }, true);
-    if (ok && sounds.selected) api("/api/preview", { name: sounds.selected }).catch(() => {});
-  };
   // Azan-Stimme wählen und probehören
   let voices = { list: [], selected: "" };
   const voiceName = id => { const k = "voice_" + id; return t(k) === k ? id : t(k); };
@@ -623,7 +740,22 @@ VIEWS.audio.bind = () => {
     catch (e) { toast(t("offline"), true); }
   });
   document.querySelectorAll("[data-stop]").forEach(b => b.onclick = () => api("/api/azan/stop", {}).catch(() => toast(t("offline"), true)));
+};
 
+// Wecker: eigene Hauptseite (Weckzeiten, Weckton, Lautstärke)
+VIEWS.alarm = () => `
+  ${card(t("alarm_times"), I.bell, `<div class="list" id="alarms"></div>
+    <div class="actions"><button class="btn" id="alarmAdd">${I.plus}${t("alarm_add")}</button></div><p class="hint">${t("alarm_hint")}</p>`)}
+  ${card(t("alarm_tone"), I.music, `<div class="list" id="sounds">${loading("")}</div>
+    <div class="vol">${I.audio}${range("volume", volPct(S.volume), 0, 100, "%")}</div>
+    <p class="hint">${t("alarm_volume_hint")}</p>`)}`;
+VIEWS.alarm.bind = () => {
+  // Wecker-Lautstärke: beim Loslassen speichern und den gewählten Weckton abspielen
+  $("volume").oninput = () => $("volumeVal").textContent = $("volume").value + "%";
+  $("volume").onchange = async () => {
+    const ok = await save({ volume: Math.round(Number($("volume").value) * 21 / 100) }, true);
+    if (ok && sounds.selected) api("/api/preview", { name: sounds.selected }).catch(() => {});
+  };
   const alarms = (S.alarms || []).map(a => Object.assign({}, a));
   const days = t("days");
   // Weckzeit: große Uhrzeit antippen, im Fenster erst Stunde, dann Minute wählen
@@ -829,7 +961,7 @@ try { applyTheme(JSON.parse(localStorage.getItem("colors") || "null")); } catch 
 // ---------- Gerüst
 function renderNav() {
   const btn = k => `<button class="navbtn ${parentOf(current) === k ? "on" : ""}" data-v="${k}">${I[k]}<span>${t(k === "dashboard" ? "tab_home" : "nav_" + k)}</span></button>`;
-  $("nav").innerHTML = TABS.map(k => btn(k) + (k === "settings" ? SUB.map(sk =>
+  $("nav").innerHTML = [...TABS, "settings"].map(k => btn(k) + (k === "settings" ? SUB.map(sk =>
     `<button class="navbtn subnav ${current === sk ? "on" : ""}" data-v="${sk}">${I[sk]}<span>${t("nav_" + sk)}</span></button>`).join("") : "")).join("");
   $("tabs").innerHTML = TABS.map(btn).join("");
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
@@ -843,8 +975,11 @@ function render() {
   const ok = online && ST && ST.wifi && ST.wifi.connected;
   const lead = SUB.includes(current) ? `<button class="round backbtn" data-go="settings" aria-label="${t("back")}">${I.back}</button>`
     : `<span class="mobile-brand"><img src="/icons/icon-192.png" alt=""></span>`;
-  const head = `<div class="top">${lead}<h1>${current === "dashboard" ? t("app") : t("nav_" + current)}</h1>
-    <button class="status" data-go="device"><span class="dot ${online ? "ok" : ""}"></span><span class="lbl">${t(online ? "device_online" : "device_offline")}</span></button></div>`;
+  const title = current === "dashboard" ? t("app") : (t("title_" + current) !== "title_" + current ? t("title_" + current) : t("nav_" + current));
+  const inSettings = parentOf(current) === "settings";
+  const head = `<div class="top">${lead}<h1>${title}</h1>
+    <button class="status" data-go="device" aria-label="${t(online ? "device_online" : "device_offline")}"><span class="dot ${online ? "ok" : ""}"></span></button>
+    <button class="round gear ${inSettings ? "on" : ""}" data-go="settings" aria-label="${t("nav_settings")}">${I.settings}</button></div>`;
   if (!S && current !== "dashboard") { $("view").innerHTML = head + (online ? loading("") : `<div class="group empty">${t("offline")}</div>`); return; }
   $("view").innerHTML = head + v();
   if (v.bind) v.bind();

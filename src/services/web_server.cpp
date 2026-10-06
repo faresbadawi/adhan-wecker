@@ -11,6 +11,7 @@
 #include "config.h"
 #include "ui/lang.h"
 #include "ui/ui.h"
+#include "ui/theme.h"
 #include "hal/rgb_led.h"
 #include "mawaqit.h"
 #include "prayer_times.h"
@@ -250,6 +251,54 @@ namespace web
         String out;
         serializeJson(doc, out);
         s_server.send(200, "application/json", out);
+    }
+
+    // Eigenes Hintergrundbild: die App schneidet zu und schickt /bg/custom.bin (480x320 RGB565)
+    // und ein kleines Vorschaubild. Ein neues Bild ersetzt das vorherige.
+    static File s_upFile;
+    static void backgroundUploadData()
+    {
+        HTTPUpload &up = s_server.upload();
+        if (up.status == UPLOAD_FILE_START)
+        {
+            const bool bin = up.name == "bin";
+            s_upFile = LittleFS.open(bin ? "/bg/custom.tmp" : "/www/bg/custom.jpg", "w");
+        }
+        else if (up.status == UPLOAD_FILE_WRITE && s_upFile)
+            s_upFile.write(up.buf, up.currentSize);
+        else if ((up.status == UPLOAD_FILE_END || up.status == UPLOAD_FILE_ABORTED) && s_upFile)
+            s_upFile.close();
+    }
+
+    static void backgroundUploadDone()
+    {
+        File f = LittleFS.open("/bg/custom.tmp", "r");
+        const size_t size = f ? f.size() : 0;
+        f.close();
+        if (size != (size_t)theme::SCREEN_W * theme::SCREEN_H * 2)
+        {
+            LittleFS.remove("/bg/custom.tmp");
+            s_server.send(400, "application/json", "{\"error\":\"size\"}");
+            return;
+        }
+        LittleFS.remove("/bg/custom.bin");
+        LittleFS.rename("/bg/custom.tmp", "/bg/custom.bin");
+        if (strcmp(settings::get().background, "custom") == 0)
+            theme::setBackground("custom"); // schon gewählt: sofort neu laden
+        sendBackgrounds();
+    }
+
+    static void backgroundDelete()
+    {
+        LittleFS.remove("/bg/custom.bin");
+        LittleFS.remove("/www/bg/custom.jpg");
+        settings::Settings st = settings::get();
+        if (strcmp(st.background, "custom") == 0)
+        {
+            strlcpy(st.background, "noir", sizeof(st.background));
+            settings::set(st);
+        }
+        sendBackgrounds();
     }
 
     // Moscheesuche auf Mawaqit (der Browser darf Mawaqit wegen CORS nicht direkt abfragen)
@@ -656,6 +705,8 @@ namespace web
         s_server.on("/api/preview", HTTP_POST, previewSound);
         s_server.on("/api/mawaqit/search", HTTP_GET, searchMosques);
         s_server.on("/api/backgrounds", HTTP_GET, sendBackgrounds);
+        s_server.on("/api/background/upload", HTTP_POST, backgroundUploadDone, backgroundUploadData);
+        s_server.on("/api/background/delete", HTTP_POST, backgroundDelete);
         s_server.on("/api/settings", HTTP_GET, sendSettings);
         s_server.on("/api/settings", HTTP_POST, receiveSettings);
         // Startseite ausdrücklich: serveStatic sucht bei "/" nur nach index.htm
