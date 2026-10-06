@@ -9,6 +9,7 @@ namespace calendar_screen
     struct Hijri
     {
         int8_t day[31] = {};    // Hijri-Tag je Monatstag (0 = unbekannt)
+        bool holiday[31] = {};  // besonderer Tag (Eid, Arafah …)
         int8_t firstMonth = 0;  // Hijri-Monat am 1. und am letzten Tag (1..12, 0 = unbekannt)
         int8_t lastMonth = 0;
         int16_t year = 0;

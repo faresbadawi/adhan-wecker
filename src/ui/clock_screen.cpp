@@ -10,7 +10,7 @@ namespace clock_screen
 {
     using namespace theme;
 
-    static lv_obj_t *s_time, *s_sec, *s_weekday, *s_date;
+    static lv_obj_t *s_time, *s_sec, *s_weekday, *s_date, *s_holiday;
     static lv_obj_t *s_hijri, *s_hDay, *s_hMonth, *s_hYear;
     static lv_obj_t *s_alarmRow, *s_alarmTime;
 
@@ -60,6 +60,8 @@ namespace clock_screen
 
         s_date = label(parent, &font_josefin_20, Role::MUTED, "");
         lv_obj_align(s_date, LV_ALIGN_TOP_MID, 0, 276);
+        s_holiday = image(parent, nullptr, Role::ACCENT);
+        lv_obj_add_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
     }
 
     void setClock(const struct tm &t)
@@ -100,5 +102,19 @@ namespace clock_screen
         lv_label_set_text_fmt(s_alarmTime, "%02d:%02d", minutes / 60, minutes % 60);
         lv_obj_clear_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
         lv_obj_align(s_alarmRow, LV_ALIGN_TOP_RIGHT, -MARGIN, 10);
+    }
+
+    void setHoliday(model::Holiday h)
+    {
+        if (h == model::NO_HOLIDAY)
+        {
+            lv_obj_add_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(s_date, LV_OBJ_FLAG_HIDDEN);
+            return;
+        }
+        lv_img_set_src(s_holiday, holidayText(h));
+        lv_obj_align(s_holiday, LV_ALIGN_TOP_MID, 0, 272);
+        lv_obj_clear_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(s_date, LV_OBJ_FLAG_HIDDEN);
     }
 }

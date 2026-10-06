@@ -420,16 +420,23 @@ HIJRI_SHORT = {
     "en": ["Muharram", "Safar", "Rabi' I", "Rabi' II", "Jumada I", "Jumada II",
            "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhu al-Qa'da", "Dhu al-Hijja"],
 }
-PRAYER_NAMES = {  # model::Prayer
-    "ar": ["الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"],
-    "de": ["Fajr", "Sonnenaufgang", "Dhuhr", "Asr", "Maghrib", "Isha"],
-    "en": ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"],
+PRAYER_NAMES = {  # model::Prayer, danach Jumu'a (ersetzt Dhuhr am Freitag)
+    "ar": ["الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء", "الجمعة"],
+    "de": ["Fajr", "Sonnenaufgang", "Dhuhr", "Asr", "Maghrib", "Isha", "Jumu'a"],
+    "en": ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha", "Jumu'a"],
+}
+# Besondere Tage, Reihenfolge = model::Holiday (Zuordnung zum Hijri-Datum in model.h)
+HOLIDAYS = {
+    "ar": ["رأس السنة الهجرية", "يوم عاشوراء", "الإسراء والمعراج", "أول رمضان", "ليلة القدر", "عيد الفطر", "يوم عرفة", "عيد الأضحى"],
+    "de": ["Islamisches Neujahr", "Aschura", "Isra und Mi'radsch", "Ramadan-Beginn", "Lailat al-Qadr", "Eid al-Fitr", "Tag von Arafah", "Eid al-Adha"],
+    "en": ["Islamic New Year", "Ashura", "Isra and Mi'raj", "Start of Ramadan", "Laylat al-Qadr", "Eid al-Fitr", "Day of Arafah", "Eid al-Adha"],
 }
 
 # Wortlisten mit gemeinsamer Grundlinie: Schlüssel -> (Größe, fett, {Sprache: Liste})
 LISTS = {
     "prayer": (22, False, PRAYER_NAMES),
     "prayer_lg": (34, False, PRAYER_NAMES),
+    "holiday": (20, False, HOLIDAYS),
     "wday": (32, False, {  # tm_wday 0..6
         "ar": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
         "de": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],

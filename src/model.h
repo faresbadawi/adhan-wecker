@@ -19,6 +19,35 @@ namespace model
     // Die fünf Pflichtgebete in zeitlicher Reihenfolge
     constexpr Prayer DAILY_PRAYERS[] = {FAJR, DHUHR, ASR, MAGHRIB, ISHA};
 
+    // Besondere Tage nach dem Hijri-Datum (das Datum liefert die Aladhan-API).
+    // Reihenfolge = Texte "holiday" in tools/gen_assets.py.
+    enum Holiday : int8_t
+    {
+        NO_HOLIDAY = -1,
+        HIJRI_NEW_YEAR, // 1. Muharram
+        ASHURA,         // 10. Muharram
+        ISRA_MIRAJ,     // 27. Radschab
+        RAMADAN_START,  // 1. Ramadan
+        LAYLAT_QADR,    // 27. Ramadan
+        EID_FITR,       // 1.-3. Schawwal
+        ARAFAH,         // 9. Dhu l-Hiddscha
+        EID_ADHA,       // 10.-13. Dhu l-Hiddscha
+        HOLIDAY_COUNT
+    };
+
+    inline Holiday holidayOf(int hijriMonth, int hijriDay)
+    {
+        switch (hijriMonth)
+        {
+        case 1: return hijriDay == 1 ? HIJRI_NEW_YEAR : hijriDay == 10 ? ASHURA : NO_HOLIDAY;
+        case 7: return hijriDay == 27 ? ISRA_MIRAJ : NO_HOLIDAY;
+        case 9: return hijriDay == 1 ? RAMADAN_START : hijriDay == 27 ? LAYLAT_QADR : NO_HOLIDAY;
+        case 10: return hijriDay >= 1 && hijriDay <= 3 ? EID_FITR : NO_HOLIDAY;
+        case 12: return hijriDay == 9 ? ARAFAH : hijriDay >= 10 && hijriDay <= 13 ? EID_ADHA : NO_HOLIDAY;
+        default: return NO_HOLIDAY;
+        }
+    }
+
     struct PrayerDay
     {
         bool valid = false;

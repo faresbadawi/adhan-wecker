@@ -136,6 +136,9 @@ namespace calendar_screen
                 lv_label_set_text(s_hijri[i], "");
 
             lv_obj_set_style_bg_opa(s_cell[i], isToday ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
+            // besonderer Tag: feiner Rahmen in der Akzentfarbe
+            const bool special = inMonth && hijri.holiday[d - 1];
+            lv_obj_set_style_border_width(s_cell[i], special && !isToday ? 1 : 0, 0);
             lv_obj_set_style_text_opa(s_greg[i], inMonth ? LV_OPA_COVER : LV_OPA_50, 0);
             setRole(s_greg[i], isFriday && inMonth ? Role::ACCENT : Role::MAIN);
             if (isToday)

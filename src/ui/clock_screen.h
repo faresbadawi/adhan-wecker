@@ -10,4 +10,5 @@ namespace clock_screen
     void setClock(const struct tm &t);
     void setHijri(const model::PrayerDay &day);
     void setAlarm(int minutes); // nächster Wecker, -1 = keiner
+    void setHoliday(model::Holiday h); // besonderer Tag statt des Datums
 }

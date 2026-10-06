@@ -1,6 +1,7 @@
 #include "web_server.h"
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
+#include <Update.h>
 #include <Preferences.h>
 #include <ESPmDNS.h>
 #include <LittleFS.h>
@@ -301,6 +302,45 @@ namespace web
         sendBackgrounds();
     }
 
+    // Update aus der App: firmware.bin (beginnt mit 0xE9) oder littlefs.bin (App-Dateien, Töne, Bilder).
+    // Die Art wird am ersten Byte erkannt; danach startet die Uhr neu.
+    static bool s_updStarted = false;
+    static void updateData()
+    {
+        HTTPUpload &up = s_server.upload();
+        if (up.status == UPLOAD_FILE_START)
+        {
+            s_updStarted = false;
+            audio::stop();
+        }
+        else if (up.status == UPLOAD_FILE_WRITE)
+        {
+            if (!s_updStarted)
+            {
+                const int kind = up.currentSize && up.buf[0] == 0xE9 ? U_FLASH : U_SPIFFS;
+                s_updStarted = Update.begin(UPDATE_SIZE_UNKNOWN, kind);
+                Serial.printf("Update: %s %s\n", kind == U_FLASH ? "Firmware" : "Dateisystem", s_updStarted ? "beginnt" : "nicht moeglich");
+            }
+            if (s_updStarted && Update.write(up.buf, up.currentSize) != up.currentSize)
+                Update.printError(Serial);
+        }
+        else if (up.status == UPLOAD_FILE_END && s_updStarted)
+            Update.end(true);
+        else if (up.status == UPLOAD_FILE_ABORTED && s_updStarted)
+            Update.abort();
+    }
+
+    static void updateDone()
+    {
+        if (!s_updStarted || Update.hasError() || !Update.isFinished())
+        {
+            s_server.send(500, "application/json", "{\"error\":\"update\"}");
+            return;
+        }
+        s_server.send(200, "application/json", "{}");
+        s_restartAt = millis() + 1500;
+    }
+
     // Moscheesuche auf Mawaqit (der Browser darf Mawaqit wegen CORS nicht direkt abfragen)
     static void searchMosques()
     {
@@ -458,6 +498,10 @@ namespace web
                 doc["prayer"]["hijri"]["day"] = day.hijriDay;
                 doc["prayer"]["hijri"]["month"] = day.hijriMonth;
                 doc["prayer"]["hijri"]["year"] = day.hijriYear;
+                static const char *HOLIDAY_KEYS[] = {"new_year", "ashura", "isra", "ramadan", "qadr", "eid_fitr", "arafah", "eid_adha"};
+                const model::Holiday h = model::holidayOf(day.hijriMonth, day.hijriDay);
+                doc["prayer"]["holiday"] = h == model::NO_HOLIDAY ? "" : HOLIDAY_KEYS[h];
+                doc["prayer"]["friday"] = now.tm_wday == 5;
             }
         }
 
@@ -705,6 +749,7 @@ namespace web
         s_server.on("/api/preview", HTTP_POST, previewSound);
         s_server.on("/api/mawaqit/search", HTTP_GET, searchMosques);
         s_server.on("/api/backgrounds", HTTP_GET, sendBackgrounds);
+        s_server.on("/api/update", HTTP_POST, updateDone, updateData);
         s_server.on("/api/background/upload", HTTP_POST, backgroundUploadDone, backgroundUploadData);
         s_server.on("/api/background/delete", HTTP_POST, backgroundDelete);
         s_server.on("/api/settings", HTTP_GET, sendSettings);

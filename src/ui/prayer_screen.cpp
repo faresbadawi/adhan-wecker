@@ -15,7 +15,8 @@ namespace prayer_screen
     static constexpr int CELLS = sizeof(model::DAILY_PRAYERS) / sizeof(model::DAILY_PRAYERS[0]);
     static constexpr lv_coord_t CELL_W = 86, CELL_H = 64, ROW_Y = 238;
 
-    static lv_obj_t *s_clock, *s_date;
+    static lv_obj_t *s_clock, *s_date, *s_holiday;
+    static int s_lastNext = -1;
     static lv_obj_t *s_content, *s_loading;
     static lv_obj_t *s_nextName, *s_countdown;
     static lv_obj_t *s_cell[CELLS], *s_cellTime[CELLS], *s_cellName[CELLS];
@@ -92,6 +93,8 @@ namespace prayer_screen
         lv_obj_set_pos(s_clock, MARGIN, 14);
         s_date = label(scr, &font_josefin_17, Role::MUTED, "");
         lv_obj_set_pos(s_date, MARGIN + 2, 80);
+        s_holiday = image(scr, nullptr, Role::ACCENT); // besonderer Tag statt Datum
+        lv_obj_add_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
 
         // WLAN-Symbol oben neben der Uhr; Antippen führt zur Einstellungsseite (QR-Code, Netzwerk)
         lv_obj_t *hit = box(scr);
@@ -192,8 +195,11 @@ namespace prayer_screen
             lv_obj_clear_flag(s_loading, LV_OBJ_FLAG_HIDDEN);
             return;
         }
+        s_lastNext = -1; // Namen neu setzen (Freitag: Jumu'a)
         for (int i = 0; i < CELLS; i++)
         {
+            lv_img_set_src(s_cellName[i], prayerName(model::DAILY_PRAYERS[i], false));
+            lv_obj_align(s_cellName[i], LV_ALIGN_TOP_MID, 0, 6);
             const uint16_t m = day.minutes[model::DAILY_PRAYERS[i]];
             lv_label_set_text_fmt(s_cellTime[i], "%02d:%02d", m / 60, m % 60);
         }
@@ -203,10 +209,9 @@ namespace prayer_screen
 
     void setNext(model::Prayer p, int32_t secondsLeft)
     {
-        static int last = -1;
-        if (p != last)
+        if (p != s_lastNext)
         {
-            last = p;
+            s_lastNext = p;
             lv_img_set_src(s_nextName, prayerName(p, true));
             lv_obj_align(s_nextName, LV_ALIGN_TOP_MID, 0, 138);
             for (int i = 0; i < CELLS; i++)
@@ -276,4 +281,18 @@ namespace prayer_screen
         lv_obj_clear_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
     }
 
+
+    void setHoliday(model::Holiday h)
+    {
+        if (h == model::NO_HOLIDAY)
+        {
+            lv_obj_add_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(s_date, LV_OBJ_FLAG_HIDDEN);
+            return;
+        }
+        lv_img_set_src(s_holiday, holidayText(h));
+        lv_obj_set_pos(s_holiday, MARGIN + 2, 78); // Platz des Datums unter der Uhr
+        lv_obj_clear_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(s_date, LV_OBJ_FLAG_HIDDEN);
+    }
 }

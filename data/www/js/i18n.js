@@ -79,6 +79,8 @@ const T = {
     alarm_name_ph: "اسم المنبه، مثلًا: العمل",
     bg_own: "صورة خاصة", bg_replace: "صورة جديدة", bg_crop: "قص الصورة", bg_use: "استخدام", bg_crop_hint: "حرّك الصورة بإصبع واحد، وكبّر بإصبعين.", zoom: "التكبير", bg_brightness: "السطوع (لوضوح الكتابة)", bg_uploading: "جارٍ رفع الصورة …", bg_delete_q: "حذف الصورة الخاصة؟", delete: "حذف",
     alarm_times: "أوقات التنبيه",
+    jumuah: "الجمعة", holiday_new_year: "رأس السنة الهجرية", holiday_ashura: "يوم عاشوراء", holiday_isra: "الإسراء والمعراج", holiday_ramadan: "أول رمضان — رمضان مبارك", holiday_qadr: "ليلة القدر", holiday_eid_fitr: "عيد الفطر — عيد مبارك", holiday_arafah: "يوم عرفة", holiday_eid_adha: "عيد الأضحى — عيد مبارك",
+    update_hint: "اختر ملف التحديث: firmware.bin لبرنامج الساعة أو littlefs.bin لملفات التطبيق والأصوات والخلفيات. تُعاد الساعة تشغيلها بعد ذلك.", update_pick: "اختيار ملف التحديث", update_confirm: "تثبيت التحديث الآن؟", update_running: "جارٍ التحديث …", update_ok: "تم التحديث، تُعاد الساعة تشغيلها …", update_fail: "فشل التحديث",
     hours: "س", minutes: "د",
   },
 
@@ -155,6 +157,8 @@ const T = {
     alarm_name_ph: "Name, z. B. Arbeit",
     bg_own: "Eigenes Bild", bg_replace: "Neues Bild", bg_crop: "Bild zuschneiden", bg_use: "Übernehmen", bg_crop_hint: "Mit einem Finger verschieben, mit zwei Fingern zoomen.", zoom: "Zoom", bg_brightness: "Helligkeit (damit die Schrift lesbar bleibt)", bg_uploading: "Bild wird hochgeladen …", bg_delete_q: "Eigenes Bild löschen?", delete: "Löschen",
     alarm_times: "Weckzeiten",
+    jumuah: "Jumu'a", holiday_new_year: "Islamisches Neujahr", holiday_ashura: "Aschura", holiday_isra: "Isra und Mi'radsch", holiday_ramadan: "Ramadan-Beginn – Ramadan Mubarak", holiday_qadr: "Lailat al-Qadr", holiday_eid_fitr: "Eid al-Fitr – Eid Mubarak", holiday_arafah: "Tag von Arafah", holiday_eid_adha: "Eid al-Adha – Eid Mubarak",
+    update_hint: "Update-Datei wählen: firmware.bin für das Programm der Uhr oder littlefs.bin für App, Töne und Hintergründe. Die Uhr startet danach neu.", update_pick: "Update-Datei wählen", update_confirm: "Update jetzt einspielen?", update_running: "Update läuft …", update_ok: "Update fertig, die Uhr startet neu …", update_fail: "Update fehlgeschlagen",
     hours: "Std.", minutes: "Min.",
   },
 
@@ -231,6 +235,8 @@ const T = {
     alarm_name_ph: "Name, e.g. Work",
     bg_own: "Own picture", bg_replace: "New picture", bg_crop: "Crop picture", bg_use: "Use", bg_crop_hint: "Drag with one finger, zoom with two.", zoom: "Zoom", bg_brightness: "Brightness (keeps text readable)", bg_uploading: "Uploading picture …", bg_delete_q: "Delete your own picture?", delete: "Delete",
     alarm_times: "Alarm times",
+    jumuah: "Jumu'a", holiday_new_year: "Islamic New Year", holiday_ashura: "Ashura", holiday_isra: "Isra and Mi'raj", holiday_ramadan: "Start of Ramadan – Ramadan Mubarak", holiday_qadr: "Laylat al-Qadr", holiday_eid_fitr: "Eid al-Fitr – Eid Mubarak", holiday_arafah: "Day of Arafah", holiday_eid_adha: "Eid al-Adha – Eid Mubarak",
+    update_hint: "Choose an update file: firmware.bin for the clock's program or littlefs.bin for app, sounds and backgrounds. The clock restarts afterwards.", update_pick: "Choose update file", update_confirm: "Install the update now?", update_running: "Updating …", update_ok: "Update done, the clock is restarting …", update_fail: "Update failed",
     hours: "h", minutes: "min",
   },
 };

@@ -166,11 +166,18 @@ namespace theme
     const lv_img_dsc_t *weekdayShort(int wday) { return text(TXT_WSHORT_0 + constrain(wday, 0, 6)); }
     const lv_img_dsc_t *gregMonth(int month) { return text(TXT_GMONTH_0 + constrain(month, 1, 12) - 1); }
 
+    static bool s_friday = false;
+    void setFriday(bool friday) { s_friday = friday; }
+
     const lv_img_dsc_t *prayerName(model::Prayer p, bool large)
     {
-        const int i = p < model::PRAYER_COUNT ? p : 0;
+        int i = p < model::PRAYER_COUNT ? p : 0;
+        if (p == model::DHUHR && s_friday)
+            i = model::PRAYER_COUNT; // Eintrag nach den sechs Zeiten: Jumu'a
         return text((large ? TXT_PRAYER_LG_0 : TXT_PRAYER_0) + i);
     }
+
+    const lv_img_dsc_t *holidayText(model::Holiday h) { return text(TXT_HOLIDAY_0 + (h < 0 ? 0 : h)); }
 
     void alignStart(lv_obj_t *obj, lv_coord_t x, lv_coord_t y)
     {

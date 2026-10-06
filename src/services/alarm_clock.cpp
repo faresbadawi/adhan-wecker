@@ -7,6 +7,9 @@
 namespace alarmclock
 {
     static constexpr uint32_t MAX_RING_MS = 10 * 60 * 1000; // spätestens nach 10 Minuten aufhören
+    static constexpr uint32_t RAMP_MS = 45 * 1000;          // sanft lauter bis zur eingestellten Lautstärke
+    static constexpr int START_VOLUME = 2;                   // Decoder 0..21
+    static int s_rampVolume = -1;
 
     static bool s_ringing = false;
     static int s_index = -1;
@@ -32,7 +35,8 @@ namespace alarmclock
         s_fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "alarm.mp3", s_path, sizeof(s_path));
         const settings::Alarm &a = st.alarms[index];
         Serial.printf("Wecker %02d:%02d: %s\n", a.hour, a.minute, s_fs ? s_path : "keine alarm.mp3");
-        audio::setVolume(st.volume);
+        s_rampVolume = min<int>(START_VOLUME, st.volume);
+        audio::setVolume(s_rampVolume);
         play();
     }
 
@@ -51,8 +55,20 @@ namespace alarmclock
                 s_ringing = false; // Azan hat den Ton übernommen, nicht anhalten
             else if (millis() - s_startedMs > MAX_RING_MS)
                 stop();
-            else if (!audio::isPlaying())
-                play(); // Ton wiederholen
+            else
+            {
+                // leise beginnen und in RAMP_MS bis zur eingestellten Lautstärke steigern
+                const uint32_t t = min<uint32_t>(millis() - s_startedMs, RAMP_MS);
+                const int start = min<int>(START_VOLUME, st.volume);
+                const int v = start + (int)((st.volume - start) * t / RAMP_MS);
+                if (v != s_rampVolume)
+                {
+                    s_rampVolume = v;
+                    audio::setVolume(v);
+                }
+                if (!audio::isPlaying())
+                    play(); // Ton wiederholen
+            }
             return;
         }
         if (azanActive)

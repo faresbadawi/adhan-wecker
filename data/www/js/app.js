@@ -182,6 +182,8 @@ const nowSec = () => {
   return (h * 3600 + m * 60 + s + Math.floor((performance.now() - stBase) / 1000)) % 86400;
 };
 
+const pname = k => (k === "dhuhr" && ST && ST.prayer && ST.prayer.friday ? t("jumuah") : t(k));
+
 VIEWS.dashboard = () => {
   const p = ST && ST.prayer, wx = ST && ST.weather, loc = ST ? ST.location : (S ? { city: S.city, country: S.country } : {});
   const date = ST && ST.time ? new Date(ST.time.date + "T12:00:00").toLocaleDateString(locale(), { weekday: "long", day: "numeric", month: "long" }) : "";
@@ -192,8 +194,9 @@ VIEWS.dashboard = () => {
   <section class="hero">
     <div class="hero-top"><span class="loc">${I.location}<span dir="auto">${esc(loc.city || "—")}</span></span><span class="clock num ltr" id="dClock">--:--</span></div>
     <div class="bism" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    ${p && p.holiday ? `<div class="holiday">${I.moon}<span>${t("holiday_" + p.holiday)}</span></div>` : ""}
     ${next ? `<div class="hero-label">${t("next_prayer")}</div>
-      <div class="hero-name">${t(next)}</div>
+      <div class="hero-name">${pname(next)}</div>
       <div class="hero-time num ltr">${esc(p.times[next])}</div>
       <div class="hero-cd">${t("in")} <span id="dCount" class="num"></span></div>
       <div class="progress"><i id="dProg"></i></div>` : `<div class="hero-label">${online ? "—" : t("offline")}</div>`}
@@ -206,7 +209,7 @@ VIEWS.dashboard = () => {
   ${card(t("today_times"), I.prayer, p ? `<div class="list plist">${ALL_TIMES.map(k => {
     const past = k !== next && toMin(p.times[k]) <= now && next !== "fajr";
     return `<div class="prow ${k === next ? "next" : past ? "past" : ""}"><span class="pi">${PRAYER_ICON[k]}</span>
-      <span class="pn">${t(k)}</span><span class="pt num ltr">${esc(p.times[k] || "--:--")}</span></div>`;
+      <span class="pn">${pname(k)}</span><span class="pt num ltr">${esc(p.times[k] || "--:--")}</span></div>`;
   }).join("")}</div>` : `<div class="empty">—</div>`)}`;
 };
 VIEWS.dashboard.bind = () => {
@@ -887,13 +890,37 @@ VIEWS.device = () => {
     <div class="kv"><span>${t("uptime")}</span><span>${duration(d.uptime)}</span></div>
     ${d.fsTotal ? `<div class="kv"><span>${t("storage")}</span><span><span class="ltr">${mb(d.fsTotal - d.fsUsed)}</span> ${t("free_of")} <span class="ltr">${mb(d.fsTotal)}</span></span></div>` : ""}` : ""}`)}
   ${installCard()}
-  ${card(t("firmware_update"), I.download, `<div class="actions" style="margin-top:0;justify-content:space-between;align-items:center">
-    <span class="hint" style="margin:0">${t("soon")}</span><button class="btn" disabled>${t("firmware_update")}</button></div>`)}
+  ${card(t("firmware_update"), I.download, `<p class="hint" style="margin-top:0">${t("update_hint")}</p>
+    <div class="upbar" id="upBar" hidden><i id="upFill"></i></div><p class="hint" id="upText" hidden></p>
+    <div class="actions"><button class="btn gold" id="upPick">${I.download}${t("update_pick")}</button></div>
+    <input type="file" id="upFile" accept=".bin,application/octet-stream" hidden>`)}
   ${card(t("restart"), I.power, `<div class="actions" style="margin-top:0">
     <button class="btn" id="devRestart">${I.power}${t("restart")}</button>
     <button class="btn danger" id="devReset">${t("factory_reset")}</button></div><p class="hint">${t("factory_hint")}</p>`)}`;
 };
 VIEWS.device.bind = () => {
+  // Update-Datei hochladen (mit Fortschritt); die Uhr startet danach neu
+  $("upPick").onclick = () => $("upFile").click();
+  $("upFile").onchange = async e => {
+    const f = e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    if (!await confirmBox(t("update_confirm"), f.name, false)) return;
+    const fd = new FormData(); fd.append("update", f, f.name);
+    const xhr = new XMLHttpRequest();
+    $("upBar").hidden = false; $("upText").hidden = false; $("upPick").disabled = true;
+    xhr.upload.onprogress = ev => {
+      if (!ev.lengthComputable) return;
+      const pct = Math.round(ev.loaded * 100 / ev.total);
+      $("upFill").style.width = pct + "%"; $("upText").textContent = `${t("update_running")} ${pct}%`;
+    };
+    xhr.onload = () => {
+      if (xhr.status === 200) { $("upText").textContent = t("update_ok"); toast(t("update_ok")); setTimeout(() => location.reload(), 15000); }
+      else { $("upText").textContent = t("update_fail"); toast(t("update_fail"), true); $("upPick").disabled = false; }
+    };
+    xhr.onerror = () => { $("upText").textContent = t("update_fail"); $("upPick").disabled = false; };
+    xhr.open("POST", "/api/update");
+    xhr.send(fd);
+  };
   bindInstall();
   $("devRestart").onclick = async () => {
     if (!await confirmBox(t("are_you_sure"), "", false)) return;

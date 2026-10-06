@@ -400,3 +400,10 @@ main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(
 
 /* ausgeschalteter Wecker: Zeit, Name und Tage blass */
 .alarmbox.off .days { opacity: .4; }
+
+/* Besonderer Tag in der Gebetskarte */
+.holiday { display: table; margin: 8px auto 0; padding: 6px 14px; border-radius: 999px; background: var(--accent-soft); color: var(--gold2); font-weight: 600; font-size: 14px; }
+.holiday svg { width: 16px; height: 16px; vertical-align: -3px; margin-inline-end: 6px; }
+/* Fortschritt beim Update */
+.upbar { height: 8px; border-radius: 8px; background: var(--surface2); overflow: hidden; margin: 12px 0 6px; }
+.upbar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .2s; }

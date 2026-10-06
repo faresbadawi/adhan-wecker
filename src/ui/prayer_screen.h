@@ -19,6 +19,8 @@ namespace prayer_screen
 
     // Nächster Wecker (Minuten seit Mitternacht), -1 = keiner aktiv
     void setAlarm(int minutes);
+    // Besonderer Tag (Eid, Arafah …) anstelle des Datums, NO_HOLIDAY = Datum zeigen
+    void setHoliday(model::Holiday h);
 
     // Hinweis zur WLAN-Einrichtung (Zugangspunkt offen)
     void showWifiSetup(bool show);

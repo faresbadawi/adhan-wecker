@@ -104,6 +104,7 @@ static void refreshCalendar(const struct tm &now)
         if (prayers::forDay(d, p) && p.month == now.tm_mon + 1 && p.day == day)
         {
             h.day[day - 1] = p.hijriDay;
+            h.holiday[day - 1] = model::holidayOf(p.hijriMonth, p.hijriDay) != model::NO_HOLIDAY;
             if (!h.firstMonth)
                 h.firstMonth = p.hijriMonth;
             h.lastMonth = p.hijriMonth;
@@ -126,8 +127,12 @@ static void refreshEverySecond(const struct tm &now)
         version = prayers::version();
         if (prayers::forDay(now, s_today))
             shownDay = now.tm_mday;
+        theme::setFriday(now.tm_wday == 5);
         prayer_screen::setPrayers(s_today);
         clock_screen::setHijri(s_today);
+        const model::Holiday holiday = s_today.valid ? model::holidayOf(s_today.hijriMonth, s_today.hijriDay) : model::NO_HOLIDAY;
+        prayer_screen::setHoliday(holiday);
+        clock_screen::setHoliday(holiday);
         refreshCalendar(now);
     }
 

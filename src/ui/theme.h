@@ -72,6 +72,10 @@ namespace theme
 
     // Name eines Gebets (klein: Zeile, groß: Azan und nächstes Gebet)
     const lv_img_dsc_t *prayerName(model::Prayer p, bool large);
+    // Freitag: Dhuhr heißt dann Jumu'a
+    void setFriday(bool friday);
+    // Name eines besonderen Tages
+    const lv_img_dsc_t *holidayText(model::Holiday h);
 
     // An der Anfangsseite der Sprache ausrichten: Arabisch rechts, sonst links (x = Abstand zum Rand)
     void alignStart(lv_obj_t *obj, lv_coord_t x, lv_coord_t y);
