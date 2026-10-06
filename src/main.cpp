@@ -39,7 +39,7 @@ static void applySettings()
     weather_screen::setCity(st.city);
     theme::setPalette(st.colorMain, st.colorAccent, st.colorMuted);
     lcd::setBrightness(st.brightness);
-    audio::setVolume(st.volume);
+    azan::setVolumes(st.azanVolume); // Wecker und Vorhören setzen ihre Lautstärke selbst
 
     // Seiten: Reihenfolge und Sichtbarkeit (Index = settings::PageId = ui::Page)
     bool visible[settings::PAGE_ID_COUNT];
@@ -55,6 +55,29 @@ static void applySettings()
         if (theme::setBackground(st.background) || theme::setBackground("islamic") || theme::setBackground("muster"))
             strlcpy(shownBackground, st.background, sizeof(shownBackground));
     }
+}
+
+// Helligkeit: nachts (ab Isha bis Fajr) dunkler, solange kein Wecker klingelt.
+// Ändert sich der Zielwert, blendet die Anzeige sanft über (je Sekunde ein paar Prozent).
+static void updateBrightness(const struct tm &now, bool snap)
+{
+    static int shown = -1;
+    const settings::Settings st = settings::get();
+    int target = st.brightness;
+    if (st.autoDim && s_today.valid && !alarmclock::ringing())
+    {
+        const int nowMin = now.tm_hour * 60 + now.tm_min;
+        const bool night = nowMin >= s_today.minutes[model::ISHA] || nowMin < s_today.minutes[model::FAJR];
+        if (night)
+            target = min<int>(st.nightBrightness, st.brightness);
+    }
+    if (shown < 0 || snap)
+        shown = target;
+    else if (shown < target)
+        shown = min(shown + 4, target);
+    else if (shown > target)
+        shown = max(shown - 4, target);
+    lcd::setBrightness(shown);
 }
 
 // Bit i = model::DAILY_PRAYERS[i] darf den Azan automatisch starten
@@ -109,10 +132,12 @@ static void refreshEverySecond(const struct tm &now)
     }
 
     static uint32_t settingsVersion = 0;
+    bool settingsChanged = false;
     if (settings::version() != settingsVersion)
     {
         settingsVersion = settings::version();
         applySettings();
+        settingsChanged = true;
     }
 
     // Wecker: auslösen, Fenster zeigen, nächste Weckzeit anzeigen
@@ -123,10 +148,14 @@ static void refreshEverySecond(const struct tm &now)
         if (alarmclock::ringing() != wasRinging)
             alarm_screen::show(alarmclock::ringing(), now.tm_hour, now.tm_min,
                                settings::alarmName(alarmclock::ringingIndex()).c_str());
+        if (alarmclock::ringing() != wasRinging)
+            settingsChanged = true; // Helligkeit sofort umschalten (Wecker: volle Helligkeit)
         const int next = alarmclock::nextAlarmMinutes(now, st);
         prayer_screen::setAlarm(next);
         clock_screen::setAlarm(next);
     }
+
+    updateBrightness(now, settingsChanged);
 
     const model::WifiInfo wifi = wifimgr::info();
     prayer_screen::setWifi(wifi);
@@ -253,10 +282,15 @@ void setup()
     lang::begin();  // Anzeigesprache vor dem Aufbau der Oberfläche
     theme::begin(); // Farbgruppen vor dem Aufbau der Oberfläche
     ui::begin(settings::get().city);
-    alarm_screen::create([] {
-        alarmclock::stop();
-        alarm_screen::show(false, 0, 0);
-    });
+    alarm_screen::create(
+        [] {
+            alarmclock::stop();
+            alarm_screen::show(false, 0, 0);
+        },
+        [](int minutes) {
+            alarmclock::snooze(minutes);
+            alarm_screen::show(false, 0, 0);
+        });
     applySettings(); // Farben, Hintergrund, Helligkeit, Lautstärke
     prayer_screen::setAzanCallback(azan::skip);
     pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);

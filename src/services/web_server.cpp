@@ -88,8 +88,13 @@ namespace web
         JsonObject az = doc["azan"].to<JsonObject>();
         for (int i = 0; i < 5; i++)
             az[AZAN_KEYS[i]] = st.azanEnabled[i];
-        doc["volume"] = st.volume;
+        doc["volume"] = st.volume; // Wecker, 0..21
+        JsonObject av = doc["azanVolume"].to<JsonObject>(); // Azan je Gebet, Prozent
+        for (int i = 0; i < 5; i++)
+            av[AZAN_KEYS[i]] = st.azanVolume[i];
         doc["brightness"] = st.brightness;
+        doc["autoDim"] = st.autoDim;
+        doc["nightBrightness"] = st.nightBrightness;
         doc["background"] = st.background;
         JsonObject col = doc["colors"].to<JsonObject>();
         col["main"] = toHex(st.colorMain);
@@ -156,7 +161,12 @@ namespace web
         for (int i = 0; i < 5; i++)
             st.azanEnabled[i] = az[AZAN_KEYS[i]] | st.azanEnabled[i];
         st.volume = doc["volume"] | st.volume;
+        JsonObject av = doc["azanVolume"];
+        for (int i = 0; i < 5; i++)
+            st.azanVolume[i] = av[AZAN_KEYS[i]] | st.azanVolume[i];
         st.brightness = doc["brightness"] | st.brightness;
+        st.autoDim = doc["autoDim"] | st.autoDim;
+        st.nightBrightness = doc["nightBrightness"] | st.nightBrightness;
         if (doc["background"].is<const char *>())
             strlcpy(st.background, doc["background"], sizeof(st.background));
         JsonObject col = doc["colors"];
@@ -299,6 +309,7 @@ namespace web
         }
         static char path[40];
         snprintf(path, sizeof(path), "/sounds/%s.mp3", name.c_str());
+        audio::setVolume(settings::get().volume); // Lautstärke des Weckers
         audio::play(LittleFS, path);
         s_server.send(200, "application/json", "{}");
     }
@@ -489,7 +500,8 @@ namespace web
     }
 
     // Probehören (Lautstärke, Stimme): nur den Ton abspielen, ohne Anzeige auf der Uhr.
-    // Body optional {"id": "<stimme>"}; ohne id die gewählte Stimme.
+    // Body optional {"id": "<stimme>", "prayer": "fajr"}; ohne id die gewählte Stimme,
+    // ohne prayer Dhuhr. Die Lautstärke ist die eingestellte des Gebets.
     static void azanPreview()
     {
         JsonDocument doc;
@@ -497,12 +509,17 @@ namespace web
         String id = doc["id"] | "";
         if (id.isEmpty())
             id = azan::voice();
+        model::Prayer prayer = model::DHUHR;
+        for (int i = 0; i < 5; i++)
+            if (strcmp(doc["prayer"] | "", AZAN_KEYS[i]) == 0)
+                prayer = model::DAILY_PRAYERS[i];
         static char path[96];
-        if (azan::status().state != azan::State::IDLE || !azan::voiceFile(id, model::DHUHR, path, sizeof(path)))
+        if (azan::status().state != azan::State::IDLE || !azan::voiceFile(id, prayer, path, sizeof(path)))
         {
             s_server.send(409, "application/json", "{\"error\":\"azan\"}");
             return;
         }
+        azan::applyVolume(prayer);
         audio::play(LittleFS, path);
         s_server.send(200, "application/json", "{}");
     }

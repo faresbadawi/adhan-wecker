@@ -7,13 +7,18 @@
 namespace settings
 {
     // Bei jeder Änderung des Struct-Aufbaus erhöhen (ältere Fassungen werden in begin() übernommen).
-    static constexpr uint16_t LAYOUT_VERSION = 5;
+    static constexpr uint16_t LAYOUT_VERSION = 6;
     static constexpr const char *KEY = "settings";
 
     struct Stored
     {
         uint16_t layout;
         Settings s;
+    };
+    struct StoredV5
+    {
+        uint16_t layout;
+        SettingsV5 s;
     };
     struct StoredV4
     {
@@ -60,11 +65,22 @@ namespace settings
         memcpy(s.pageOrder, order, sizeof(order));
     }
 
+    // Standardwerte der mit Fassung 6 hinzugekommenen Felder: Fajr und Isha leiser (die Leute schlafen),
+    // nachts dunkler
+    static void setV6Defaults(Settings &s)
+    {
+        const uint8_t vol[5] = {25, 100, 100, 100, 35};
+        memcpy(s.azanVolume, vol, sizeof(vol));
+        s.autoDim = true;
+        s.nightBrightness = 20;
+    }
+
     // Standardwerte der mit Fassung 5 hinzugekommenen Felder: keine Wecker
     static void setV5Defaults(Settings &s)
     {
         s.alarmCount = 0;
         memset(s.alarms, 0, sizeof(s.alarms));
+        setV6Defaults(s);
     }
 
     // Standardwerte der mit Fassung 4 hinzugekommenen Felder: wie bisher berechnen
@@ -120,7 +136,10 @@ namespace settings
     static bool valid(const Settings &s)
     {
         auto offsetOk = [](int8_t o) { return o >= -30 && o <= 30; };
-        return s.latitude >= -90 && s.latitude <= 90 && s.longitude >= -180 && s.longitude <= 180 &&
+        for (uint8_t v : s.azanVolume)
+            if (v > 100)
+                return false;
+        return s.nightBrightness >= 5 && s.nightBrightness <= 100 && s.latitude >= -90 && s.latitude <= 90 && s.longitude >= -180 && s.longitude <= 180 &&
                s.calculationMethod <= 23 && s.madhhab <= 1 && offsetOk(s.fajrOffset) &&
                offsetOk(s.dhuhrOffset) && offsetOk(s.asrOffset) && offsetOk(s.maghribOffset) &&
                offsetOk(s.ishaOffset) && s.volume <= 21 && s.brightness >= 5 && s.brightness <= 100 &&
@@ -132,6 +151,7 @@ namespace settings
     {
         s_lock = xSemaphoreCreateMutex();
         Stored st;
+        StoredV5 v5;
         StoredV4 v4;
         StoredV3 v3;
         StoredV2 v2;
@@ -139,6 +159,15 @@ namespace settings
         if (storage::loadBlob(KEY, &st, sizeof(st)) && st.layout == LAYOUT_VERSION && valid(st.s))
         {
             s_current = st.s;
+        }
+        else if (storage::loadBlob(KEY, &v5, sizeof(v5)) && v5.layout == 5)
+        {
+            // Fassung 5 übernehmen, Azan-Lautstärke je Gebet und Nachtdimmung mit Standardwerten
+            s_current = defaults();
+            static_cast<SettingsV5 &>(s_current) = v5.s;
+            setV6Defaults(s_current);
+            if (!valid(s_current))
+                s_current = defaults();
         }
         else if (storage::loadBlob(KEY, &v4, sizeof(v4)) && v4.layout == 4)
         {

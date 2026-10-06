@@ -85,10 +85,20 @@ namespace settings
     };
     constexpr int MAX_ALARMS = 4;
 
-    struct Settings : SettingsV4
+    struct SettingsV5 : SettingsV4
     {
         uint8_t alarmCount; // belegte Einträge in alarms
         Alarm alarms[MAX_ALARMS];
+    };
+
+    struct Settings : SettingsV5
+    {
+        // Lautstärke des Azans je Gebet (Fajr, Dhuhr, Asr, Maghrib, Isha) in Prozent;
+        // volume (0..21) gilt für den Wecker
+        uint8_t azanVolume[5];
+        // Nachts (ab Isha bis Fajr) dunkler: nightBrightness in Prozent (5..100)
+        bool autoDim;
+        uint8_t nightBrightness;
     };
 
     // Lädt aus dem NVS, sonst Standardwerte aus config.h.

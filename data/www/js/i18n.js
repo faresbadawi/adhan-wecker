@@ -5,6 +5,11 @@ export const LANGS = { ar: "العربية", de: "Deutsch", en: "English" };
 
 const T = {
   ar: {
+    sig_strong: "إشارة قوية", sig_medium: "إشارة متوسطة", sig_weak: "إشارة ضعيفة",
+    auto_dim: "تعتيم تلقائي ليلًا", night_brightness: "سطوع الشاشة ليلًا",
+    auto_dim_hint: "من العشاء حتى الفجر تصبح الشاشة أخفت تلقائيًا، وفي النهار تعود إلى السطوع المضبوط. عند رنين المنبه يكون السطوع كاملًا.",
+    azan_volume_hint: "مستوى الصوت لكل صلاة على حدة – مثلًا الفجر والعشاء أخفض حتى لا يُزعج النائمين. زر التشغيل يُسمعك الأذان بهذا المستوى على الساعة.",
+    alarm_volume_hint: "مستوى صوت المنبه. عند تحريك الشريط يُشغَّل النغمة المختارة لتسمعها.",
     app: "ساعة الأذان الذكية",
     nav_dashboard: "الرئيسية", nav_prayer: "أوقات الصلاة", nav_location: "الموقع", nav_display: "المظهر",
     nav_audio: "الصوت", nav_lang: "اللغة", nav_wifi: "الواي فاي", nav_device: "الجهاز",
@@ -37,7 +42,7 @@ const T = {
     preset_rosegold: "ذهبي وردي", preset_gold: "ذهبي", preset_silver: "فضي", preset_emerald: "زمردي", preset_turquoise: "فيروزي", preset_amber: "عنبري",
     // Audio
     volume: "مستوى الصوت", azan: "الأذان", azan_for: "أذان", alarms: "المنبه", alarm_add: "إضافة منبه",
-    alarm_none: "لا يوجد منبه بعد", alarm_hint: "يرن المنبه في الأيام المختارة حتى تلمس الشاشة أو تضغط زر BOOT (بحد أقصى ١٠ دقائق).",
+    alarm_none: "لا يوجد منبه بعد", alarm_hint: "يرن المنبه في الأيام المختارة حتى تلمس الشاشة أو تضغط زر BOOT (بحد أقصى ١٠ دقائق). بعد الإيقاف لا يرن إلا في موعده التالي. بأزرار صغيرة على الشاشة يمكنك الغفوة ٥ أو ١٠ أو ١٥ أو ٣٠ دقيقة.",
     alarm_tone: "نغمة المنبه", tone_calm: "هادئة · أجراس متصاعدة", tone_bells: "أجراس · لحن هادئ", tone_classic: "تقليدية · صفير",
     tone_playing: "♪ تشغيل النغمة على الجهاز", day_min: "اختر يومًا واحدًا على الأقل",
     days: ["ح", "ن", "ث", "ر", "خ", "ج", "س"],
@@ -76,6 +81,11 @@ const T = {
   },
 
   de: {
+    sig_strong: "Signal stark", sig_medium: "Signal mittel", sig_weak: "Signal schwach",
+    auto_dim: "Nachts automatisch dunkler", night_brightness: "Helligkeit nachts",
+    auto_dim_hint: "Von Isha bis Fajr wird das Display von allein dunkler, tagsüber gilt die eingestellte Helligkeit. Klingelt ein Wecker, ist es voll hell.",
+    azan_volume_hint: "Lautstärke je Gebet – zum Beispiel Fajr und Isha leiser, damit niemand aus dem Schlaf gerissen wird. Mit ▶ hörst du den Azan in dieser Lautstärke auf der Uhr.",
+    alarm_volume_hint: "Lautstärke des Weckers. Nach dem Loslassen spielt die Uhr den gewählten Weckton zur Probe.",
     app: "Smart Azan Wecker",
     nav_dashboard: "Dashboard", nav_prayer: "Gebetszeiten", nav_location: "Standort", nav_display: "Darstellung",
     nav_audio: "Audio", nav_lang: "Sprache", nav_wifi: "WLAN", nav_device: "Gerät",
@@ -104,7 +114,7 @@ const T = {
     hue: "Farbton", lightness: "Hell / Dunkel", done: "Fertig", hour_pick: "Stunde wählen", minute_pick: "Minute wählen",
     preset_rosegold: "Roségold", preset_gold: "Gold", preset_silver: "Silber", preset_emerald: "Smaragd", preset_turquoise: "Türkis", preset_amber: "Bernstein",
     volume: "Lautstärke", azan: "Azan", azan_for: "Azan", alarms: "Wecker", alarm_add: "Wecker hinzufügen",
-    alarm_none: "Noch kein Wecker", alarm_hint: "Der Wecker klingelt an den gewählten Tagen, bis du den Bildschirm berührst oder BOOT drückst (höchstens 10 Minuten).",
+    alarm_none: "Noch kein Wecker", alarm_hint: "Der Wecker klingelt an den gewählten Tagen, bis du den Bildschirm berührst oder BOOT drückst (höchstens 10 Minuten). Nach dem Stoppen klingelt er erst wieder zum nächsten Termin. Mit den kleinen Tasten auf dem Display kannst du 5, 10, 15 oder 30 Minuten weiterschlafen.",
     alarm_tone: "Weckton", tone_calm: "Ruhig · aufsteigende Glocken", tone_bells: "Glocken · sanfte Melodie", tone_classic: "Klassisch · Piepen",
     tone_playing: "♪ Ton wird auf der Uhr abgespielt", day_min: "Mindestens einen Tag wählen",
     days: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
@@ -145,6 +155,11 @@ const T = {
   },
 
   en: {
+    sig_strong: "Strong signal", sig_medium: "Medium signal", sig_weak: "Weak signal",
+    auto_dim: "Dim automatically at night", night_brightness: "Night brightness",
+    auto_dim_hint: "From Isha until Fajr the display dims on its own; during the day it uses the brightness set above. While an alarm rings it is fully bright.",
+    azan_volume_hint: "Volume per prayer – for example Fajr and Isha quieter so nobody is woken up. ▶ plays the azan on the clock at that volume.",
+    alarm_volume_hint: "Alarm volume. After you let go, the clock plays the selected alarm tone as a preview.",
     app: "Smart Azan Clock",
     nav_dashboard: "Dashboard", nav_prayer: "Prayer times", nav_location: "Location", nav_display: "Appearance",
     nav_audio: "Audio", nav_lang: "Language", nav_wifi: "Wi-Fi", nav_device: "Device",
@@ -173,7 +188,7 @@ const T = {
     hue: "Hue", lightness: "Light / dark", done: "Done", hour_pick: "Choose the hour", minute_pick: "Choose the minute",
     preset_rosegold: "Rose gold", preset_gold: "Gold", preset_silver: "Silver", preset_emerald: "Emerald", preset_turquoise: "Turquoise", preset_amber: "Amber",
     volume: "Volume", azan: "Azan", azan_for: "Azan", alarms: "Alarms", alarm_add: "Add alarm",
-    alarm_none: "No alarm yet", alarm_hint: "The alarm rings on the selected days until you touch the screen or press BOOT (10 minutes at most).",
+    alarm_none: "No alarm yet", alarm_hint: "The alarm rings on the selected days until you touch the screen or press BOOT (10 minutes at most). After stopping it only rings again at its next time. The small buttons on the display let you snooze for 5, 10, 15 or 30 minutes.",
     alarm_tone: "Alarm tone", tone_calm: "Calm · rising bells", tone_bells: "Bells · gentle melody", tone_classic: "Classic · beeping",
     tone_playing: "♪ Playing on the clock", day_min: "Select at least one day",
     days: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],

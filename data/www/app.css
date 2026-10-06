@@ -1,8 +1,8 @@
 /* Smart Azan Clock – Web-App. Modernes, ruhiges App-Design: dunkle Flächen, ein Akzent in Gold,
    Smaragdgrün nur in der großen Gebetskarte. Für das Handy gebaut, am PC mit Seitenleiste. */
 :root {
-  --bg: #0a0a0a; --surface: #1a1b1b; --surface2: #272a29; --sep: rgba(255, 255, 255, .1);
-  --text: #ffffff; --muted: #b9bdba; --dim: #8b908d; --gold: #e9a27c; --gold2: #f4c7ae;
+  --bg: #0a0a0a; --surface: #1c1e1d; --surface2: #2b2f2d; --sep: rgba(255, 255, 255, .14);
+  --text: #ffffff; --muted: #d2d6d3; --dim: #aeb3b0; --gold: #e9a27c; --gold2: #f4c7ae;
   --accent-soft: rgba(233, 162, 124, .18);
   --ok: #5fc08b; --err: #e2735f; --radius: 20px; --nav: 248px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Geeza Pro", sans-serif;
@@ -13,7 +13,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
 body {
-  background: var(--bg); color: var(--text); font: 16px/1.45 var(--font);
+  background: var(--bg); color: var(--text); font: 17px/1.45 var(--font);
   -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
 }
 button, input, select { font: inherit; color: inherit; }
@@ -31,7 +31,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .brand { display: flex; align-items: center; gap: 12px; padding: 4px 10px 22px; }
 .brand img { width: 40px; height: 40px; border-radius: 11px; }
 .brand b { display: block; font-size: 15px; font-weight: 600; }
-.brand small { color: var(--muted); font-size: 12px; }
+.brand small { color: var(--muted); font-size: 13px; }
 .navbtn {
   display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 0; border-radius: 14px;
   background: none; color: var(--muted); cursor: pointer; text-align: start; width: 100%;
@@ -58,22 +58,23 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--err); flex: none; }
 .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px rgba(95, 192, 139, .15); }
-.bars { width: 18px; height: 14px; }
-.bars rect { fill: var(--dim); stroke: none; }
-.bars rect.on { fill: var(--text); }
+.sig { font-size: 13px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.sig.medium { background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold2); }
+.sig.weak { background: color-mix(in srgb, var(--err) 18%, transparent); color: var(--err); }
+.status .sig { display: none; }
 .pill { display: inline-flex; align-items: center; gap: 8px; }
 
 /* ---------- Abschnitte: Überschrift über einer abgerundeten Gruppe (wie Einstellungen am Handy) */
 .sec { margin-bottom: 24px; }
 .sec > h2 {
-  margin: 0 6px 8px; font-size: 13px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .6px;
+  margin: 0 6px 10px; font-size: 14px; font-weight: 700; color: var(--gold2); text-transform: uppercase; letter-spacing: .6px;
 }
 .sec > h2 svg { display: none; }
-.group { background: var(--surface); border: 1px solid rgba(255, 255, 255, .06); border-radius: var(--radius); padding: 6px 16px; }
+.group { background: var(--surface); border: 1px solid rgba(255, 255, 255, .11); border-radius: var(--radius); padding: 6px 16px; }
 .group > :first-child:not(.list):not(.kv):not(.item) { margin-top: 12px; }
 .group > :last-child:not(.list):not(.kv):not(.item) { margin-bottom: 12px; }
 .group > .range:only-child { margin: 14px 0; }
-.hint { color: var(--dim); font-size: 13px; margin: 10px 0 4px; line-height: 1.5; }
+.hint { color: var(--muted); font-size: 14px; margin: 10px 0 4px; line-height: 1.5; }
 .empty, .loading { color: var(--dim); padding: 16px 0; text-align: center; }
 .spinner { display: inline-block; width: 14px; height: 14px; margin-inline-end: 8px; border: 2px solid var(--sep); border-top-color: var(--gold); border-radius: 50%; animation: spin .9s linear infinite; vertical-align: -2px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -108,7 +109,7 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 }
 .chip svg { color: var(--gold); width: 28px; height: 28px; stroke-width: 1.5; }
 .chip b { font-size: 20px; font-weight: 600; display: block; line-height: 1.2; }
-.chip small { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip small { display: block; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip > div { min-width: 0; }
 
 .plist { padding: 6px 8px; }
@@ -118,7 +119,7 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 .prow .pi svg { width: 19px; height: 19px; }
 .prow .pn { flex: 1; font-size: 17px; }
 .prow .pt { font-size: 18px; font-weight: 600; }
-.prow.past { opacity: .42; }
+.prow.past { opacity: .6; }
 .prow.next { background: color-mix(in srgb, var(--gold) 13%, transparent); }
 .prow.next, .prow.next + .prow { border-top-color: transparent; }
 .prow.next .pn, .prow.next .pt { color: var(--gold2); }
@@ -129,7 +130,7 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 .item { display: flex; align-items: center; gap: 12px; padding: 12px 0; min-height: 56px; }
 .item + .item, .kv + .kv { border-top: 1px solid var(--sep); }
 .item .name { flex: 1; min-width: 0; }
-.item.off .name, .item.off .pico { opacity: .45; }
+.item.off .name, .item.off .pico { opacity: .6; }
 .item .pico { color: var(--gold); display: inline-flex; }
 .idx { width: 22px; color: var(--dim); text-align: center; font-size: 13px; }
 .kv { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 15px 0; }
@@ -141,7 +142,7 @@ main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
 .mark { width: 22px; color: var(--gold); display: inline-flex; }
 
 /* ---------- Formularelemente */
-label.f { display: block; color: var(--muted); font-size: 13px; margin: 14px 0 6px; }
+label.f { display: block; color: var(--muted); font-size: 14px; margin: 14px 0 6px; }
 input[type=text], input[type=password], input[type=number], input:not([type]), select {
   width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid transparent; background: var(--surface2); outline: none;
 }
@@ -170,7 +171,7 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 .result .t { flex: 1; min-width: 0; }
 .result b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .result small { color: var(--muted); }
-.badge { font-size: 12px; color: var(--muted); padding: 3px 8px; border-radius: 999px; background: var(--surface); white-space: nowrap; }
+.badge { font-size: 13px; color: var(--muted); padding: 3px 8px; border-radius: 999px; background: var(--surface); white-space: nowrap; }
 .chosen { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; background: color-mix(in srgb, var(--gold) 10%, transparent); margin: 12px 0; }
 .chosen.none { background: var(--surface2); color: var(--muted); }
 .chosen svg { color: var(--gold); }
@@ -199,7 +200,7 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 .alarm { flex-wrap: wrap; }
 .alarm input[type=time] { width: auto; padding: 6px 10px; border-radius: 12px; border: 0; background: var(--surface2); font-size: 24px; font-weight: 600; color-scheme: dark; }
 .days { display: flex; gap: 6px; width: 100%; }
-.days button { flex: 1; padding: 7px 0; border-radius: 999px; border: 0; background: var(--surface2); color: var(--dim); cursor: pointer; font-size: 13px; }
+.days button { flex: 1; padding: 9px 0; border-radius: 999px; border: 0; background: var(--surface2); color: var(--muted); cursor: pointer; font-size: 14px; }
 .days button.on { color: #17140e; background: var(--gold); font-weight: 600; }
 
 /* Darstellung */
@@ -362,3 +363,10 @@ main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(
 .slider::-moz-range-thumb { width: 26px; height: 26px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, .5); }
 .slider.hue { --track: linear-gradient(90deg, #f00, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00); }
 #ledBri { --track: linear-gradient(90deg, #222, #fff); }
+
+/* Azan je Gebet: Name mit Schalter, darunter Lautstärke */
+.pvol + .pvol { border-top: 1px solid var(--sep); }
+.pvol .item { padding-bottom: 2px; }
+.pvol .vol { padding: 0 0 12px; }
+.pvol.off .vol { opacity: .45; }
+.vol .range output { min-width: 48px; }

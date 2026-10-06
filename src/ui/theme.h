@@ -10,11 +10,11 @@ extern "C"
     LV_FONT_DECLARE(font_clock_130);
     LV_FONT_DECLARE(font_clock_64);
     LV_FONT_DECLARE(font_temp_64);
-    LV_FONT_DECLARE(font_josefin_18);
+    LV_FONT_DECLARE(font_josefin_20);
     LV_FONT_DECLARE(font_count_52);
     LV_FONT_DECLARE(font_temp_30);
-    LV_FONT_DECLARE(font_josefin_22);
-    LV_FONT_DECLARE(font_josefin_15);
+    LV_FONT_DECLARE(font_josefin_25);
+    LV_FONT_DECLARE(font_josefin_17);
 }
 
 namespace theme
@@ -55,7 +55,7 @@ namespace theme
     // Unsichtbarer Container ohne Stil, Scrollen und Klicks
     lv_obj_t *box(lv_obj_t *parent);
 
-    // Dünne goldene Linie mit kleiner Raute in der Mitte
+    // Goldene Linie (2 px) mit Raute in der Mitte
     void divider(lv_obj_t *parent, lv_coord_t cx, lv_coord_t y, lv_coord_t halfWidth);
 
     // Wettersymbol (Bild, gold) passend zu Himmel und Tageszeit; klein 34 px, groß 112 px

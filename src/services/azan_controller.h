@@ -28,6 +28,11 @@ namespace azan
     // (Fajr, Dhuhr, Asr, Maghrib, Isha) darf den Azan automatisch starten.
     void update(const struct tm &now, const model::PrayerDay &day, uint8_t enabledMask);
 
+    // Lautstärke je Gebet in Prozent (Fajr, Dhuhr, Asr, Maghrib, Isha), wirkt beim nächsten Start
+    void setVolumes(const uint8_t percent[5]);
+    // Lautstärke des Gebets am Ausgang einstellen (vor dem Abspielen oder zum Probehören)
+    void applyVolume(model::Prayer p);
+
     // Azan sofort starten (Test/Demo).
     void start(model::Prayer p, uint16_t minutes);
 

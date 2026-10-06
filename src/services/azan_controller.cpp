@@ -12,6 +12,7 @@ namespace azan
     static uint32_t s_startedMs = 0; // Beginn (millis)
     static uint32_t s_mutedMs = 0;
     static int32_t s_lastKey = -1;   // zuletzt ausgelöstes Gebet (Datum + Index), verhindert Doppelstart
+    static uint8_t s_volume[5] = {100, 100, 100, 100, 100}; // Prozent je Gebet
 
     static const char *fileName(model::Prayer p)
     {
@@ -67,6 +68,17 @@ namespace azan
         return LittleFS.exists(path);
     }
 
+    void setVolumes(const uint8_t percent[5]) { memcpy(s_volume, percent, sizeof(s_volume)); }
+
+    void applyVolume(model::Prayer p)
+    {
+        uint8_t percent = 100;
+        for (int i = 0; i < 5; i++)
+            if (model::DAILY_PRAYERS[i] == p)
+                percent = s_volume[i];
+        audio::setVolume((percent * 21 + 50) / 100); // Decoder 0..21
+    }
+
     void start(model::Prayer p, uint16_t minutes)
     {
         s_status = {};
@@ -85,7 +97,10 @@ namespace azan
             fs = &LittleFS;
         s_status.hasAudio = fs != nullptr;
         if (fs)
+        {
+            applyVolume(p);
             audio::play(*fs, path);
+        }
         Serial.printf("Azan %s: %s\n", model::prayerName(p), fs ? path : "keine Audiodatei gefunden");
     }
 

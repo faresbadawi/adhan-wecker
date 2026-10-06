@@ -24,7 +24,7 @@ namespace clock_screen
         lv_obj_set_style_pad_column(s_alarmRow, 4, 0);
         lv_obj_align(s_alarmRow, LV_ALIGN_TOP_RIGHT, -MARGIN, 10);
         image(s_alarmRow, &img_alarm, Role::ACCENT);
-        s_alarmTime = label(s_alarmRow, &font_josefin_15, Role::MUTED, "");
+        s_alarmTime = label(s_alarmRow, &font_josefin_17, Role::MUTED, "");
         lv_obj_add_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
 
         // Uhrzeit und Sekunden nebeneinander, unten bündig, gemeinsam zentriert
@@ -53,12 +53,12 @@ namespace clock_screen
         lv_obj_set_flex_align(s_hijri, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(s_hijri, 10, 0);
         lv_obj_align(s_hijri, LV_ALIGN_TOP_MID, 0, 222);
-        s_hDay = label(s_hijri, &font_josefin_22, Role::ACCENT, "");
+        s_hDay = label(s_hijri, &font_josefin_25, Role::ACCENT, "");
         s_hMonth = image(s_hijri, nullptr, Role::ACCENT);
-        s_hYear = label(s_hijri, &font_josefin_22, Role::ACCENT, "");
+        s_hYear = label(s_hijri, &font_josefin_25, Role::ACCENT, "");
         lv_obj_add_flag(s_hijri, LV_OBJ_FLAG_HIDDEN);
 
-        s_date = label(parent, &font_josefin_18, Role::MUTED, "");
+        s_date = label(parent, &font_josefin_20, Role::MUTED, "");
         lv_obj_align(s_date, LV_ALIGN_TOP_MID, 0, 276);
     }
 

@@ -329,14 +329,13 @@ MDI = "materialdesignicons-webfont.ttf"
 
 # Name -> Codepunkt, aus @mdi/font 7.4.47 (css/materialdesignicons.min.css)
 ICONS = {
-    "WIFI_1": 0xF091F, "WIFI_2": 0xF0922, "WIFI_3": 0xF0925, "WIFI_4": 0xF0928, "WIFI_OFF": 0xF16C5,
+    "WIFI": 0xF05A9, "WIFI_OFF": 0xF05AA, "ALARM_SNOOZE": 0xF068E,
     "SUNNY": 0xF0599, "NIGHT": 0xF0594, "PARTLY_CLOUDY": 0xF0595, "NIGHT_PARTLY_CLOUDY": 0xF0F31,
     "CLOUDY": 0xF0590, "FOG": 0xF0591, "RAINY": 0xF0597, "POURING": 0xF0596, "SNOWY": 0xF0598,
     "LIGHTNING": 0xF0593, "WINDY": 0xF059D,
     "THERMOMETER": 0xF050F, "HUMIDITY": 0xF058E, "ARROW_UP": 0xF19B2, "ARROW_DOWN": 0xF19B3,
     "MOSQUE": 0xF1827, "VOLUME_OFF": 0xF0581, "SKIP_NEXT": 0xF04AD, "ALARM": 0xF0020,
 }
-WIFI = ["WIFI_1", "WIFI_2", "WIFI_3", "WIFI_4", "WIFI_OFF"]
 WEATHER = ["SUNNY", "NIGHT", "PARTLY_CLOUDY", "NIGHT_PARTLY_CLOUDY", "CLOUDY", "FOG", "RAINY", "POURING",
            "SNOWY", "LIGHTNING", "WINDY"]
 
@@ -371,29 +370,32 @@ LANGS = ["ar", "de", "en"]  # Reihenfolge = ui::Lang
 # Alle Texte werden weiß als Alphamaske erzeugt und auf dem Gerät in ihrer Farbgruppe gezeichnet.
 TEXTS = {
     "title": (30, True, {"ar": "مواقيت الصلاة", "de": "Gebetszeiten", "en": "Prayer Times"}),
-    "next": (20, False, {"ar": "الصلاة القادمة", "de": "Nächstes Gebet", "en": "Next prayer"}),
-    "loading": (22, False, {"ar": "جارٍ تحميل المواقيت …", "de": "Gebetszeiten werden geladen …",
+    "next": (22, False, {"ar": "الصلاة القادمة", "de": "Nächstes Gebet", "en": "Next prayer"}),
+    "loading": (24, False, {"ar": "جارٍ تحميل المواقيت …", "de": "Gebetszeiten werden geladen …",
                             "en": "Loading prayer times …"}),
-    "azan_now": (26, False, {"ar": "حان الآن وقت صلاة", "de": "Es ist Zeit für das Gebet", "en": "It is time for"}),
-    "azan_stop": (20, False, {"ar": "المس الشاشة لإيقاف الأذان", "de": "Bildschirm berühren, um den Azan zu beenden",
+    "azan_now": (28, False, {"ar": "حان الآن وقت صلاة", "de": "Es ist Zeit für das Gebet", "en": "It is time for"}),
+    "azan_stop": (22, False, {"ar": "المس الشاشة لإيقاف الأذان", "de": "Bildschirm berühren, um den Azan zu beenden",
                               "en": "Touch the screen to stop the azan"}),
     "weather": (30, True, {"ar": "الطقس", "de": "Wetter", "en": "Weather"}),
-    "feels": (20, False, {"ar": "الإحساس", "de": "Gefühlt", "en": "Feels like"}),
-    "humidity": (20, False, {"ar": "الرطوبة", "de": "Feuchte", "en": "Humidity"}),
-    "wind": (20, False, {"ar": "الرياح", "de": "Wind", "en": "Wind"}),
-    "today": (20, False, {"ar": "اليوم", "de": "Heute", "en": "Today"}),
-    "tomorrow": (20, False, {"ar": "غدًا", "de": "Morgen", "en": "Tomorrow"}),
-    "after": (20, False, {"ar": "بعد غد", "de": "Übermorgen", "en": "Day after"}),
-    "no_weather": (22, False, {"ar": "جارٍ تحميل الطقس …", "de": "Wetter wird geladen …", "en": "Loading weather …"}),
+    "feels": (22, False, {"ar": "الإحساس", "de": "Gefühlt", "en": "Feels like"}),
+    "humidity": (22, False, {"ar": "الرطوبة", "de": "Feuchte", "en": "Humidity"}),
+    "wind": (22, False, {"ar": "الرياح", "de": "Wind", "en": "Wind"}),
+    "today": (22, False, {"ar": "اليوم", "de": "Heute", "en": "Today"}),
+    "tomorrow": (22, False, {"ar": "غدًا", "de": "Morgen", "en": "Tomorrow"}),
+    "after": (22, False, {"ar": "بعد غد", "de": "Übermorgen", "en": "Day after"}),
+    "no_weather": (24, False, {"ar": "جارٍ تحميل الطقس …", "de": "Wetter wird geladen …", "en": "Loading weather …"}),
     "alarm": (30, True, {"ar": "المنبه", "de": "Wecker", "en": "Alarm"}),
-    "alarm_stop": (20, False, {"ar": "المس الشاشة لإيقاف المنبه", "de": "Bildschirm berühren, um den Wecker zu beenden",
+    "alarm_stop": (22, False, {"ar": "المس الشاشة لإيقاف المنبه", "de": "Bildschirm berühren, um den Wecker zu beenden",
                                "en": "Touch the screen to stop the alarm"}),
     "settings": (30, True, {"ar": "الإعدادات", "de": "Einstellungen", "en": "Settings"}),
-    "network": (20, False, {"ar": "الشبكة", "de": "Netzwerk", "en": "Network"}),
-    "web": (20, False, {"ar": "صفحة الإعدادات", "de": "Einstellungsseite", "en": "Settings page"}),
-    "scan": (18, False, {"ar": "امسح الرمز بهاتفك لفتح الإعدادات", "de": "Mit dem Handy scannen",
+    "network": (22, False, {"ar": "الشبكة", "de": "Netzwerk", "en": "Network"}),
+    "web": (22, False, {"ar": "صفحة الإعدادات", "de": "Einstellungsseite", "en": "Settings page"}),
+    "scan": (20, False, {"ar": "امسح الرمز بهاتفك لفتح الإعدادات", "de": "Mit dem Handy scannen",
                          "en": "Scan with your phone"}),
-    "offline": (22, False, {"ar": "غير متصل بالشبكة", "de": "Nicht verbunden", "en": "Not connected"}),
+    "offline": (24, False, {"ar": "غير متصل بالشبكة", "de": "Nicht verbunden", "en": "Not connected"}),
+    "sig_strong": (22, False, {"ar": "إشارة قوية", "de": "Signal stark", "en": "Strong signal"}),
+    "sig_medium": (22, False, {"ar": "إشارة متوسطة", "de": "Signal mittel", "en": "Medium signal"}),
+    "sig_weak": (22, False, {"ar": "إشارة ضعيفة", "de": "Signal schwach", "en": "Weak signal"}),
     "wifi_title": (28, True, {"ar": "إعداد الواي فاي", "de": "WLAN einrichten", "en": "Wi-Fi setup"}),
     "wifi_1": (21, False, {"ar": "١. اتصل بالهاتف بشبكة Adhan-Wecker", "de": "1. Handy mit dem WLAN Adhan-Wecker verbinden",
                            "en": "1. Connect your phone to the Wi-Fi Adhan-Wecker"}),
@@ -426,13 +428,13 @@ PRAYER_NAMES = {  # model::Prayer
 
 # Wortlisten mit gemeinsamer Grundlinie: Schlüssel -> (Größe, fett, {Sprache: Liste})
 LISTS = {
-    "prayer": (20, False, PRAYER_NAMES),
+    "prayer": (22, False, PRAYER_NAMES),
     "prayer_lg": (34, False, PRAYER_NAMES),
     "wday": (32, False, {  # tm_wday 0..6
         "ar": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
         "de": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
         "en": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]}),
-    "wshort": (17, False, {
+    "wshort": (21, False, {
         "ar": ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"],
         "de": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
         "en": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]}),
@@ -444,7 +446,7 @@ LISTS = {
         "en": ["January", "February", "March", "April", "May", "June",
                "July", "August", "September", "October", "November", "December"]}),
     "hmonth": (26, False, HIJRI),
-    "hmonth_sm": ((20, 18), False, HIJRI_SHORT),  # (Größe Arabisch, Größe Latein vor Skalierung)
+    "hmonth_sm": ((21, 19), False, HIJRI_SHORT),  # (Größe Arabisch, Größe Latein vor Skalierung)
     "sky": (26, False, {  # model::Sky
         "ar": ["صافٍ", "غائم جزئيًا", "غائم", "ضباب", "رذاذ", "مطر", "ثلج", "عاصفة رعدية"],
         "de": ["Klar", "Teils bewölkt", "Bewölkt", "Nebel", "Nieselregen", "Regen", "Schnee", "Gewitter"],
@@ -463,7 +465,7 @@ def text_font(lang, size, bold):
     if bold:
         return ImageFont.truetype(str(FONTS / "Marcellus-Regular.ttf"), size, layout_engine=ImageFont.Layout.RAQM), size
     f = ImageFont.truetype(str(FONTS / "JosefinSans-Variable.ttf"), size, layout_engine=ImageFont.Layout.RAQM)
-    f.set_variation_by_axes([400])
+    f.set_variation_by_axes([500])
     return f, size
 
 
@@ -539,31 +541,36 @@ def main():
             write_bg(f.stem, load_background(f))
 
     # Text
-    write_font("font_clock_64", "JosefinSans-Variable.ttf", 64, DIGITS, weight=300, tabular=True)
-    write_font("font_clock_130", "JosefinSans-Variable.ttf", 130, DIGITS, weight=200, tabular=True)
-    write_font("font_count_52", "JosefinSans-Variable.ttf", 52, DIGITS, weight=300, tabular=True)
-    write_font("font_temp_64", "JosefinSans-Variable.ttf", 64, TEMP, weight=300, tabular=True)
-    write_font("font_temp_30", "JosefinSans-Variable.ttf", 30, TEMP, weight=300, tabular=True)
+    write_font("font_clock_64", "JosefinSans-Variable.ttf", 64, DIGITS, weight=400, tabular=True)
+    write_font("font_clock_130", "JosefinSans-Variable.ttf", 130, DIGITS, weight=300, tabular=True)
+    write_font("font_count_52", "JosefinSans-Variable.ttf", 52, DIGITS, weight=400, tabular=True)
+    write_font("font_temp_64", "JosefinSans-Variable.ttf", 64, TEMP, weight=400, tabular=True)
+    write_font("font_temp_30", "JosefinSans-Variable.ttf", 30, TEMP, weight=400, tabular=True)
     write_font("font_marcellus_26", "Marcellus-Regular.ttf", 26, ASCII + GERMAN)
-    write_font("font_josefin_22", "JosefinSans-Variable.ttf", 22, ASCII + GERMAN, weight=400, tabular=True)
+    write_font("font_josefin_25", "JosefinSans-Variable.ttf", 25, ASCII + GERMAN, weight=500, tabular=True)
     # Arabische Ersatzschriften: frei eingegebener Text (z. B. Stadtname) erscheint damit auf Arabisch
-    write_font("font_ar_17", "Amiri-Regular.ttf", 17, ARABIC_CHARS)
-    write_font("font_ar_20", "Amiri-Regular.ttf", 20, ARABIC_CHARS)
-    write_font("font_josefin_18", "JosefinSans-Variable.ttf", 18, ASCII + GERMAN, weight=400, fallback="font_ar_20")
-    write_font("font_josefin_15", "JosefinSans-Variable.ttf", 15, ASCII + GERMAN, weight=400, fallback="font_ar_17")
+    write_font("font_ar_19", "Amiri-Regular.ttf", 19, ARABIC_CHARS)
+    write_font("font_ar_22", "Amiri-Regular.ttf", 22, ARABIC_CHARS)
+    write_font("font_josefin_20", "JosefinSans-Variable.ttf", 20, ASCII + GERMAN, weight=500, fallback="font_ar_22")
+    write_font("font_josefin_17", "JosefinSans-Variable.ttf", 17, ASCII + GERMAN, weight=500, fallback="font_ar_19")
 
 
     masks = {}
     write_texts(masks)
-    for i, icon in enumerate(["WIFI_OFF", "WIFI_1", "WIFI_2", "WIFI_3", "WIFI_4"]):
-        write_icon_image(f"img_wifi_{i}", ICONS[icon], 22, IMG_WHITE)
+    # WLAN: ein klares Symbol (verbunden) und durchgestrichen (nicht verbunden); Stärke zeigt der Text
+    for i, icon in enumerate(["WIFI_OFF", "WIFI"]):
+        write_icon_image(f"img_wifi_{i}", ICONS[icon], 28, IMG_WHITE)
     (OUT / "img_wifi_list.c").write_text(
         '// Automatisch erzeugt von tools/gen_assets.py\n#include "lvgl.h"\n'
-        + "\n".join(f"extern const lv_img_dsc_t img_wifi_{i};" for i in range(5))
-        + "\nconst lv_img_dsc_t *const img_wifi_list[5] = {"
-        + ", ".join(f"&img_wifi_{i}" for i in range(5)) + "};\n")
-    write_icon_image("img_alarm", ICONS["ALARM"], 20, IMG_WHITE)
-    write_icon_image("img_alarm_lg", ICONS["ALARM"], 64, IMG_WHITE)
+        + "\n".join(f"extern const lv_img_dsc_t img_wifi_{i};" for i in range(2))
+        + "\nconst lv_img_dsc_t *const img_wifi_list[2] = {"
+        + ", ".join(f"&img_wifi_{i}" for i in range(2)) + "};\n")
+    write_icon_image("img_alarm", ICONS["ALARM"], 24, IMG_WHITE)
+    write_icon_image("img_alarm_lg", ICONS["ALARM"], 56, IMG_WHITE)
+    write_icon_image("img_snooze", ICONS["ALARM_SNOOZE"], 22, IMG_WHITE)
+    # Wetterdetails: gefühlte Temperatur, Luftfeuchte, Wind
+    for i, icon in enumerate(["THERMOMETER", "HUMIDITY", "WINDY"]):
+        write_icon_image(f"img_detail_{i}", ICONS[icon], 28, IMG_WHITE)
     for size, suffix in ((34, "sm"), (112, "lg")):
         for i, icon in enumerate(SKY_ICONS):
             write_icon_image(f"img_wx_{suffix}_{i}", ICONS[icon], size, GOLD)

@@ -3,7 +3,7 @@
 
 extern "C"
 {
-    extern const lv_img_dsc_t *const img_wifi_list[5];
+    extern const lv_img_dsc_t *const img_wifi_list[2];
 }
 
 namespace settings_screen
@@ -14,6 +14,7 @@ namespace settings_screen
     static constexpr lv_coord_t COL_X = 250; // rechte Spalte (Netzwerk)
 
     static lv_obj_t *s_wifiIcon, *s_ssid, *s_signal, *s_offline;
+    static int s_shownSignal = -1;
     static lv_obj_t *s_qr, *s_url, *s_scan;
     static char s_shownUrl[40] = "-";
 
@@ -26,9 +27,9 @@ namespace settings_screen
         lv_obj_set_style_radius(c, 12, 0);
         setRole(c, Role::ACCENT);
         lv_obj_set_style_bg_color(c, black(), 0);
-        lv_obj_set_style_bg_opa(c, LV_OPA_40, 0);
-        lv_obj_set_style_border_opa(c, LV_OPA_30, 0);
-        lv_obj_set_style_border_width(c, 1, 0);
+        lv_obj_set_style_bg_opa(c, LV_OPA_60, 0);
+        lv_obj_set_style_border_opa(c, LV_OPA_70, 0);
+        lv_obj_set_style_border_width(c, 2, 0);
         return c;
     }
 
@@ -41,20 +42,20 @@ namespace settings_screen
         alignStart(image(net, lang::text(TXT_NETWORK), Role::MUTED), 14, 10);
         s_wifiIcon = image(net, img_wifi_list[0], Role::ACCENT);
         alignStart(s_wifiIcon, 14, 50);
-        s_ssid = label(net, &font_josefin_18, Role::MAIN, "");
+        s_ssid = label(net, &font_josefin_20, Role::MAIN, "");
         lv_label_set_long_mode(s_ssid, LV_LABEL_LONG_DOT);
         lv_obj_set_width(s_ssid, 146);
         lv_obj_set_style_text_align(s_ssid, lang::rtl() ? LV_TEXT_ALIGN_RIGHT : LV_TEXT_ALIGN_LEFT, 0);
         alignStart(s_ssid, 46, 52);
-        s_signal = label(net, &font_josefin_15, Role::MUTED, "");
-        alignStart(s_signal, 46, 80);
+        s_signal = image(net, lang::text(TXT_SIG_STRONG), Role::MUTED);
+        alignStart(s_signal, 46, 82);
         s_offline = image(net, lang::text(TXT_OFFLINE), Role::MAIN);
         alignStart(s_offline, 46, 48);
 
         alignStart(image(net, lang::text(TXT_WEB), Role::MUTED), 14, 128);
-        s_url = label(net, &font_josefin_18, Role::MAIN, "");
+        s_url = label(net, &font_josefin_20, Role::MAIN, "");
         alignStart(s_url, 14, 160);
-        lv_obj_t *host = label(net, &font_josefin_15, Role::MUTED, "azan-clock.local");
+        lv_obj_t *host = label(net, &font_josefin_17, Role::MUTED, "azan-clock.local");
         alignStart(host, 14, 188);
 
         // Links: QR-Code zur Weboberfläche
@@ -70,13 +71,19 @@ namespace settings_screen
     void setWifi(const model::WifiInfo &w, const char *url)
     {
         const bool online = w.connected;
-        lv_img_set_src(s_wifiIcon, img_wifi_list[online ? constrain(w.bars, 1, 4) : 0]);
+        lv_img_set_src(s_wifiIcon, img_wifi_list[online ? 1 : 0]);
         setRole(s_wifiIcon, online ? Role::ACCENT : Role::MUTED);
 
         if (online)
         {
             lv_label_set_text(s_ssid, w.ssid);
-            lv_label_set_text_fmt(s_signal, "%d / 4", w.bars); // Signalstärke in Balken
+            const int signal = w.bars >= 3 ? TXT_SIG_STRONG : w.bars == 2 ? TXT_SIG_MEDIUM : TXT_SIG_WEAK;
+            if (signal != s_shownSignal)
+            {
+                s_shownSignal = signal;
+                lv_img_set_src(s_signal, lang::text(signal));
+                alignStart(s_signal, 46, 82);
+            }
             lv_obj_clear_flag(s_ssid, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(s_signal, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(s_offline, LV_OBJ_FLAG_HIDDEN);

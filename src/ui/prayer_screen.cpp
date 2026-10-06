@@ -4,7 +4,7 @@
 
 extern "C"
 {
-    extern const lv_img_dsc_t *const img_wifi_list[5];
+    extern const lv_img_dsc_t *const img_wifi_list[2];
     LV_IMG_DECLARE(img_alarm);
 }
 
@@ -40,7 +40,7 @@ namespace prayer_screen
         setRole(card, Role::ACCENT);
         lv_obj_set_style_bg_color(card, black(), 0);
         lv_obj_set_style_border_opa(card, LV_OPA_60, 0);
-        lv_obj_set_style_border_width(card, 1, 0);
+        lv_obj_set_style_border_width(card, 2, 0);
 
         lv_obj_align(image(card, lang::text(TXT_WIFI_TITLE), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 16);
         divider(card, 200, 66, 150);
@@ -49,7 +49,7 @@ namespace prayer_screen
         lv_obj_t *step2 = image(card, lang::text(TXT_WIFI_2), Role::MAIN);
         alignStart(step2, 24, 128);
         // IP in lateinischer Schrift, sonst setzt Amiri arabische Trennzeichen
-        lv_obj_t *ip = label(card, &font_josefin_18, Role::MAIN, "192.168.4.1");
+        lv_obj_t *ip = label(card, &font_josefin_20, Role::MAIN, "192.168.4.1");
         if (lang::rtl())
             lv_obj_align_to(ip, step2, LV_ALIGN_OUT_LEFT_MID, -8, 2);
         else
@@ -75,7 +75,7 @@ namespace prayer_screen
         lv_obj_set_style_bg_color(card, black(), 0);
         lv_obj_set_style_bg_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_opa(card, LV_OPA_70, 0);
-        lv_obj_set_style_border_width(card, 1, 0);
+        lv_obj_set_style_border_width(card, 2, 0);
 
         lv_obj_align(image(card, lang::text(TXT_AZAN_NOW), Role::MAIN), LV_ALIGN_TOP_MID, 0, 26);
         s_azanName = image(card, nullptr, Role::ACCENT);
@@ -90,7 +90,7 @@ namespace prayer_screen
         // Oben links: Uhr und Datum
         s_clock = label(scr, &font_clock_64, Role::MAIN, "--:--");
         lv_obj_set_pos(s_clock, MARGIN, 14);
-        s_date = label(scr, &font_josefin_15, Role::MUTED, "");
+        s_date = label(scr, &font_josefin_17, Role::MUTED, "");
         lv_obj_set_pos(s_date, MARGIN + 2, 80);
 
         // WLAN-Symbol oben neben der Uhr; Antippen führt zur Einstellungsseite (QR-Code, Netzwerk)
@@ -99,8 +99,8 @@ namespace prayer_screen
         lv_obj_set_pos(hit, 196, 14);
         lv_obj_set_size(hit, 44, 40);
         lv_obj_add_event_cb(hit, [](lv_event_t *) { ui::showPage(ui::PAGE_SETTINGS); }, LV_EVENT_CLICKED, nullptr);
-        s_wifiIcon = image(hit, img_wifi_list[0], Role::MUTED);
-        lv_obj_align(s_wifiIcon, LV_ALIGN_TOP_LEFT, 4, 8);
+        s_wifiIcon = image(hit, img_wifi_list[0], Role::ACCENT);
+        lv_obj_align(s_wifiIcon, LV_ALIGN_TOP_LEFT, 4, 4);
 
         // Nächster Wecker (nur sichtbar, wenn einer aktiv ist)
         s_alarmRow = box(scr);
@@ -110,7 +110,7 @@ namespace prayer_screen
         lv_obj_set_style_pad_column(s_alarmRow, 4, 0);
         lv_obj_set_pos(s_alarmRow, 196 + 8, 50);
         image(s_alarmRow, &img_alarm, Role::ACCENT);
-        s_alarmTime = label(s_alarmRow, &font_josefin_15, Role::MUTED, "");
+        s_alarmTime = label(s_alarmRow, &font_josefin_17, Role::MUTED, "");
         lv_obj_add_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
 
         // Oben rechts: Titel und Stadt
@@ -124,7 +124,7 @@ namespace prayer_screen
         lv_obj_set_flex_align(wx, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(wx, 8, 0);
         lv_obj_align(wx, LV_ALIGN_TOP_RIGHT, -MARGIN, 58);
-        s_city = label(wx, &font_josefin_15, Role::MUTED, city);
+        s_city = label(wx, &font_josefin_17, Role::MUTED, city);
         lv_obj_set_style_pad_right(s_city, 6, 0);
         s_wxTemp = label(wx, &font_temp_30, Role::MAIN, "");
         s_wxIcon = image(wx, nullptr, Role::ACCENT);
@@ -155,12 +155,12 @@ namespace prayer_screen
             lv_obj_set_size(c, CELL_W - 6, CELL_H);
             lv_obj_set_style_radius(c, 10, 0);
             setRole(c, Role::ACCENT); // Rahmen und Hinterlegung
-            lv_obj_set_style_border_opa(c, LV_OPA_70, 0);
+            lv_obj_set_style_border_opa(c, LV_OPA_COVER, 0);
             s_cell[i] = c;
 
             s_cellName[i] = image(c, prayerName(p, false), Role::ACCENT);
             lv_obj_align(s_cellName[i], LV_ALIGN_TOP_MID, 0, 6);
-            s_cellTime[i] = label(c, &font_josefin_22, Role::MAIN, "--:--");
+            s_cellTime[i] = label(c, &font_josefin_25, Role::MAIN, "--:--");
             lv_obj_align(s_cellTime[i], LV_ALIGN_TOP_MID, 0, 32);
         }
 
@@ -212,8 +212,8 @@ namespace prayer_screen
             for (int i = 0; i < CELLS; i++)
             {
                 const bool on = model::DAILY_PRAYERS[i] == p;
-                lv_obj_set_style_border_width(s_cell[i], on ? 1 : 0, 0);
-                lv_obj_set_style_bg_opa(s_cell[i], on ? LV_OPA_10 : LV_OPA_TRANSP, 0);
+                lv_obj_set_style_border_width(s_cell[i], on ? 2 : 0, 0);
+                lv_obj_set_style_bg_opa(s_cell[i], on ? LV_OPA_20 : LV_OPA_TRANSP, 0);
                 setRole(s_cellTime[i], on ? Role::ACCENT : Role::MAIN);
             }
         }
@@ -259,8 +259,9 @@ namespace prayer_screen
 
     void setWifi(const model::WifiInfo &w)
     {
-        lv_img_set_src(s_wifiIcon, img_wifi_list[w.connected ? constrain(w.bars, 1, 4) : 0]);
-        setRole(s_wifiIcon, w.connected ? Role::MUTED : Role::ACCENT); // ohne Verbindung auffälliger
+        // ein klares Symbol; auffällig (Akzent) nur bei schwachem Signal oder ohne Verbindung
+        lv_img_set_src(s_wifiIcon, img_wifi_list[w.connected ? 1 : 0]);
+        setRole(s_wifiIcon, w.connected && w.bars >= 2 ? Role::MAIN : Role::ACCENT);
     }
 
 

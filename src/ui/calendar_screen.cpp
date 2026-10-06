@@ -6,8 +6,8 @@ namespace calendar_screen
     using namespace theme;
 
     static constexpr int COLS = 7, ROWS = 6;
-    static constexpr lv_coord_t CELL_W = 61, CELL_H = 37;
-    static constexpr lv_coord_t GRID_X = (SCREEN_W - COLS * CELL_W) / 2, GRID_Y = 82;
+    static constexpr lv_coord_t CELL_W = 61, CELL_H = 38;
+    static constexpr lv_coord_t GRID_X = (SCREEN_W - COLS * CELL_W) / 2, GRID_Y = 78;
 
     static lv_obj_t *s_gMonth, *s_gYear;
     static lv_obj_t *s_hRow, *s_hFirst, *s_hSep, *s_hLast, *s_hYear;
@@ -51,23 +51,23 @@ namespace calendar_screen
         lv_obj_t *title = textRow(parent, 10);
         alignStart(title, GRID_X, 6);
         s_gMonth = image(title, nullptr, Role::ACCENT);
-        s_gYear = label(title, &font_josefin_22, Role::ACCENT, "");
+        s_gYear = label(title, &font_josefin_25, Role::ACCENT, "");
 
         // Gegenüber: Hijri-Monat(e) und Jahr
         s_hRow = textRow(parent, 6);
         lv_obj_align(s_hRow, lang::rtl() ? LV_ALIGN_TOP_LEFT : LV_ALIGN_TOP_RIGHT, lang::rtl() ? GRID_X : -GRID_X, 12);
-        s_hFirst = image(s_hRow, nullptr, Role::MUTED);
-        s_hSep = label(s_hRow, &font_josefin_15, Role::MUTED, "/");
-        s_hLast = image(s_hRow, nullptr, Role::MUTED);
-        s_hYear = label(s_hRow, &font_josefin_15, Role::MUTED, "");
+        s_hFirst = image(s_hRow, nullptr, Role::MAIN);
+        s_hSep = label(s_hRow, &font_josefin_17, Role::MAIN, "/");
+        s_hLast = image(s_hRow, nullptr, Role::MAIN);
+        s_hYear = label(s_hRow, &font_josefin_17, Role::MAIN, "");
         lv_obj_add_flag(s_hRow, LV_OBJ_FLAG_HIDDEN);
 
         // Kopfzeile mit Wochentagen, Freitag in der Akzentfarbe, darunter eine feine Linie
         for (int wday = 0; wday < 7; wday++)
         {
             const int col = columnOf(wday);
-            lv_obj_t *h = image(parent, weekdayShort(wday), col == fridayColumn() ? Role::ACCENT : Role::MUTED);
-            lv_obj_set_pos(h, columnX(col) + (CELL_W - weekdayShort(wday)->header.w) / 2, GRID_Y - 32);
+            lv_obj_t *h = image(parent, weekdayShort(wday), col == fridayColumn() ? Role::ACCENT : Role::MAIN);
+            lv_obj_set_pos(h, columnX(col) + (CELL_W - weekdayShort(wday)->header.w) / 2, GRID_Y - 33);
         }
         divider(parent, SCREEN_W / 2, GRID_Y - 3, COLS * CELL_W / 2);
 
@@ -81,12 +81,11 @@ namespace calendar_screen
             setRole(c, Role::ACCENT); // Fläche für "heute"
             s_cell[i] = c;
 
-            // gregorianisch groß und mittig, Hijri klein oben links in der Ecke
-            s_greg[i] = label(c, &font_josefin_22, Role::MAIN, "");
-            lv_obj_align(s_greg[i], LV_ALIGN_CENTER, 7, 3);
-            s_hijri[i] = label(c, &font_josefin_15, Role::ACCENT, "");
-            lv_obj_set_style_text_opa(s_hijri[i], LV_OPA_70, 0);
-            lv_obj_align(s_hijri[i], LV_ALIGN_TOP_LEFT, 3, -1);
+            // gregorianisch groß unten rechts, Hijri klein oben links in der Ecke (beide in voller Deckkraft)
+            s_greg[i] = label(c, &font_josefin_25, Role::MAIN, "");
+            lv_obj_align(s_greg[i], LV_ALIGN_BOTTOM_RIGHT, -4, 2);
+            s_hijri[i] = label(c, &font_josefin_17, Role::ACCENT, "");
+            lv_obj_align(s_hijri[i], LV_ALIGN_TOP_LEFT, 4, -2);
         }
     }
 
@@ -130,14 +129,14 @@ namespace calendar_screen
             show(s_cell[i], i / COLS < usedRows);
 
             lv_label_set_text_fmt(s_greg[i], "%d", d);
-            lv_obj_align(s_greg[i], LV_ALIGN_CENTER, 7, 3);
+            lv_obj_align(s_greg[i], LV_ALIGN_BOTTOM_RIGHT, -4, 2);
             if (inMonth && hijri.day[d - 1] > 0)
                 lv_label_set_text_fmt(s_hijri[i], "%d", hijri.day[d - 1]);
             else
                 lv_label_set_text(s_hijri[i], "");
 
             lv_obj_set_style_bg_opa(s_cell[i], isToday ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
-            lv_obj_set_style_text_opa(s_greg[i], inMonth ? LV_OPA_COVER : LV_OPA_30, 0);
+            lv_obj_set_style_text_opa(s_greg[i], inMonth ? LV_OPA_COVER : LV_OPA_50, 0);
             setRole(s_greg[i], isFriday && inMonth ? Role::ACCENT : Role::MAIN);
             if (isToday)
             {

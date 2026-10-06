@@ -140,9 +140,10 @@ function confirmBox(text, hint, danger) {
 }
 
 // ---------- kleine Bausteine
+// Signalstärke (1..4) als Wort: stark, mittel, schwach
 function bars(n) {
-  return `<svg class="bars" viewBox="0 0 20 16" aria-hidden="true">${[0, 1, 2, 3].map(i =>
-    `<rect x="${i * 5 + 1}" y="${12 - i * 3.5}" width="3" height="${4 + i * 3.5}" rx="1" class="${i < n ? "on" : ""}"/>`).join("")}</svg>`;
+  const lvl = n >= 3 ? "strong" : n === 2 ? "medium" : "weak";
+  return `<span class="sig ${lvl}">${t("sig_" + lvl)}</span>`;
 }
 const wifiState = () => {
   const w = ST && ST.wifi;
@@ -361,7 +362,11 @@ VIEWS.display = () => `
   ${card(t("background"), I.image, `<div class="bgs" id="bgs">${loading("")}</div>`)}
   ${card(t("presets"), I.palette, `<div class="themes" id="presets"></div>`)}
   ${card(t("custom_colors"), I.palette, `<div class="list" id="customCols"></div>`)}
-  ${card(t("brightness"), I.sun, range("brightness", S.brightness, 5, 100, "%"))}
+  ${card(t("brightness"), I.sun, `<div class="vol">${I.sun}${range("brightness", S.brightness, 5, 100, "%")}</div>
+    <div class="item"><span class="name">${t("auto_dim")}</span>${toggle(`id="autoDim"`, S.autoDim)}</div>
+    <div id="nightBox" ${S.autoDim ? "" : "hidden"}><label class="f">${t("night_brightness")}</label>
+      <div class="vol">${I.moon}${range("nightBrightness", S.nightBrightness, 5, 100, "%")}</div></div>
+    <p class="hint">${t("auto_dim_hint")}</p>`)}
   ${card(t("led"), I.palette, `<div class="item"><span class="ledglow" id="ledGlow"></span><span class="name">${t("led_on")}</span>${toggle(`id="ledOn"`, led.on)}</div>
     <div class="swatches big" id="ledSw">${LED_PRESETS.map(c => `<button data-c="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
     <label class="f">${t("hue")}</label><input type="range" class="slider hue" id="ledHue" min="0" max="359" value="0">
@@ -527,6 +532,8 @@ VIEWS.display.bind = () => {
     else applyTheme(S.colors);
   };
   bindRange("brightness", v => save({ brightness: v }), "%");
+  bindRange("nightBrightness", v => save({ nightBrightness: v }), "%");
+  $("autoDim").onchange = () => { $("nightBox").hidden = !$("autoDim").checked; save({ autoDim: $("autoDim").checked }); };
 
   const drawLed = () => {
     $("ledGlow").style.setProperty("--c", led.on ? led.color : "transparent");
@@ -548,14 +555,14 @@ function bindRange(id, onSet, suffix = "") {
   el.onchange = () => onSet(Number(el.value));
 }
 
+const volPct = v => Math.round(v * 100 / 21); // Wecker: Decoder 0..21 <-> Prozent
 VIEWS.audio = () => `
-  ${card(t("volume"), I.audio, `<div class="vol">${I.audio}${range("volume", S.volume, 0, 21)}</div>
-    <div class="actions"><button class="btn gold" id="volListen">${I.play}${t("listen")}</button>
-      <button class="btn" data-stop>${I.stop}${t("stop")}</button></div>
-    <p class="hint">${t("volume_hint")}</p>`)}
+  ${card(t("azan"), I.prayer, `<div class="list">${PRAYERS.map(k => `<div class="pvol ${S.azan[k] ? "" : "off"}">
+      <div class="item"><span class="pico">${PRAYER_ICON[k]}</span><span class="name">${t(k)}</span>${toggle(`data-az="${k}"`, S.azan[k])}</div>
+      <div class="vol">${I.audio}${range("pv_" + k, S.azanVolume[k], 0, 100, "%")}<button class="round" data-pplay="${k}" aria-label="${t("listen")}">${I.play}</button></div></div>`).join("")}</div>
+    <p class="hint">${t("azan_volume_hint")}</p>
+    <div class="actions"><button class="btn danger" data-stop>${I.stop}${t("stop")}</button></div>`)}
   ${card(t("azan_voice"), I.music, `<div class="list" id="voices">${loading("")}</div><p class="hint">${t("azan_voice_hint")}</p>`)}
-  ${card(t("azan"), I.prayer, `<div class="list">${PRAYERS.map(k => `<div class="item"><span class="name">${t("azan_for")} ${t(k)}</span>
-    ${toggle(`data-az="${k}"`, S.azan[k])}</div>`).join("")}</div>`)}
   ${card(t("azan_test_display"), I.play, `<div class="actions">
       <button class="btn" data-test="dhuhr">${I.play}${t("azan_test_normal")}</button>
       <button class="btn" data-test="fajr">${I.play}${t("azan_test_fajr")}</button>
@@ -563,14 +570,29 @@ VIEWS.audio = () => `
     <p class="hint">${t("azan_test_hint")}</p>`)}
   ${card(t("alarms"), I.bell, `<div class="list" id="alarms"></div>
     <div class="actions"><button class="btn" id="alarmAdd">${I.plus}${t("alarm_add")}</button></div><p class="hint">${t("alarm_hint")}</p>`)}
-  ${card(t("alarm_tone"), I.music, `<div class="list" id="sounds">${loading("")}</div>`)}`;
+  ${card(t("alarm_tone"), I.music, `<div class="list" id="sounds">${loading("")}</div>
+    <div class="vol">${I.audio}${range("volume", volPct(S.volume), 0, 100, "%")}</div>
+    <p class="hint">${t("alarm_volume_hint")}</p>`)}`;
 VIEWS.audio.bind = () => {
-  // Lautstärke wird schon beim Schieben übernommen, damit man sie beim Probehören direkt hört
-  const vol = $("volume");
-  vol.oninput = () => { $("volumeVal").textContent = vol.value; saveLater({ volume: Number(vol.value) }); };
-  $("volListen").onclick = async () => {
-    try { const r = await api("/api/azan/preview", {}); toast(r.ok ? t("azan_playing") : t("error"), !r.ok); }
-    catch (e) { toast(t("offline"), true); }
+  // Lautstärke je Gebet: beim Loslassen speichern, ▶ spielt den Azan des Gebets in dieser Lautstärke
+  PRAYERS.forEach(k => {
+    const el = $("pv_" + k);
+    el.oninput = () => $("pv_" + k + "Val").textContent = el.value + "%";
+    el.onchange = () => save({ azanVolume: { [k]: Number(el.value) } }, true);
+  });
+  document.querySelectorAll("[data-pplay]").forEach(b => b.onclick = async () => {
+    const k = b.dataset.pplay;
+    try {
+      await save({ azanVolume: { [k]: Number($("pv_" + k).value) } }, true);
+      const r = await api("/api/azan/preview", { prayer: k });
+      toast(r.ok ? t("azan_playing") : t("error"), !r.ok);
+    } catch (e) { toast(t("offline"), true); }
+  });
+  // Wecker-Lautstärke: beim Loslassen speichern und den gewählten Weckton abspielen
+  $("volume").oninput = () => $("volumeVal").textContent = $("volume").value + "%";
+  $("volume").onchange = async () => {
+    const ok = await save({ volume: Math.round(Number($("volume").value) * 21 / 100) }, true);
+    if (ok && sounds.selected) api("/api/preview", { name: sounds.selected }).catch(() => {});
   };
   // Azan-Stimme wählen und probehören
   let voices = { list: [], selected: "" };
@@ -595,7 +617,7 @@ VIEWS.audio.bind = () => {
       if (r.ok) { sortVoices(r.data); toast(t("saved")); } else toast(t("error"), true);
     } catch (err) { toast(t("offline"), true); }
   };
-  document.querySelectorAll("[data-az]").forEach(c => c.onchange = () => save({ azan: { [c.dataset.az]: c.checked } }));
+  document.querySelectorAll("[data-az]").forEach(c => c.onchange = () => { c.closest(".pvol").classList.toggle("off", !c.checked); save({ azan: { [c.dataset.az]: c.checked } }); });
   document.querySelectorAll("[data-test]").forEach(b => b.onclick = async () => {
     try { const r = await api("/api/azan/test", { prayer: b.dataset.test }); toast(r.ok ? t("azan_playing") : t("error"), !r.ok); }
     catch (e) { toast(t("offline"), true); }
@@ -822,7 +844,7 @@ function render() {
   const lead = SUB.includes(current) ? `<button class="round backbtn" data-go="settings" aria-label="${t("back")}">${I.back}</button>`
     : `<span class="mobile-brand"><img src="/icons/icon-192.png" alt=""></span>`;
   const head = `<div class="top">${lead}<h1>${current === "dashboard" ? t("app") : t("nav_" + current)}</h1>
-    <button class="status" data-go="device"><span class="dot ${online ? "ok" : ""}"></span>${ok ? bars(ST.wifi.bars) : ""}<span class="lbl">${t(online ? "device_online" : "device_offline")}</span></button></div>`;
+    <button class="status" data-go="device"><span class="dot ${online ? "ok" : ""}"></span><span class="lbl">${t(online ? "device_online" : "device_offline")}</span></button></div>`;
   if (!S && current !== "dashboard") { $("view").innerHTML = head + (online ? loading("") : `<div class="group empty">${t("offline")}</div>`); return; }
   $("view").innerHTML = head + v();
   if (v.bind) v.bind();

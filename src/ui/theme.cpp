@@ -122,25 +122,26 @@ namespace theme
 
     void divider(lv_obj_t *parent, lv_coord_t cx, lv_coord_t y, lv_coord_t halfWidth)
     {
-        static const lv_point_t DIAMOND[] = {{0, 4}, {4, 0}, {8, 4}, {4, 8}, {0, 4}};
+        static const lv_point_t DIAMOND[] = {{0, 6}, {6, 0}, {12, 6}, {6, 12}, {0, 6}};
         // lv_line merkt sich nur den Zeiger, deshalb eigene Punkte pro Aufruf
-        auto *left = new lv_point_t[2]{{(lv_coord_t)(cx - halfWidth), y}, {(lv_coord_t)(cx - 10), y}};
-        auto *right = new lv_point_t[2]{{(lv_coord_t)(cx + 10), y}, {(lv_coord_t)(cx + halfWidth), y}};
+        auto *left = new lv_point_t[2]{{(lv_coord_t)(cx - halfWidth), y}, {(lv_coord_t)(cx - 14), y}};
+        auto *right = new lv_point_t[2]{{(lv_coord_t)(cx + 14), y}, {(lv_coord_t)(cx + halfWidth), y}};
 
         for (lv_point_t *pts : {left, right})
         {
             lv_obj_t *l = lv_line_create(parent);
             lv_line_set_points(l, pts, 2);
             setRole(l, Role::ACCENT);
-            lv_obj_set_style_line_opa(l, LV_OPA_30, 0);
-            lv_obj_set_style_line_width(l, 1, 0);
+            lv_obj_set_style_line_opa(l, LV_OPA_70, 0);
+            lv_obj_set_style_line_width(l, 2, 0);
+            lv_obj_set_style_line_rounded(l, true, 0);
         }
         lv_obj_t *d = lv_line_create(parent);
         lv_line_set_points(d, DIAMOND, 5);
-        lv_obj_set_pos(d, cx - 4, y - 4);
+        lv_obj_set_pos(d, cx - 6, y - 6);
         setRole(d, Role::ACCENT);
-        lv_obj_set_style_line_opa(d, LV_OPA_70, 0);
-        lv_obj_set_style_line_width(d, 1, 0);
+        lv_obj_set_style_line_opa(d, LV_OPA_COVER, 0);
+        lv_obj_set_style_line_width(d, 2, 0);
     }
 
     extern "C" const lv_img_dsc_t *const img_wx_sm_list[10];

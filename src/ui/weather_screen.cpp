@@ -1,34 +1,57 @@
 #include "weather_screen.h"
 #include "theme.h"
 
+extern "C"
+{
+    LV_IMG_DECLARE(img_detail_0);
+    LV_IMG_DECLARE(img_detail_1);
+    LV_IMG_DECLARE(img_detail_2);
+}
+
 namespace weather_screen
 {
     using namespace theme;
 
     static constexpr int DAYS = 3;
+    static constexpr lv_coord_t COL_W = 152; // drei gleich breite Spalten (Details und Vorhersage)
     static lv_obj_t *s_content, *s_loading, *s_city;
     static lv_obj_t *s_icon, *s_temp, *s_sky;
     static lv_obj_t *s_feels, *s_humidity, *s_wind;
     static lv_obj_t *s_dayIcon[DAYS], *s_dayRange[DAYS];
 
-    // Detailzeile: Bezeichnung an der Anfangsseite der Sprache, Wert gegenüber
-    static lv_obj_t *detail(lv_obj_t *parent, lv_coord_t y, const lv_img_dsc_t *name)
+    static lv_coord_t colX(int i) { return (SCREEN_W - 3 * COL_W) / 2 + (lang::rtl() ? 2 - i : i) * COL_W; }
+
+    // Zeile in Leserichtung der Sprache, mittig in der Spalte
+    static lv_obj_t *cell(lv_obj_t *parent, int col, lv_coord_t y, lv_coord_t h)
     {
-        constexpr lv_coord_t X = MARGIN, W = 160;
-        lv_obj_t *row = box(parent);
-        lv_obj_set_pos(row, X, y);
-        lv_obj_set_size(row, W, 34);
-        const bool rtl = lang::rtl();
-        lv_obj_align(image(row, name, Role::MUTED), rtl ? LV_ALIGN_RIGHT_MID : LV_ALIGN_LEFT_MID, 0, 0);
-        lv_obj_t *v = label(row, &font_josefin_22, Role::MAIN, "");
-        lv_obj_align(v, rtl ? LV_ALIGN_LEFT_MID : LV_ALIGN_RIGHT_MID, 0, 2);
-        return v;
+        lv_obj_t *r = box(parent);
+        lv_obj_set_pos(r, colX(col), y);
+        lv_obj_set_size(r, COL_W, h);
+        lv_obj_set_style_base_dir(r, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
+        lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(r, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_column(r, 6, 0);
+        return r;
+    }
+
+    // Detail rechts neben der Temperatur: Symbol und Wert (Gegenseite zum großen Symbol)
+    static lv_obj_t *detail(lv_obj_t *parent, int row, const lv_img_dsc_t *icon)
+    {
+        lv_obj_t *r = box(parent);
+        lv_obj_set_size(r, 122, 36);
+        lv_obj_set_style_base_dir(r, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
+        lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_column(r, 10, 0);
+        lv_obj_align(r, lang::rtl() ? LV_ALIGN_TOP_LEFT : LV_ALIGN_TOP_RIGHT, lang::rtl() ? MARGIN : -MARGIN, 52 + row * 40);
+        image(r, icon, Role::ACCENT);
+        return label(r, &font_josefin_25, Role::MAIN, "");
     }
 
     void create(lv_obj_t *parent)
     {
         lv_obj_align(image(parent, lang::text(TXT_WEATHER), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 6);
-        s_city = label(parent, &font_josefin_18, Role::MUTED, "");
+        s_city = label(parent, &font_josefin_20, Role::MUTED, "");
         lv_obj_set_pos(s_city, MARGIN, 18);
 
         s_loading = image(parent, lang::text(TXT_NO_WEATHER), Role::MUTED);
@@ -38,42 +61,39 @@ namespace weather_screen
         lv_obj_set_size(s_content, SCREEN_W, SCREEN_H);
         lv_obj_add_flag(s_content, LV_OBJ_FLAG_HIDDEN);
 
-        // Rechts: großes Symbol, daneben Temperatur und Beschreibung
+        // Oben: großes Symbol, daneben Temperatur und Beschreibung (an der Anfangsseite der Sprache)
         s_icon = image(s_content, nullptr, Role::ACCENT);
-        lv_obj_align(s_icon, LV_ALIGN_TOP_RIGHT, -MARGIN, 56);
+        alignStart(s_icon, MARGIN, 50);
         s_temp = label(s_content, &font_temp_64, Role::MAIN, "");
-        lv_obj_align(s_temp, LV_ALIGN_TOP_RIGHT, -146, 52);
+        alignStart(s_temp, 144, 50);
         s_sky = image(s_content, nullptr, Role::MAIN);
-        lv_obj_align(s_sky, LV_ALIGN_TOP_RIGHT, -152, 124);
+        alignStart(s_sky, 146, 124);
 
-        // Links: Details
-        s_feels = detail(s_content, 56, lang::text(TXT_FEELS));
-        s_humidity = detail(s_content, 94, lang::text(TXT_HUMIDITY));
-        s_wind = detail(s_content, 132, lang::text(TXT_WIND));
+        // Rechts: Gefühlt, Feuchte, Wind
+        s_feels = detail(s_content, 0, &img_detail_0);
+        s_humidity = detail(s_content, 1, &img_detail_1);
+        s_wind = detail(s_content, 2, &img_detail_2);
 
-        divider(s_content, SCREEN_W / 2, 182, SCREEN_W / 2 - MARGIN);
+        divider(s_content, SCREEN_W / 2, 190, SCREEN_W / 2 - MARGIN);
 
-        // Vorhersage in Leserichtung: "heute" auf Arabisch ganz rechts, sonst ganz links
+        // Vorhersage ohne Kästen, nur durch feine senkrechte Linien getrennt;
+        // in Leserichtung: "heute" auf Arabisch ganz rechts, sonst ganz links
         static const int NAMES[DAYS] = {TXT_TODAY, TXT_TOMORROW, TXT_AFTER};
-        constexpr lv_coord_t CW = 138, GAP = 10, Y = 194, H = 106;
-        const lv_coord_t x0 = (SCREEN_W - DAYS * CW - (DAYS - 1) * GAP) / 2;
         for (int i = 0; i < DAYS; i++)
         {
-            lv_obj_t *c = box(s_content);
-            lv_obj_set_pos(c, x0 + (lang::rtl() ? DAYS - 1 - i : i) * (CW + GAP), Y);
-            lv_obj_set_size(c, CW, H);
-            lv_obj_set_style_radius(c, 10, 0);
-            setRole(c, Role::ACCENT); // Rahmenfarbe
-            lv_obj_set_style_bg_color(c, black(), 0);
-            lv_obj_set_style_bg_opa(c, LV_OPA_40, 0);
-            lv_obj_set_style_border_opa(c, LV_OPA_20, 0);
-            lv_obj_set_style_border_width(c, 1, 0);
-
-            lv_obj_align(image(c, lang::text(NAMES[i]), Role::MUTED), LV_ALIGN_TOP_MID, 0, 2);
-            s_dayIcon[i] = image(c, nullptr, Role::ACCENT);
-            lv_obj_align(s_dayIcon[i], LV_ALIGN_TOP_MID, 0, 38);
-            s_dayRange[i] = label(c, &font_josefin_18, Role::MAIN, "");
-            lv_obj_align(s_dayRange[i], LV_ALIGN_TOP_MID, 0, 78);
+            lv_obj_t *name = image(s_content, lang::text(NAMES[i]), Role::ACCENT);
+            lv_obj_set_pos(name, colX(i) + (COL_W - lang::text(NAMES[i])->header.w) / 2, 206);
+            lv_obj_t *r = cell(s_content, i, 244, 44);
+            s_dayIcon[i] = image(r, nullptr, Role::ACCENT);
+            s_dayRange[i] = label(r, &font_josefin_25, Role::MAIN, ""); // passt mit Symbol in die Spalte
+            if (i < DAYS - 1)
+            {
+                lv_obj_t *sep = box(s_content);
+                setRole(sep, Role::ACCENT);
+                lv_obj_set_pos(sep, colX(i) + (lang::rtl() ? 0 : COL_W) - 1, 208);
+                lv_obj_set_size(sep, 2, 80);
+                lv_obj_set_style_bg_opa(sep, LV_OPA_50, 0);
+            }
         }
     }
 
@@ -87,7 +107,7 @@ namespace weather_screen
         lv_img_set_src(s_icon, weatherIcon(w.sky, w.isDay, true));
         lv_label_set_text_fmt(s_temp, "%d°C", (int)lroundf(w.temp));
         lv_img_set_src(s_sky, theme::skyText(w.sky));
-        lv_obj_align(s_sky, LV_ALIGN_TOP_RIGHT, -152, 124);
+        alignStart(s_sky, 146, 124);
 
         lv_label_set_text_fmt(s_feels, "%d°C", (int)lroundf(w.feelsLike));
         lv_label_set_text_fmt(s_humidity, "%d %%", w.humidity);
@@ -96,9 +116,7 @@ namespace weather_screen
         for (int i = 0; i < DAYS; i++)
         {
             lv_img_set_src(s_dayIcon[i], weatherIcon(w.forecast[i].sky, true, false));
-            lv_obj_align(s_dayIcon[i], LV_ALIGN_TOP_MID, 0, 38);
-            lv_label_set_text_fmt(s_dayRange[i], "%d°  /  %d°", w.forecast[i].tempMax, w.forecast[i].tempMin);
-            lv_obj_align(s_dayRange[i], LV_ALIGN_TOP_MID, 0, 78);
+            lv_label_set_text_fmt(s_dayRange[i], "%d°/%d°", w.forecast[i].tempMax, w.forecast[i].tempMin);
         }
     }
 
