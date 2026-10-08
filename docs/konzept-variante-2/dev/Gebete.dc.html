@@ -11,27 +11,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;600&amp;family=Aref+Ruqaa:wght@400;700&amp;display=swap" rel="stylesheet">
 <style>body{margin:0}</style>
 </helmet>
-<div style="width: 480px; height: 320px; box-sizing: border-box; padding: 14px 24px; background: #EBDDC6; color: #2A221A; font-family: 'Readex Pro', system-ui, sans-serif; display: flex; flex-direction: column; gap: 4px">
-  <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: #6E5B45; padding-bottom: 6px">
-    <span style="font-size: 18px; color: #2A221A">Gebetszeiten</span><span>Peine · Muslim World League</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 14px; height: 40px; opacity: 0.45">
-    <span style="flex: 1; font-size: 19px">Fajr</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">الفجر</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">05:52</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 14px; height: 40px; opacity: 0.45">
-    <span style="flex: 1; font-size: 19px">Shuruq</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">الشروق</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">07:24</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 14px; height: 40px; opacity: 0.45">
-    <span style="flex: 1; font-size: 19px">Dhuhr</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">الظهر</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">13:07</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 14px; height: 46px; margin: 0 -12px; padding: 0 12px; border-radius: 12px; background: #9C5414; color: #FFF6EA">
-    <span style="flex: 1; font-size: 19px">Asr <span style="font-size: 12px; opacity: 0.85">· jetzt</span></span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">العصر</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 400">16:08</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 14px; height: 40px">
-    <span style="flex: 1; font-size: 19px">Maghrib <span style="font-size: 12px; color: #9C5414">· in 1:12</span></span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">المغرب</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">18:50</span>
-  </div>
-  <div style="display: flex; align-items: center; gap: 14px; height: 40px">
-    <span style="flex: 1; font-size: 19px">Isha</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">العشاء</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">20:23</span>
+<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #EFE4D1; color: #2C2419; font-family: 'Readex Pro', system-ui, sans-serif">
+  <svg width="480" height="320" viewBox="0 0 480 320" style="position: absolute; left: 0; top: 0">
+    <defs>
+      <pattern id="gz" width="64" height="64" patternUnits="userSpaceOnUse"><g fill="none" stroke="#A8823F" stroke-width="0.9"><rect x="18" y="18" width="28" height="28"></rect><rect x="18" y="18" width="28" height="28" transform="rotate(45 32 32)"></rect><circle cx="32" cy="32" r="6"></circle><path d="M0 32h12M52 32h12M32 0v12M32 52v12M0 0l12 12M64 0 52 12M0 64l12-12M64 64 52 52"></path></g></pattern>
+      <linearGradient id="lz" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"></stop><stop offset="0.6" stop-color="#000"></stop><stop offset="1" stop-color="#fff"></stop></linearGradient>
+      <mask id="mz"><rect width="480" height="320" fill="url(#lz)"></rect></mask>
+    </defs>
+    <rect width="480" height="320" fill="url(#gz)" opacity="0.45" mask="url(#mz)"></rect>
+  </svg>
+  <div style="position: relative; box-sizing: border-box; height: 320px; padding: 14px 24px; display: flex; flex-direction: column; gap: 4px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: #75644D; padding-bottom: 6px">
+      <span style="font-size: 18px; color: #2C2419">Gebetszeiten</span><span>Peine · Muslim World League</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; height: 40px; opacity: 0.45">
+      <span style="flex: 1; font-size: 19px">Fajr</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">الفجر</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">05:52</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; height: 40px; opacity: 0.45">
+      <span style="flex: 1; font-size: 19px">Shuruq</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">الشروق</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">07:24</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; height: 40px; opacity: 0.45">
+      <span style="flex: 1; font-size: 19px">Dhuhr</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">الظهر</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">13:07</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; height: 46px; margin: 0 -12px; padding: 0 12px; border-radius: 12px; background: #A86A30; color: #FFF7EC">
+      <svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><rect x="-5" y="-5" width="10" height="10" fill="#FFF7EC"></rect><rect x="-5" y="-5" width="10" height="10" fill="#FFF7EC" transform="rotate(45)"></rect><circle r="2" fill="#A86A30"></circle></svg>
+      <span style="flex: 1; font-size: 19px">Asr <span style="font-size: 12px; opacity: 0.85">· jetzt</span></span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">العصر</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 400">16:08</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; height: 40px">
+      <span style="flex: 1; font-size: 19px">Maghrib <span style="font-size: 12px; color: #A86A30">· in 1:12</span></span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">المغرب</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">18:50</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; height: 40px">
+      <span style="flex: 1; font-size: 19px">Isha</span><span style="font-family: 'Aref Ruqaa', serif; font-size: 19px" lang="ar">العشاء</span><span style="width: 70px; text-align: right; font-size: 22px; font-weight: 300">20:23</span>
+    </div>
   </div>
 </div>
 </x-dc>

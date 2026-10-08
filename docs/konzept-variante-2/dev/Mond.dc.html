@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Uhr – Mond und Hijri</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;600&amp;family=Aref+Ruqaa:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #252C4A; color: #EEF0F6; font-family: 'Readex Pro', system-ui, sans-serif">
+  <svg width="480" height="320" viewBox="0 0 480 320" style="position: absolute; left: 0; top: 0">
+    <defs>
+      <pattern id="gz" width="64" height="64" patternUnits="userSpaceOnUse"><g fill="none" stroke="#D8C08C" stroke-width="0.9"><rect x="18" y="18" width="28" height="28"></rect><rect x="18" y="18" width="28" height="28" transform="rotate(45 32 32)"></rect><circle cx="32" cy="32" r="6"></circle><path d="M0 32h12M52 32h12M32 0v12M32 52v12M0 0l12 12M64 0 52 12M0 64l12-12M64 64 52 52"></path></g></pattern>
+      <radialGradient id="rz" cx="27%" cy="50%" r="55%"><stop offset="0.38" stop-color="#000"></stop><stop offset="1" stop-color="#fff"></stop></radialGradient>
+      <mask id="mz"><rect width="480" height="320" fill="url(#rz)"></rect></mask>
+      <clipPath id="mc"><circle cx="128" cy="160" r="78"></circle></clipPath>
+    </defs>
+    <rect width="480" height="320" fill="url(#gz)" opacity="0.26" mask="url(#mz)"></rect>
+    <g fill="none" stroke="#D8C08C" stroke-opacity="0.55" stroke-width="1.2">
+      <rect x="62" y="94" width="132" height="132"></rect>
+      <rect x="62" y="94" width="132" height="132" transform="rotate(45 128 160)"></rect>
+    </g>
+    <circle cx="128" cy="160" r="78" fill="#F2E6C9"></circle>
+    <g clip-path="url(#mc)"><ellipse cx="196" cy="160" rx="34" ry="78" fill="#252C4A" fill-opacity="0.85"></ellipse><rect x="196" y="80" width="40" height="160" fill="#252C4A" fill-opacity="0.85"></rect></g>
+    <circle cx="104" cy="134" r="7" fill="#E3D5B4"></circle><circle cx="120" cy="184" r="5" fill="#E3D5B4"></circle><circle cx="86" cy="176" r="4" fill="#E3D5B4"></circle>
+  </svg>
+  <div style="position: absolute; left: 252px; right: 22px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px">
+    <div style="font-family: 'Aref Ruqaa', serif; font-size: 34px; color: #D8C08C; line-height: 1.15" lang="ar" dir="rtl">ربيع الآخر</div>
+    <div style="font-size: 24px; font-weight: 300">Tag 17 von 30</div>
+    <div style="font-size: 13px; color: #A9B0CC">Abnehmender Mond · Vollmond war vor 2 Tagen</div>
+    <div style="height: 1px; background: #3A4370; margin: 10px 0"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 13px"><span>Weiße Tage</span><span style="color: #A9B0CC">13.–15. · vorbei</span></div>
+    <div style="display: flex; justify-content: space-between; font-size: 13px"><span>Dschumada I beginnt</span><span style="color: #A9B0CC">≈ 23. Okt.</span></div>
+    <div style="display: flex; justify-content: space-between; font-size: 13px"><span>Nächster besonderer Tag</span><span style="color: #E8B4A8">in 100 Tagen</span></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":480,"height":320}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

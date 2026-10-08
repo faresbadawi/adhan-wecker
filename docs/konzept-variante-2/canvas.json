@@ -1,38 +1,39 @@
 {
   "v": 3,
+  "attachments": {},
   "createdOnFiles": {"v": 1, "at": "2026-10-08T10:05:00Z"},
   "title": "Bilal Smart Wecker – Konzept Variante 2",
   "launch": {"view": "canvas"},
   "pages": [],
   "designSystems": [],
   "boards": {
-    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1700, "title": "Konzept: Die Uhr folgt dem Himmel"},
-    "dev/Heute-Fajr.dc.html": {"x": 0, "y": 2060, "w": 480, "h": 320, "title": "Uhr · Heute (Fajr, Dämmerung)"},
-    "dev/Heute-Dhuhr.dc.html": {"x": 560, "y": 2060, "w": 480, "h": 320, "title": "Uhr · Heute (Dhuhr, Tag)"},
-    "dev/Heute-Maghrib-ar.dc.html": {"x": 1120, "y": 2060, "w": 480, "h": 320, "title": "Uhr · Heute (Maghrib, Arabisch)"},
-    "dev/Gebete.dc.html": {"x": 1680, "y": 2060, "w": 480, "h": 320, "title": "Uhr · Gebetsliste"},
-    "dev/Nachtuhr.dc.html": {"x": 0, "y": 2500, "w": 480, "h": 320, "title": "Uhr · Nachtuhr (Isha)"},
-    "dev/Wetter.dc.html": {"x": 560, "y": 2500, "w": 480, "h": 320, "title": "Uhr · Wetter"},
-    "dev/Kalender.dc.html": {"x": 1120, "y": 2500, "w": 480, "h": 320, "title": "Uhr · Kalender"},
-    "dev/Dhikr.dc.html": {"x": 1680, "y": 2500, "w": 480, "h": 320, "title": "Uhr · Dhikr-Zähler (neu)", "is_interactive": true},
-    "dev/Azan.dc.html": {"x": 0, "y": 2940, "w": 480, "h": 320, "title": "Uhr · Azan läuft"},
-    "dev/Erinnerung.dc.html": {"x": 560, "y": 2940, "w": 480, "h": 320, "title": "Uhr · Erinnerung vor dem Azan (neu)"},
-    "dev/Wecker.dc.html": {"x": 1120, "y": 2940, "w": 480, "h": 320, "title": "Uhr · Wecker klingelt"},
-    "app/Heute.dc.html": {"x": 0, "y": 3700, "w": 390, "h": 844, "title": "App · Heute"},
-    "app/Gebete.dc.html": {"x": 470, "y": 3700, "w": 390, "h": 844, "title": "App · Gebete"},
-    "app/Wecker.dc.html": {"x": 940, "y": 3700, "w": 390, "h": 844, "title": "App · Wecker"},
-    "app/Uhr.dc.html": {"x": 1410, "y": 3700, "w": 390, "h": 844, "title": "App · Uhr (Einstellungen)"},
-    "app/Gestaltung.dc.html": {"x": 1880, "y": 3700, "w": 390, "h": 844, "title": "App · Gestaltung"}
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1780, "title": "Konzept: Die Uhr folgt dem Himmel"},
+    "dev/Heute-Fajr.dc.html": {"x": 0, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Heute (Fajr, Dämmerung)"},
+    "dev/Heute-Dhuhr.dc.html": {"x": 560, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Heute (Dhuhr, Tag)"},
+    "dev/Heute-Maghrib-ar.dc.html": {"x": 1120, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Heute (Maghrib, Arabisch)"},
+    "dev/Gebete.dc.html": {"x": 1680, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Gebetsliste"},
+    "dev/Nachtuhr.dc.html": {"x": 0, "y": 2580, "w": 480, "h": 320, "title": "Uhr · Nachtuhr (Isha)"},
+    "dev/Wetter.dc.html": {"x": 560, "y": 2580, "w": 480, "h": 320, "title": "Uhr · Wetter"},
+    "dev/Kalender.dc.html": {"x": 1120, "y": 2580, "w": 480, "h": 320, "title": "Uhr · Kalender"},
+    "dev/Mond.dc.html": {"x": 1680, "y": 2580, "w": 480, "h": 320, "title": "Uhr · Mond & Hijri (neu)"},
+    "dev/Azan.dc.html": {"x": 0, "y": 3020, "w": 480, "h": 320, "title": "Uhr · Azan läuft"},
+    "dev/Erinnerung.dc.html": {"x": 560, "y": 3020, "w": 480, "h": 320, "title": "Uhr · Erinnerung vor dem Azan (neu)"},
+    "dev/Wecker.dc.html": {"x": 1120, "y": 3020, "w": 480, "h": 320, "title": "Uhr · Wecker klingelt"},
+    "app/Heute.dc.html": {"x": 0, "y": 3780, "w": 390, "h": 844, "title": "App · Heute"},
+    "app/Gebete.dc.html": {"x": 470, "y": 3780, "w": 390, "h": 844, "title": "App · Gebete"},
+    "app/Wecker.dc.html": {"x": 940, "y": 3780, "w": 390, "h": 844, "title": "App · Wecker"},
+    "app/Uhr.dc.html": {"x": 1410, "y": 3780, "w": 390, "h": 844, "title": "App · Uhr (Einstellungen)"},
+    "app/Gestaltung.dc.html": {"x": 1880, "y": 3780, "w": 390, "h": 844, "title": "App · Gestaltung"}
   },
   "order": [
     "Main.dc.html",
     "dev/Heute-Fajr.dc.html", "dev/Heute-Dhuhr.dc.html", "dev/Heute-Maghrib-ar.dc.html", "dev/Gebete.dc.html",
-    "dev/Nachtuhr.dc.html", "dev/Wetter.dc.html", "dev/Kalender.dc.html", "dev/Dhikr.dc.html",
+    "dev/Nachtuhr.dc.html", "dev/Wetter.dc.html", "dev/Kalender.dc.html", "dev/Mond.dc.html",
     "dev/Azan.dc.html", "dev/Erinnerung.dc.html", "dev/Wecker.dc.html",
     "app/Heute.dc.html", "app/Gebete.dc.html", "app/Wecker.dc.html", "app/Uhr.dc.html", "app/Gestaltung.dc.html"
   ],
   "notes": {
-    "t_dev": {"x": 0, "y": 1800, "text": "Uhr-Display (480 × 320)", "kind": "title1", "maxW": 2160},
-    "t_app": {"x": 0, "y": 3440, "text": "App (Handy)", "kind": "title1", "maxW": 2270}
+    "t_dev": {"x": 0, "y": 1880, "text": "Uhr-Display (480 × 320)", "kind": "title1", "maxW": 2160, "w": 240},
+    "t_app": {"x": 0, "y": 3520, "text": "App (Handy)", "kind": "title1", "maxW": 2270, "w": 240}
   }
 }

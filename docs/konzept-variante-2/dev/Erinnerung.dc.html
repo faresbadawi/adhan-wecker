@@ -11,20 +11,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;600&amp;display=swap" rel="stylesheet">
 <style>body{margin:0}</style>
 </helmet>
-<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #EBDDC6; color: #2A221A; font-family: 'Readex Pro', system-ui, sans-serif">
+<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #EFE4D1; color: #2C2419; font-family: 'Readex Pro', system-ui, sans-serif">
   <svg width="480" height="320" viewBox="0 0 480 320" style="position: absolute; left: 0; top: 0">
-    <path d="M40 236 C 110 50, 370 50, 440 236" fill="none" stroke="#2A221A" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"></path>
-    <path d="M40 236 C 110 50, 370 50, 440 236" fill="none" stroke="#9C5414" stroke-width="2.5" pathLength="100" stroke-dasharray="68 100" stroke-linecap="round"></path>
-    <circle cx="331" cy="116" r="8" fill="#E7B54A"></circle>
+    <defs>
+      <pattern id="gz" width="64" height="64" patternUnits="userSpaceOnUse"><g fill="none" stroke="#A8823F" stroke-width="0.9"><rect x="18" y="18" width="28" height="28"></rect><rect x="18" y="18" width="28" height="28" transform="rotate(45 32 32)"></rect><circle cx="32" cy="32" r="6"></circle><path d="M0 32h12M52 32h12M32 0v12M32 52v12M0 0l12 12M64 0 52 12M0 64l12-12M64 64 52 52"></path></g></pattern>
+      <radialGradient id="rz" cx="50%" cy="45%" r="62%"><stop offset="0.45" stop-color="#000"></stop><stop offset="1" stop-color="#fff"></stop></radialGradient>
+      <mask id="mz"><rect width="480" height="320" fill="url(#rz)"></rect></mask>
+    </defs>
+    <rect width="480" height="320" fill="url(#gz)" opacity="0.4" mask="url(#mz)"></rect>
+    <path d="M40 236 C 110 50, 370 50, 440 236" fill="none" stroke="#2C2419" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"></path>
+    <path d="M40 236 C 110 50, 370 50, 440 236" fill="none" stroke="#A86A30" stroke-width="2.5" pathLength="100" stroke-dasharray="68 100" stroke-linecap="round"></path>
+    <g transform="translate(331 116)"><circle r="16" fill="#D9A94A" fill-opacity="0.22"></circle><rect x="-6.5" y="-6.5" width="13" height="13" fill="#D9A94A"></rect><rect x="-6.5" y="-6.5" width="13" height="13" fill="#D9A94A" transform="rotate(45)"></rect><circle r="2.6" fill="#EFE4D1"></circle></g>
   </svg>
   <div style="position: absolute; left: 0; right: 0; top: 104px; text-align: center; font-size: 76px; font-weight: 200; line-height: 1">15:58</div>
-  <div style="position: absolute; left: 16px; right: 16px; bottom: 16px; height: 76px; border-radius: 20px; background: #2A221A; color: #FFF6EA; display: flex; align-items: center; gap: 14px; padding: 0 18px; box-shadow: 0 8px 24px rgba(42, 34, 26, .25)">
-    <span style="width: 44px; height: 44px; border-radius: 50%; background: #9C5414; display: flex; align-items: center; justify-content: center">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFF6EA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2ZM10 20a2 2 0 0 0 4 0"></path></svg>
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 16px; height: 76px; border-radius: 20px; background: #2C2419; color: #FFF7EC; display: flex; align-items: center; gap: 14px; padding: 0 18px; box-shadow: 0 8px 24px rgba(44, 36, 25, .22)">
+    <span style="width: 44px; height: 44px; border-radius: 50%; background: #A86A30; display: flex; align-items: center; justify-content: center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFF7EC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2ZM10 20a2 2 0 0 0 4 0"></path></svg>
     </span>
     <div style="flex: 1; display: flex; flex-direction: column">
       <span style="font-size: 20px">Asr in 10 Minuten</span>
-      <span style="font-size: 13px; color: #D9C9B4">16:08 · ein leiser Ton, dann blendet der Hinweis aus</span>
+      <span style="font-size: 13px; color: #DCCCB6">16:08 · ein leiser Ton, dann blendet der Hinweis aus</span>
     </div>
   </div>
 </div>

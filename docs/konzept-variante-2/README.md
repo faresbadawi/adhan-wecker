@@ -7,7 +7,8 @@ Idee: Die Uhr folgt dem Himmel. Jeder Gebetsabschnitt hat eine eigene Farbwelt
 Element ist ein Sonnenbogen mit allen Gebetszeiten. Schrift: Readex Pro, arabische
 Gebetsnamen in Aref Ruqaa.
 
-Uhr-Seiten: Heute · Gebete · Uhr (Nachtuhr) · Wetter · Kalender · Dhikr · Info & QR
+Uhr-Seiten: Heute · Gebete · Uhr (Nachtuhr) · Wetter · Kalender · Mond & Hijri · Info & QR
+Durchgehend: feines goldenes Achtstern-Gittermuster, Stern (Rub el Hizb) auf dem Sonnenbogen.
 Überlagerungen: Azan, Erinnerung vor dem Azan, Wecker
 App: Heute · Gebete · Wecker · Uhr (Gestaltung, Seiten, Helligkeit, Sprache, WLAN, Variante, Update)
 

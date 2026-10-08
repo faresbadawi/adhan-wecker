@@ -12,17 +12,25 @@
 <style>
 body{margin:0}
 @keyframes rise{0%{transform:translateY(60px);opacity:.35}100%{transform:translateY(0);opacity:1}}
-.sun{position:absolute;left:50%;bottom:-260px;width:520px;height:360px;margin-left:-260px;border-radius:50%;background:#F0A39A;opacity:.9;animation:rise 6s ease-out infinite alternate}
+.sun{position:absolute;left:50%;bottom:-260px;width:520px;height:360px;margin-left:-260px;border-radius:50%;background:#E8B4A8;opacity:.85;animation:rise 6s ease-out infinite alternate}
 @media (prefers-reduced-motion: reduce){.sun{animation:none}}
 </style>
 </helmet>
-<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #1B2347; color: #EEF0F7; font-family: 'Readex Pro', system-ui, sans-serif">
+<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #252C4A; color: #EEF0F6; font-family: 'Readex Pro', system-ui, sans-serif">
+  <svg width="480" height="320" viewBox="0 0 480 320" style="position: absolute; left: 0; top: 0">
+    <defs>
+      <pattern id="gz" width="64" height="64" patternUnits="userSpaceOnUse"><g fill="none" stroke="#D8C08C" stroke-width="0.9"><rect x="18" y="18" width="28" height="28"></rect><rect x="18" y="18" width="28" height="28" transform="rotate(45 32 32)"></rect><circle cx="32" cy="32" r="6"></circle><path d="M0 32h12M52 32h12M32 0v12M32 52v12M0 0l12 12M64 0 52 12M0 64l12-12M64 64 52 52"></path></g></pattern>
+      <linearGradient id="lz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"></stop><stop offset="0.55" stop-color="#000"></stop></linearGradient>
+      <mask id="mz"><rect width="480" height="320" fill="url(#lz)"></rect></mask>
+    </defs>
+    <rect width="480" height="320" fill="url(#gz)" opacity="0.3" mask="url(#mz)"></rect>
+  </svg>
   <span class="sun"></span>
-  <div style="position: absolute; left: 0; right: 0; top: 22px; text-align: center; font-size: 15px; color: #A7AFD0">Arbeit · Montag bis Freitag</div>
+  <div style="position: absolute; left: 0; right: 0; top: 22px; text-align: center; font-size: 15px; color: #A9B0CC">Arbeit · Montag bis Freitag</div>
   <div style="position: absolute; left: 0; right: 0; top: 50px; text-align: center; font-size: 96px; font-weight: 200; line-height: 1">05:30</div>
   <div style="position: absolute; left: 24px; right: 24px; bottom: 22px; display: flex; gap: 12px">
-    <button style="flex: 2; height: 64px; border: 0; border-radius: 18px; background: #EEF0F7; color: #1B2347; font: inherit; font-size: 19px; cursor: pointer">Schlummern · 10 Min.</button>
-    <button style="flex: 1; height: 64px; border: 0; border-radius: 18px; background: #1B2347; color: #EEF0F7; font: inherit; font-size: 19px; cursor: pointer">Aus</button>
+    <button style="flex: 2; height: 64px; border: 0; border-radius: 18px; background: #EEF0F6; color: #252C4A; font: inherit; font-size: 19px; cursor: pointer">Schlummern · 10 Min.</button>
+    <button style="flex: 1; height: 64px; border: 0; border-radius: 18px; background: #252C4A; color: #EEF0F6; font: inherit; font-size: 19px; cursor: pointer">Aus</button>
   </div>
 </div>
 </x-dc>
