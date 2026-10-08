@@ -5,6 +5,7 @@ export const LANGS = { ar: "العربية", de: "Deutsch", en: "English" };
 
 const T = {
   ar: {
+    place_title: "المكان", place_ph: "اكتب اسم المدينة، مثال: دمشق", place_saved: "تم حفظ المكان، الأوقات تُحسب الآن لهذا المكان", place_hint: "يُستخدم المكان لحساب أوقات الصلاة وللطقس.", mawaqit_hint: "مع Mawaqit تأتي الأوقات من المسجد المختار وليس من المكان.", mosque_link: "رابط المسجد من mawaqit.net", mosque_link_hint: "افتح mawaqit.net وابحث عن مسجدك، ثم انسخ الرابط من شريط العنوان والصقه هنا.", mosque_open: "فتح mawaqit.net", mosque_link_bad: "هذا ليس رابط مسجد من Mawaqit", 
     sig_strong: "إشارة قوية", sig_medium: "إشارة متوسطة", sig_weak: "إشارة ضعيفة",
     auto_dim: "تعتيم تلقائي ليلًا", night_brightness: "سطوع الشاشة ليلًا",
     auto_dim_hint: "من العشاء حتى الفجر تصبح الشاشة أخفت تلقائيًا، وفي النهار تعود إلى السطوع المضبوط. عند رنين المنبه يكون السطوع كاملًا.",
@@ -68,7 +69,7 @@ const T = {
     
     installed: "التطبيق مثبّت ✓", install_menu: "في Chrome: القائمة ⋮ ← «تثبيت التطبيق».",
     install_android: "على أندرويد (Chrome)", sc_0: "افتح نسخة التطبيق أولًا:", sc_open: "فتح نسخة التطبيق", sc_1: "افتح القائمة ⋮ في الأعلى.", sc_2: "اختر «إضافة إلى الشاشة الرئيسية» ثم «إضافة».",
-    sc_3: "افتح الأيقونة من الشاشة الرئيسية واضغط مرة على الشاشة، فيعمل التطبيق بملء الشاشة.", sc_adv: "بدون شريط المتصفح (متقدم)",
+    sc_3: "افتح التطبيق من أيقونته على الشاشة الرئيسية.", sc_adv: "بدون شريط المتصفح (متقدم)",
     install_why: "يسمح Chrome بتثبيت التطبيق فقط عبر اتصال آمن. الساعة تعمل داخل شبكتك المنزلية دون HTTPS، لذلك يلزم إعداد لمرة واحدة:",
     install_s1: "انسخ هذا العنوان والصقه في شريط العنوان في Chrome:", install_s2: "اختر «Enabled» وأدخل في الحقل عنوان الساعة هذا:",
     install_s3: "اضغط «Relaunch»، ثم افتح هذه الصفحة من جديد واضغط «تثبيت التطبيق».",
@@ -90,6 +91,7 @@ const T = {
   },
 
   de: {
+    place_title: "Ort", place_ph: "Ort eingeben, z. B. Damaskus", place_saved: "Ort gespeichert – die Zeiten werden jetzt für diesen Ort berechnet", place_hint: "Der Ort bestimmt die berechneten Gebetszeiten und das Wetter.", mawaqit_hint: "Bei Mawaqit kommen die Zeiten von der gewählten Moschee, nicht vom Ort.", mosque_link: "Link der Moschee von mawaqit.net", mosque_link_hint: "Öffne mawaqit.net, suche deine Moschee und kopiere den Link aus der Adresszeile hierher.", mosque_open: "mawaqit.net öffnen", mosque_link_bad: "Das ist kein Moschee-Link von Mawaqit", 
     sig_strong: "Signal stark", sig_medium: "Signal mittel", sig_weak: "Signal schwach",
     auto_dim: "Nachts automatisch dunkler", night_brightness: "Helligkeit nachts",
     auto_dim_hint: "Von Isha bis Fajr wird das Display von allein dunkler, tagsüber gilt die eingestellte Helligkeit. Klingelt ein Wecker, ist es voll hell.",
@@ -151,7 +153,7 @@ const T = {
     
     installed: "App ist installiert ✓", install_menu: "In Chrome: Menü ⋮ → „App installieren“.",
     install_android: "Auf Android (Chrome)", sc_0: "Zuerst die App-Version öffnen:", sc_open: "App-Version öffnen", sc_1: "Oben rechts das Menü ⋮ öffnen.", sc_2: "„Zum Startbildschirm hinzufügen“ wählen und „Hinzufügen“ tippen.",
-    sc_3: "Die App über das Symbol öffnen und einmal auf den Bildschirm tippen – dann läuft sie im Vollbild.", sc_adv: "Ohne Browserleiste (für Fortgeschrittene)",
+    sc_3: "Die App über ihr Symbol auf dem Startbildschirm öffnen.", sc_adv: "Ohne Browserleiste (für Fortgeschrittene)",
     install_why: "Chrome installiert Apps nur über eine sichere Verbindung. Die Uhr läuft in deinem Heimnetz ohne HTTPS, deshalb ist einmalig diese Einstellung nötig:",
     install_s1: "Diese Adresse kopieren und in Chrome in die Adresszeile einfügen:", install_s2: "Auf „Enabled“ stellen und in das Feld diese Adresse der Uhr eintragen:",
     install_s3: "„Relaunch“ tippen, diese Seite wieder öffnen und „App installieren“ tippen.",
@@ -173,6 +175,7 @@ const T = {
   },
 
   en: {
+    place_title: "Place", place_ph: "Type a city, e.g. Damascus", place_saved: "Place saved – times are now calculated for it", place_hint: "The place is used for calculated prayer times and the weather.", mawaqit_hint: "With Mawaqit, times come from the chosen mosque, not from the place.", mosque_link: "Mosque link from mawaqit.net", mosque_link_hint: "Open mawaqit.net, find your mosque and paste the link from the address bar here.", mosque_open: "Open mawaqit.net", mosque_link_bad: "This is not a Mawaqit mosque link", 
     sig_strong: "Strong signal", sig_medium: "Medium signal", sig_weak: "Weak signal",
     auto_dim: "Dim automatically at night", night_brightness: "Night brightness",
     auto_dim_hint: "From Isha until Fajr the display dims on its own; during the day it uses the brightness set above. While an alarm rings it is fully bright.",
@@ -234,7 +237,7 @@ const T = {
     
     installed: "App installed ✓", install_menu: "In Chrome: menu ⋮ → “Install app”.",
     install_android: "On Android (Chrome)", sc_0: "First open the app version:", sc_open: "Open app version", sc_1: "Open the menu ⋮ at the top right.", sc_2: "Choose “Add to Home screen” and tap “Add”.",
-    sc_3: "Open the app from its icon and tap the screen once – it then runs full screen.", sc_adv: "Without browser bar (advanced)",
+    sc_3: "Open the app from its icon on the home screen.", sc_adv: "Without browser bar (advanced)",
     install_why: "Chrome installs apps only over a secure connection. The clock runs in your home network without HTTPS, so this one-time setting is needed:",
     install_s1: "Copy this address and paste it into Chrome's address bar:", install_s2: "Set it to “Enabled” and enter this address of the clock in the field:",
     install_s3: "Tap “Relaunch”, open this page again and tap “Install app”.",

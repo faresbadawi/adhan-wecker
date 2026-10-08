@@ -359,7 +359,7 @@ ICONS = {
     "CLOUDY": 0xF0590, "FOG": 0xF0591, "RAINY": 0xF0597, "POURING": 0xF0596, "SNOWY": 0xF0598,
     "LIGHTNING": 0xF0593, "WINDY": 0xF059D,
     "THERMOMETER": 0xF050F, "HUMIDITY": 0xF058E, "ARROW_UP": 0xF19B2, "ARROW_DOWN": 0xF19B3,
-    "MOSQUE": 0xF1827, "VOLUME_OFF": 0xF0581, "SKIP_NEXT": 0xF04AD, "ALARM": 0xF0020,
+    "MOSQUE": 0xF1827, "SUNRISE": 0xF059C, "VOLUME_OFF": 0xF0581, "SKIP_NEXT": 0xF04AD, "ALARM": 0xF0020,
 }
 WEATHER = ["SUNNY", "NIGHT", "PARTLY_CLOUDY", "NIGHT_PARTLY_CLOUDY", "CLOUDY", "FOG", "RAINY", "POURING",
            "SNOWY", "LIGHTNING", "WINDY"]
@@ -650,6 +650,8 @@ def main():
     write_icon_image("img_alarm_lg", ICONS["ALARM"], 56, IMG_WHITE)
     masks["ornament"] = write_ornament("img_moon_orn", 196)
     write_icon_image("img_snooze", ICONS["ALARM_SNOOZE"], 22, IMG_WHITE)
+    # Sonnenaufgang auf der Seite "Drittel der Nacht"
+    write_icon_image("img_sunrise", ICONS["SUNRISE"], 34, IMG_WHITE)
     # Wetterdetails: gefühlte Temperatur, Luftfeuchte, Wind
     for i, icon in enumerate(["THERMOMETER", "HUMIDITY", "WINDY"]):
         write_icon_image(f"img_detail_{i}", ICONS[icon], 28, IMG_WHITE)

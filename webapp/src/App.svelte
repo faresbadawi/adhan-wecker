@@ -5,7 +5,7 @@
   import { App, Views, View, Toolbar, Link } from 'framework7-svelte';
   import { t, lang } from './lib/i18n.js';
   import { I } from './lib/icons.js';
-  import { app, refreshStatus, loadSettings, applyTheme, isStandalone, appMode } from './lib/store.svelte.js';
+  import { app, refreshStatus, loadSettings, applyTheme } from './lib/store.svelte.js';
   import routes from './routes.js';
 
   let accent = '#e9a27c';
@@ -28,13 +28,6 @@
     { id: 'alarm', url: '/alarm/', icon: I.alarm, label: 'nav_alarm' },
     { id: 'azan', url: '/azan/', icon: I.audio, label: 'nav_audio' },
   ];
-
-  // Vollbild nur in der gespeicherten Android-Verknüpfung (?app=1), nie im normalen Browser-Tab
-  function enterFullscreen() {
-    const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (!appMode() || isStandalone() || document.fullscreenElement || document.webkitFullscreenElement || !req) return;
-    try { const r = req.call(el, { navigationUI: 'hide' }); if (r && r.catch) r.catch(() => {}); } catch (e) { /* nicht erlaubt */ }
-  }
 
   onMount(() => {
     try {
@@ -62,7 +55,6 @@
     const bip = e => { e.preventDefault(); app.installEvt = e; };
     window.addEventListener('beforeinstallprompt', bip);
     window.addEventListener('appinstalled', () => (app.installEvt = null));
-    document.addEventListener('pointerup', enterFullscreen, { capture: true });
     return () => { clearInterval(tick); clearInterval(poll); document.removeEventListener('visibilitychange', vis); window.removeEventListener('beforeinstallprompt', bip); };
   });
 </script>

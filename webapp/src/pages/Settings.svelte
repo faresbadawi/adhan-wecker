@@ -11,12 +11,6 @@
 
 <Page>
   <TopBar title={t('nav_settings')} back settings={false} />
-  <BlockTitle>{t('grp_prayer')}</BlockTitle>
-  <List strong inset dividers>
-    <ListItem link="/settings/location/" title={t('nav_location')} after={app.S ? app.S.city : ''}>
-      {#snippet media()}<span class="ico">{@html I.location}</span>{/snippet}
-    </ListItem>
-  </List>
   <BlockTitle>{t('grp_clock')}</BlockTitle>
   <List strong inset dividers>
     <ListItem link="/settings/display/" title={t('nav_display')}>

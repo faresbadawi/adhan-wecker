@@ -1,6 +1,8 @@
 #include "night_screen.h"
 #include "theme.h"
 
+LV_IMG_DECLARE(img_sunrise);
+
 namespace night_screen
 {
     using namespace theme;
@@ -10,7 +12,7 @@ namespace night_screen
 
     static lv_obj_t *s_content, *s_loading;
     static lv_obj_t *s_time, *s_state, *s_countdown, *s_sunrise;
-    static lv_obj_t *s_tMaghrib, *s_tMidnight, *s_tFajr, *s_now;
+    static lv_obj_t *s_tMaghrib, *s_tMidnight, *s_tFajr, *s_tThird, *s_now;
 
     // Zahlen immer von links nach rechts, auch in der arabischen Anzeige
     static lv_obj_t *digits(lv_obj_t *parent, const lv_font_t *font, Role role)
@@ -100,10 +102,29 @@ namespace night_screen
         s_tMidnight = mark(s_content, 0.5f, lang::text(TXT_MIDNIGHT_LBL));
         s_tFajr = mark(s_content, 1, prayerName(model::FAJR, false));
 
-        // Beschriftung des hervorgehobenen Abschnitts unter der Leiste
+        // Beginn des letzten Drittels auf der Leiste: Ring in der Akzentfarbe, darunter die Uhrzeit
+        // und daneben (zum Fajr hin) die Beschriftung des Abschnitts
+        const lv_coord_t tx = lineX(2.0f / 3);
+        lv_obj_t *ring = box(s_content);
+        lv_obj_set_size(ring, 18, 18);
+        lv_obj_set_pos(ring, tx - 9, LINE_Y - 9);
+        lv_obj_set_style_radius(ring, LV_RADIUS_CIRCLE, 0);
+        setRole(ring, Role::ACCENT); // Rand in der Akzentfarbe, Füllung dunkel (lokaler Stil hat Vorrang)
+        lv_obj_set_style_bg_color(ring, black(), 0);
+        lv_obj_set_style_bg_opa(ring, LV_OPA_COVER, 0);
+        lv_obj_set_style_border_width(ring, 4, 0);
+        lv_obj_set_style_border_opa(ring, LV_OPA_COVER, 0);
+
+        static constexpr lv_coord_t T_W = 60;
+        s_tThird = digits(s_content, &font_josefin_20, Role::ACCENT);
+        lv_obj_set_width(s_tThird, T_W);
+        lv_obj_set_style_text_align(s_tThird, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_pos(s_tThird, tx - T_W / 2, LINE_Y + 14);
+
         const lv_img_dsc_t *thirdTxt = lang::text(TXT_LASTTHIRD_LBL);
         lv_obj_t *third = image(s_content, thirdTxt, Role::ACCENT);
-        lv_obj_set_pos(third, (lineX(2.0f / 3) + lineX(1)) / 2 - thirdTxt->header.w / 2, LINE_Y + 10);
+        const lv_coord_t lx = lang::rtl() ? tx - T_W / 2 - 6 - thirdTxt->header.w : tx + T_W / 2 + 6;
+        lv_obj_set_pos(third, lx, LINE_Y + 16);
 
         // Punkt für "jetzt"
         s_now = box(s_content);
@@ -113,16 +134,17 @@ namespace night_screen
         lv_obj_set_style_bg_opa(s_now, LV_OPA_COVER, 0);
         lv_obj_add_flag(s_now, LV_OBJ_FLAG_HIDDEN);
 
-        // Sonnenaufgang klein unten
+        // Sonnenaufgang unten: Symbol, Name und Uhrzeit
         lv_obj_t *sun = box(s_content);
         lv_obj_set_size(sun, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
         lv_obj_set_style_base_dir(sun, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
         lv_obj_set_flex_flow(sun, LV_FLEX_FLOW_ROW);
         lv_obj_set_flex_align(sun, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-        lv_obj_set_style_pad_column(sun, 8, 0);
-        image(sun, prayerName(model::SUNRISE, false), Role::MUTED);
-        s_sunrise = digits(sun, &font_josefin_20, Role::MUTED);
-        lv_obj_align(sun, LV_ALIGN_TOP_MID, 0, 262);
+        lv_obj_set_style_pad_column(sun, 12, 0);
+        image(sun, &img_sunrise, Role::ACCENT);
+        image(sun, prayerName(model::SUNRISE, true), Role::MAIN);
+        s_sunrise = digits(sun, &font_josefin_25, Role::MAIN);
+        lv_obj_align(sun, LV_ALIGN_TOP_MID, 0, 256);
     }
 
     void set(const model::NightTimes &n)
@@ -141,6 +163,7 @@ namespace night_screen
         setClockText(s_tMidnight, n.midnight);
         setClockText(s_tFajr, n.fajr);
         setClockText(s_sunrise, n.sunrise);
+        setClockText(s_tThird, n.lastThird);
 
         if (n.secondsToLastThird > 0)
         {

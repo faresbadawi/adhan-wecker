@@ -3,13 +3,9 @@
   "name": "Smart Azan Wecker",
   "short_name": "Azan Wecker",
   "description": "Smart Azan Wecker – Gebetszeiten, Azan und Einstellungen der Uhr",
-  "start_url": "/?app=1#dashboard",
+  "start_url": "/?app=1",
   "scope": "/",
-  "display": "fullscreen",
-  "display_override": [
-    "fullscreen",
-    "standalone"
-  ],
+  "display": "standalone",
   "orientation": "any",
   "background_color": "#0a0b0b",
   "theme_color": "#0a0b0b",
