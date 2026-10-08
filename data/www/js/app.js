@@ -56,7 +56,8 @@ const TABS = ["dashboard", "prayer", "alarm", "audio"];
 const SUB = ["location", "display", "lang", "wifi", "device"];
 const NAV = [...TABS, "settings", ...SUB];
 const parentOf = k => SUB.includes(k) ? "settings" : k;
-const PAGE_ICON = { clock: I.clock, prayer: I.prayer, weather: I.cloud, calendar: I.calendar };
+const PAGE_ICON = { clock: I.clock, prayer: I.prayer, weather: I.cloud, calendar: I.calendar, night: I.moon,
+  moon: svg('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16a5 8 0 0 0 0-16z" fill="currentColor"/>') };
 const SKY_ICON = { clear: I.sun, partly_cloudy: I.partly, cloudy: I.cloud, fog: I.fog, drizzle: I.rain, rain: I.rain, snow: I.snow, thunder: I.thunder };
 
 // Berechnungsmethoden von Aladhan: [id, arabisch, englisch]
@@ -382,8 +383,7 @@ VIEWS.location.bind = () => {
 
 VIEWS.display = () => `
   ${card(t("pages"), I.display, `<div class="list" id="pages"></div>
-    <div class="item"><span class="pico">${I.moon}</span><span class="name">${t("night_page")}</span>${toggle(`id="showNight"`, S.showNight)}</div>
-    <p class="hint">${t("pages_hint")} ${t("night_page_hint")}</p>`)}
+    <p class="hint">${t("pages_hint")}</p>`)}
   ${fold(t("background"), "", `<div class="bgs" id="bgs">${loading("")}</div>`)}
   ${fold(t("presets"), "", `<div class="themes" id="presets"></div>`)}
   ${fold(t("custom_colors"), "", `<div class="list" id="customCols"></div>`)}
@@ -616,7 +616,6 @@ VIEWS.display.bind = () => {
     [pages[i], pages[j]] = [pages[j], pages[i]];
     render(); save({ pages });
   };
-  $("showNight").onchange = () => save({ showNight: $("showNight").checked });
   $("pages").onchange = e => { const c = e.target; if (c.dataset.on === undefined) return; pages[c.dataset.on].on = c.checked; render(); save({ pages }); };
 
   // Hintergründe; das eigene Bild ("custom") steht vorne, die Kachel "+" lädt ein neues hoch (ersetzt das alte)

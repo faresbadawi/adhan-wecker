@@ -6,8 +6,8 @@ namespace calendar_screen
     using namespace theme;
 
     static constexpr int COLS = 7, ROWS = 6;
-    static constexpr lv_coord_t CELL_W = 61, CELL_H = 38;
-    static constexpr lv_coord_t GRID_X = (SCREEN_W - COLS * CELL_W) / 2, GRID_Y = 78;
+    static constexpr lv_coord_t CELL_W = 61, CELL_H = 36; // sechs Zeilen enden über den Seitenpunkten
+    static constexpr lv_coord_t GRID_X = (SCREEN_W - COLS * CELL_W) / 2, GRID_Y = 76;
 
     static lv_obj_t *s_gMonth, *s_gYear;
     static lv_obj_t *s_hRow, *s_hFirst, *s_hSep, *s_hLast, *s_hYear;

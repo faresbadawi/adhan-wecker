@@ -8,6 +8,8 @@ extern "C" {
 
 enum TextId
 {
+    TXT_MOON_TITLE,
+    TXT_WHITE_DAYS,
     TXT_TITLE,
     TXT_NEXT,
     TXT_LOADING,
@@ -64,6 +66,14 @@ enum TextId
     TXT_HOLIDAY_5,
     TXT_HOLIDAY_6,
     TXT_HOLIDAY_7,
+    TXT_MOONPHASE_0,
+    TXT_MOONPHASE_1,
+    TXT_MOONPHASE_2,
+    TXT_MOONPHASE_3,
+    TXT_MOONPHASE_4,
+    TXT_MOONPHASE_5,
+    TXT_MOONPHASE_6,
+    TXT_MOONPHASE_7,
     TXT_WDAY_0,
     TXT_WDAY_1,
     TXT_WDAY_2,

@@ -20,6 +20,7 @@
 #include "ui/calendar_screen.h"
 #include "ui/clock_screen.h"
 #include "ui/lang.h"
+#include "ui/moon_screen.h"
 #include "ui/night_screen.h"
 #include "ui/prayer_screen.h"
 #include "ui/settings_screen.h"
@@ -42,13 +43,26 @@ static void applySettings()
     lcd::setBrightness(st.brightness);
     azan::setVolumes(st.azanVolume); // Wecker und Vorhören setzen ihre Lautstärke selbst
 
-    // Seiten: Reihenfolge und Sichtbarkeit (Index = settings::PageId = ui::Page)
-    bool visible[settings::PAGE_ID_COUNT];
-    visible[settings::PAGE_ID_CLOCK] = st.showClock;
-    visible[settings::PAGE_ID_PRAYER] = st.showPrayerTimes;
-    visible[settings::PAGE_ID_WEATHER] = st.showWeather;
-    visible[settings::PAGE_ID_CALENDAR] = st.showCalendar;
-    ui::setPages(st.pageOrder, visible, st.showNight);
+    // Seiten: Reihenfolge und Sichtbarkeit aller Inhaltsseiten ("night,prayer,-moon,...")
+    {
+        static const char *const KEYS[] = {"clock", "prayer", "weather", "calendar", "night", "moon"};
+        static const ui::Page PAGES[] = {ui::PAGE_CLOCK, ui::PAGE_PRAYER, ui::PAGE_WEATHER, ui::PAGE_CALENDAR, ui::PAGE_NIGHT, ui::PAGE_MOON};
+        const String layout = settings::pageLayout();
+        ui::Page order[ui::PAGE_COUNT];
+        int count = 0, start = 0;
+        while (start < (int)layout.length() && count < ui::PAGE_COUNT)
+        {
+            int end = layout.indexOf(',', start);
+            if (end < 0)
+                end = layout.length();
+            const String key = layout.substring(start, end);
+            for (int k = 0; k < 6; k++)
+                if (key == KEYS[k])
+                    order[count++] = PAGES[k];
+            start = end + 1;
+        }
+        ui::setPages(order, count);
+    }
 
     if (strcmp(shownBackground, st.background) != 0)
     {
@@ -135,6 +149,8 @@ static void refreshEverySecond(const struct tm &now)
         prayer_screen::setHoliday(holiday);
         clock_screen::setHoliday(holiday);
         refreshCalendar(now);
+        struct tm t = now;
+        moon_screen::update(mktime(&t), s_today);
     }
 
     static uint32_t settingsVersion = 0;
@@ -185,6 +201,16 @@ static void refreshEverySecond(const struct tm &now)
         model::NightTimes n;
         prayers::night(now, n);
         night_screen::set(n);
+    }
+
+    {
+        static int moonHour = -1;
+        if (now.tm_hour != moonHour)
+        {
+            moonHour = now.tm_hour;
+            struct tm t = now;
+            moon_screen::update(mktime(&t), s_today);
+        }
     }
 
     if (s_today.valid)

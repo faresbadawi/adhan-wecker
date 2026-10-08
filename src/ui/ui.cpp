@@ -1,6 +1,7 @@
 #include "ui.h"
 #include "calendar_screen.h"
 #include "clock_screen.h"
+#include "moon_screen.h"
 #include "night_screen.h"
 #include "prayer_screen.h"
 #include "settings_screen.h"
@@ -69,26 +70,26 @@ namespace ui
         calendar_screen::create(s_page[PAGE_CALENDAR]);
         settings_screen::create(s_page[PAGE_SETTINGS]);
         night_screen::create(s_page[PAGE_NIGHT]);
+        moon_screen::create(s_page[PAGE_MOON]);
 
-        const uint8_t order[4] = {PAGE_CLOCK, PAGE_PRAYER, PAGE_WEATHER, PAGE_CALENDAR};
-        const bool visible[4] = {true, true, true, true};
-        setPages(order, visible, true);
+        const Page order[] = {PAGE_NIGHT, PAGE_PRAYER, PAGE_CLOCK, PAGE_WEATHER, PAGE_CALENDAR};
+        setPages(order, 5);
         showPage(PAGE_PRAYER);
     }
 
-    void setPages(const uint8_t order[4], const bool visible[4], bool night)
+    void setPages(const Page *order, int count)
     {
         lv_obj_t *active = lv_tileview_get_tile_act(s_tiles);
 
         // sichtbare Seiten in der gewünschten Reihenfolge, Einstellungen immer zuletzt
         s_shownCount = 0;
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < count && s_shownCount < PAGE_COUNT - 1; i++)
         {
-            if (order[i] >= 4 || !visible[order[i]])
-                continue;
-            if (order[i] == PAGE_PRAYER && night)
-                s_shown[s_shownCount++] = PAGE_NIGHT;
-            s_shown[s_shownCount++] = (Page)order[i];
+            bool dup = order[i] >= PAGE_COUNT || order[i] == PAGE_SETTINGS;
+            for (int k = 0; k < s_shownCount && !dup; k++)
+                dup = s_shown[k] == order[i];
+            if (!dup)
+                s_shown[s_shownCount++] = order[i];
         }
         s_shown[s_shownCount++] = PAGE_SETTINGS;
 

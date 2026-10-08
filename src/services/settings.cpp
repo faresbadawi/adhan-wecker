@@ -305,4 +305,56 @@ namespace settings
         p.putString(("n" + String(i)).c_str(), name.substring(0, 40));
         p.end();
     }
+
+    static const char *const PAGE_KEYS[] = {"clock", "prayer", "weather", "calendar", "night", "moon"};
+
+    String pageLayout()
+    {
+        Preferences p;
+        p.begin("ui", true);
+        String l = p.getString("pages", "");
+        p.end();
+        if (l.length())
+            return l;
+        // abgeleitet aus den alten Feldern: Nachtseite links neben den Gebetszeiten, Mond ausgeblendet
+        const Settings st = get();
+        const bool vis[PAGE_ID_COUNT] = {st.showClock, st.showPrayerTimes, st.showWeather, st.showCalendar};
+        for (int i = 0; i < PAGE_ID_COUNT; i++)
+        {
+            const int id = st.pageOrder[i];
+            if (id == PAGE_ID_PRAYER)
+                l += String(st.showNight ? "" : "-") + "night,";
+            l += String(vis[id] ? "" : "-") + PAGE_KEYS[id] + ",";
+        }
+        return l + "-moon";
+    }
+
+    bool setPageLayout(const String &layout)
+    {
+        // nur bekannte Schlüssel, jeder höchstens einmal
+        int start = 0, seen = 0;
+        while (start < (int)layout.length())
+        {
+            int end = layout.indexOf(',', start);
+            if (end < 0)
+                end = layout.length();
+            String key = layout.substring(start, end);
+            if (key.startsWith("-"))
+                key.remove(0, 1);
+            int id = -1;
+            for (int k = 0; k < 6; k++)
+                if (key == PAGE_KEYS[k])
+                    id = k;
+            if (id < 0 || (seen & (1 << id)))
+                return false;
+            seen |= 1 << id;
+            start = end + 1;
+        }
+        Preferences p;
+        p.begin("ui", false);
+        p.putString("pages", layout);
+        p.end();
+        s_version++;
+        return true;
+    }
 }

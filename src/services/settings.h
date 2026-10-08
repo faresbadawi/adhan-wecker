@@ -121,6 +121,12 @@ namespace settings
     // Prüft, speichert dauerhaft und erhöht version(). false bei ungültigen Werten.
     bool set(const Settings &s);
 
+    // Reihenfolge aller Inhaltsseiten als Text, z. B. "night,prayer,clock,weather,calendar,-moon"
+    // ("-" = ausgeblendet). Schlüssel: clock, prayer, weather, calendar, night, moon.
+    // Ohne gespeicherte Folge wird sie aus pageOrder/show*/showNight abgeleitet.
+    String pageLayout();
+    bool setPageLayout(const String &layout); // erhöht version()
+
     // Name eines Weckers (frei wählbar, z. B. "Arbeit"); eigener NVS-Bereich "alarms"
     String alarmName(int i);
     void setAlarmName(int i, const String &name);

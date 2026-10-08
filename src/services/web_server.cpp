@@ -42,20 +42,6 @@ namespace web
     }
 
     static const char *AZAN_KEYS[5] = {"fajr", "dhuhr", "asr", "maghrib", "isha"};
-    // Index = settings::PageId
-    static const char *PAGE_KEYS[settings::PAGE_ID_COUNT] = {"clock", "prayer", "weather", "calendar"};
-
-    static bool *pageVisible(settings::Settings &st, int id)
-    {
-        switch (id)
-        {
-        case settings::PAGE_ID_CLOCK: return &st.showClock;
-        case settings::PAGE_ID_PRAYER: return &st.showPrayerTimes;
-        case settings::PAGE_ID_WEATHER: return &st.showWeather;
-        default: return &st.showCalendar;
-        }
-    }
-
     static String toHex(uint32_t c)
     {
         char buf[8];
@@ -123,13 +109,24 @@ namespace web
         doc["mawaqit"]["slug"] = st.mawaqitSlug;
         doc["mawaqit"]["name"] = st.mawaqitName;
 
-        // Seiten in Reihenfolge: [{"id":"prayer","on":true}, ...]
+        // Seiten in Reihenfolge: [{"id":"night","on":true}, {"id":"prayer","on":true}, ...]
         JsonArray pages = doc["pages"].to<JsonArray>();
-        for (int i = 0; i < settings::PAGE_ID_COUNT; i++)
         {
-            JsonObject p = pages.add<JsonObject>();
-            p["id"] = PAGE_KEYS[st.pageOrder[i]];
-            p["on"] = *pageVisible(st, st.pageOrder[i]);
+            const String layout = settings::pageLayout();
+            int start = 0;
+            while (start < (int)layout.length())
+            {
+                int end = layout.indexOf(',', start);
+                if (end < 0)
+                    end = layout.length();
+                String key = layout.substring(start, end);
+                JsonObject p = pages.add<JsonObject>();
+                p["on"] = !key.startsWith("-");
+                if (key.startsWith("-"))
+                    key.remove(0, 1);
+                p["id"] = key;
+                start = end + 1;
+            }
         }
         String out;
         serializeJson(doc, out);
@@ -216,21 +213,21 @@ namespace web
             return;
         }
 
-        // Seiten: vollständige Liste in neuer Reihenfolge (unbekannte IDs ignorieren)
+        // Seiten: vollständige Liste in neuer Reihenfolge, z. B. Nacht- und Mondseite frei verschiebbar
         JsonArray pages = doc["pages"];
-        if (pages.size() == settings::PAGE_ID_COUNT)
+        if (pages.size() > 0)
         {
-            for (int i = 0; i < settings::PAGE_ID_COUNT; i++)
+            String layout;
+            for (JsonObject p : pages)
             {
-                const char *key = pages[i]["id"] | "";
-                for (int id = 0; id < settings::PAGE_ID_COUNT; id++)
-                {
-                    if (strcmp(key, PAGE_KEYS[id]) == 0)
-                    {
-                        st.pageOrder[i] = id;
-                        *pageVisible(st, id) = pages[i]["on"] | true;
-                    }
-                }
+                if (layout.length())
+                    layout += ",";
+                layout += String((p["on"] | true) ? "" : "-") + (const char *)(p["id"] | "");
+            }
+            if (!settings::setPageLayout(layout))
+            {
+                s_server.send(400, "application/json", "{\"error\":\"pages\"}");
+                return;
             }
         }
 
@@ -684,7 +681,7 @@ namespace web
     static void sendScreenshot()
     {
         const int page = s_server.arg("page").toInt();
-        if (page >= 1 && page <= 6)
+        if (page >= 1 && page <= ui::PAGE_COUNT)
         {
             ui::showPage((ui::Page)(page - 1));
             for (int i = 0; i < 40; i++) // Wischanimation abwarten

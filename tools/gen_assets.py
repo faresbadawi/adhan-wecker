@@ -213,6 +213,31 @@ def write_icon_image(name, codepoint, size, color):
     return mask
 
 
+def write_ornament(name, size):
+    """Achtstern-Ornament (zwei verdrehte Quadrate, Kreis, kleine Sterne an den Spitzen) als Alphamaske;
+    umrahmt den Mond und dreht sich auf der Mondseite langsam."""
+    ss = 4
+    S = size * ss
+    m = Image.new("L", (S, S), 0)
+    d = ImageDraw.Draw(m)
+    c = S / 2
+    r = S * 0.46
+    w = max(2, int(1.6 * ss))
+    for rot in (0, 45):
+        pts = [(c + r * math.cos(math.radians(rot + 45 + 90 * k)), c + r * math.sin(math.radians(rot + 45 + 90 * k))) for k in range(4)]
+        d.polygon(pts, outline=255, width=w)
+    rc = r * 0.80
+    d.ellipse([c - rc, c - rc, c + rc, c + rc], outline=255, width=w)
+    for k in range(8):  # kleine Punkte an den Sternspitzen
+        a = math.radians(45 * k)
+        px, py = c + r * 1.02 * math.cos(a), c + r * 1.02 * math.sin(a)
+        rd = 2.2 * ss
+        d.ellipse([px - rd, py - rd, px + rd, py + rd], fill=255)
+    m = m.resize((size, size), Image.LANCZOS)
+    write_image_c(name, np.asarray(m, np.uint8).tobytes(), size, size, "LV_IMG_CF_ALPHA_8BIT")
+    return m
+
+
 # Ersatzzeichen: U+2236 sieht aus wie ":" und gilt in LVGLs Bidi-Logik nicht als neutral.
 # So bleibt eine Uhrzeit wie "20:41" in arabischem Text zusammen.
 # U+200E (LRM) bekommt eine leere Glyphe ohne Breite: unsichtbar, für LVGL aber "links nach rechts".
@@ -369,6 +394,8 @@ LANGS = ["ar", "de", "en"]  # Reihenfolge = ui::Lang
 # Feste Texte: Schlüssel -> (Größe der arabischen Fassung, fett, {Sprache: Text}).
 # Alle Texte werden weiß als Alphamaske erzeugt und auf dem Gerät in ihrer Farbgruppe gezeichnet.
 TEXTS = {
+    "moon_title": (30, True, {"ar": "القمر والتقويم الهجري", "de": "Mond & Hijri", "en": "Moon & Hijri"}),
+    "white_days": (19, False, {"ar": "الأيام البيض", "de": "Weiße Tage", "en": "White days"}),
     "title": (30, True, {"ar": "مواقيت الصلاة", "de": "Gebetszeiten", "en": "Prayer Times"}),
     "next": (22, False, {"ar": "الصلاة القادمة", "de": "Nächstes Gebet", "en": "Next prayer"}),
     "loading": (24, False, {"ar": "جارٍ تحميل المواقيت …", "de": "Gebetszeiten werden geladen …",
@@ -391,7 +418,7 @@ TEXTS = {
     "settings": (30, True, {"ar": "الإعدادات", "de": "Einstellungen", "en": "Settings"}),
     "network": (22, False, {"ar": "الشبكة", "de": "Netzwerk", "en": "Network"}),
     "web": (22, False, {"ar": "صفحة الإعدادات", "de": "Einstellungsseite", "en": "Settings page"}),
-    "scan": (20, False, {"ar": "امسح الرمز بهاتفك لفتح الإعدادات", "de": "Mit dem Handy scannen",
+    "scan": (20, False, {"ar": "امسح الرمز بهاتفك", "de": "Mit dem Handy scannen",
                          "en": "Scan with your phone"}),
     "offline": (24, False, {"ar": "غير متصل بالشبكة", "de": "Nicht verbunden", "en": "Not connected"}),
     "sig_strong": (22, False, {"ar": "إشارة قوية", "de": "Signal stark", "en": "Strong signal"}),
@@ -446,6 +473,10 @@ LISTS = {
     "prayer": (22, False, PRAYER_NAMES),
     "prayer_lg": (34, False, PRAYER_NAMES),
     "holiday": (20, False, HOLIDAYS),
+    "moonphase": (21, False, {  # Mondalter in Achteln, 0 = Neumond
+        "ar": ["محاق", "هلال متزايد", "تربيع أول", "أحدب متزايد", "بدر", "أحدب متناقص", "تربيع ثانٍ", "هلال متناقص"],
+        "de": ["Neumond", "Zunehmende Sichel", "Erstes Viertel", "Zunehmender Mond", "Vollmond", "Abnehmender Mond", "Letztes Viertel", "Abnehmende Sichel"],
+        "en": ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous", "Full moon", "Waning gibbous", "Last quarter", "Waning crescent"]}),
     "wday": (32, False, {  # tm_wday 0..6
         "ar": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
         "de": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
@@ -462,7 +493,7 @@ LISTS = {
         "en": ["January", "February", "March", "April", "May", "June",
                "July", "August", "September", "October", "November", "December"]}),
     "hmonth": (26, False, HIJRI),
-    "hmonth_sm": ((21, 19), False, HIJRI_SHORT),  # (Größe Arabisch, Größe Latein vor Skalierung)
+    "hmonth_sm": ((18, 17), False, HIJRI_SHORT),  # (Größe Arabisch, Größe Latein vor Skalierung)
     "sky": (26, False, {  # model::Sky
         "ar": ["صافٍ", "غائم جزئيًا", "غائم", "ضباب", "رذاذ", "مطر", "ثلج", "عاصفة رعدية"],
         "de": ["Klar", "Teils bewölkt", "Bewölkt", "Nebel", "Nieselregen", "Regen", "Schnee", "Gewitter"],
@@ -615,6 +646,7 @@ def main():
         + ", ".join(f"&img_wifi_{i}" for i in range(2)) + "};\n")
     write_icon_image("img_alarm", ICONS["ALARM"], 24, IMG_WHITE)
     write_icon_image("img_alarm_lg", ICONS["ALARM"], 56, IMG_WHITE)
+    masks["ornament"] = write_ornament("img_moon_orn", 196)
     write_icon_image("img_snooze", ICONS["ALARM_SNOOZE"], 22, IMG_WHITE)
     # Wetterdetails: gefühlte Temperatur, Luftfeuchte, Wind
     for i, icon in enumerate(["THERMOMETER", "HUMIDITY", "WINDY"]):
