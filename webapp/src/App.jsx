@@ -6,7 +6,7 @@ import { IonReactHashRouter } from '@ionic/react-router';
 import { Route, Navigate } from 'react-router-dom';
 import { homeOutline, alarmOutline, volumeHighOutline } from 'ionicons/icons';
 import { t, lang } from './lib/i18n.js';
-import { set, get, refreshStatus, loadSettings, applyTheme } from './lib/store.js';
+import { set, get, refreshStatus, loadSettings, applyTheme, save, confirmBox, slugFromLink } from './lib/store.js';
 import Hosts from './components/Hosts.jsx';
 import Home from './pages/Home.jsx';
 import Prayer from './pages/Prayer.jsx';
@@ -17,9 +17,21 @@ import Display from './pages/Display.jsx';
 import Language from './pages/Language.jsx';
 import Wifi from './pages/Wifi.jsx';
 import Device from './pages/Device.jsx';
+import Install from './pages/Install.jsx';
+import { reloadApp } from './lib/errors.js';
 
 // Moschee-Symbol für den Tab "Gebetszeiten"
 const mosque = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='none' stroke='currentColor' stroke-width='32' stroke-linecap='round' stroke-linejoin='round' d='M96 464V272c0-88 72-136 160-176 88 40 160 88 160 176v192M48 464h416M208 464v-80a48 48 0 0 1 96 0v80M256 96V40'/></svg>";
+
+// Aus der Mawaqit-App geteilte Moschee (Web Share Target, siehe manifest.json): ?title=…&text=…&url=…
+function sharedMosque() {
+  const q = new URLSearchParams(location.search);
+  const all = [q.get('url'), q.get('text'), q.get('title')].filter(Boolean).join(' ');
+  const slug = slugFromLink(all);
+  if (!slug) return null;
+  const name = (q.get('title') || (q.get('text') || '').replace(/https?:\/\/\S+/g, '')).trim().split('\n')[0].slice(0, 60);
+  return { slug, name: name || slug };
+}
 
 export default function App() {
   useEffect(() => {
@@ -35,13 +47,18 @@ export default function App() {
       const { ST, online } = get();
       if (ST && ST.lang && online && ST.lang !== lang()) {
         try { localStorage.setItem('lang', ST.lang); } catch (e) { /* privat */ }
-        location.reload();
+        reloadApp();
         return;
       }
       await loadSettings();
+      const shared = sharedMosque();
+      if (shared) {
+        history.replaceState(null, '', '/?app=1#/prayer');
+        location.hash = '#/prayer';
+        if (await confirmBox(t('mosque_take'), shared.name)) await save({ source: 'mawaqit', mawaqit: shared });
+      }
     })();
 
-    const tick = setInterval(() => set({ now: Date.now() }), 1000);
     const poll = setInterval(() => { if (!document.hidden) refreshStatus(); }, 20000);
     const vis = () => { if (!document.hidden) refreshStatus(); };
     document.addEventListener('visibilitychange', vis);
@@ -50,7 +67,7 @@ export default function App() {
     const inst = () => set({ installEvt: null });
     window.addEventListener('appinstalled', inst);
     return () => {
-      clearInterval(tick); clearInterval(poll);
+      clearInterval(poll);
       document.removeEventListener('visibilitychange', vis);
       window.removeEventListener('beforeinstallprompt', bip);
       window.removeEventListener('appinstalled', inst);
@@ -71,6 +88,7 @@ export default function App() {
             <Route path="/settings/lang" element={<Language />} />
             <Route path="/settings/wifi" element={<Wifi />} />
             <Route path="/settings/device" element={<Device />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/" element={<Navigate to="/home" replace />} />
           </IonRouterOutlet>
           <IonTabBar slot="bottom">

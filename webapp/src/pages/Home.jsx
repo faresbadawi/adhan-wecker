@@ -8,12 +8,13 @@ import Svg from '../components/Svg.jsx';
 import { t } from '../lib/i18n.js';
 import { I, SKY_ICON, PRAYER_ICON } from '../lib/icons.js';
 import { ALL_TIMES } from '../lib/constants.js';
-import { useApp, set, save, refreshStatus, locale, duration, hijri, nowSec, elapsed, toMin, two, pname, signal, isStandalone } from '../lib/store.js';
+import { useApp, set, save, refreshStatus, locale, duration, hijri, nowSec, elapsed, toMin, two, pname, signal, isStandalone, useNow } from '../lib/store.js';
 
 const RING = 2 * Math.PI * 104; // Umfang des Fortschrittsrings
 
 export default function Home() {
   const st = useApp();
+  useNow(); // Uhr und Countdowns jede Sekunde
   const { ST, S, online, installEvt } = st;
   const router = useIonRouter();
   const p = ST && ST.prayer;
@@ -41,10 +42,10 @@ export default function Home() {
   const past = k => k !== next && p && toMin(p.times[k]) <= ns / 60 && next !== 'fajr';
 
   const [bannerOff, setBannerOff] = useState(() => { try { return localStorage.getItem('installBanner') === 'off'; } catch (e) { return false; } });
-  const showBanner = !bannerOff && !isStandalone() && (installEvt || /android/i.test(navigator.userAgent));
+  const showBanner = !bannerOff && !isStandalone() && (installEvt || /android|iphone|ipad/i.test(navigator.userAgent));
   const closeBanner = () => { setBannerOff(true); try { localStorage.setItem('installBanner', 'off'); } catch (e) { /* privat */ } };
   async function install() {
-    if (!installEvt) { router.push('/settings/device'); return; }
+    if (!installEvt) { router.push('/install'); return; }
     installEvt.prompt();
     await installEvt.userChoice;
     set({ installEvt: null });
@@ -63,8 +64,8 @@ export default function Home() {
         {showBanner && (
           <div className="banner">
             <IonIcon icon={downloadOutline} className="accent" />
-            <div className="grow">{t('install_banner')}</div>
-            <IonButton size="small" shape="round" onClick={install}>{installEvt ? t('install') : t('install_how')}</IonButton>
+            <div className="grow">{t('inst_banner')}</div>
+            <IonButton size="small" shape="round" onClick={install}>{installEvt ? t('install') : t('inst_how')}</IonButton>
             <IonButton size="small" fill="clear" color="medium" onClick={closeBanner} aria-label={t('close')}><IonIcon slot="icon-only" icon={close} /></IonButton>
           </div>
         )}

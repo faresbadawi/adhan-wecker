@@ -5,6 +5,7 @@ import { Bar } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t, lang, LANGS } from '../lib/i18n.js';
 import { api, toast } from '../lib/store.js';
+import { reloadApp } from '../lib/errors.js';
 
 export default function Language() {
   async function choose(l) {
@@ -14,7 +15,7 @@ export default function Language() {
       if (!r.ok) throw new Error();
       try { localStorage.setItem('lang', l); } catch (e) { /* privat */ }
       toast(t('lang_restart'));
-      setTimeout(() => location.reload(), 900);
+      setTimeout(() => reloadApp(), 900);
     } catch (e) { toast(t('offline'), true); }
   }
   return (

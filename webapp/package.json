@@ -12,7 +12,6 @@
     "@ionic/react": "^9.0.7",
     "@ionic/react-router": "^9.0.7",
     "ionicons": "^8.1.0",
-    "leaflet": "1.9",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router": "^6.30.6",

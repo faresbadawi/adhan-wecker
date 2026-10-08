@@ -5,10 +5,9 @@ import {
   IonPage, IonContent, IonList, IonItem, IonLabel, IonNote, IonIcon, IonSegment, IonSegmentButton, IonSelect, IonSelectOption,
   IonButton, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonSearchbar, IonSpinner, IonInput,
 } from '@ionic/react';
-import { locationOutline, mapOutline, linkOutline, checkmarkCircle, chevronForward, chevronBack, removeOutline, addOutline } from 'ionicons/icons';
+import { locationOutline, searchOutline, openOutline, clipboardOutline, linkOutline, checkmarkCircle, chevronForward, chevronBack, removeOutline, addOutline } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
-import MosqueMap from '../components/MosqueMap.jsx';
 import { t, lang } from '../lib/i18n.js';
 import { METHODS, PRAYERS } from '../lib/constants.js';
 import { useApp, save, saveLater, toast, slugFromLink } from '../lib/store.js';
@@ -72,7 +71,9 @@ function PlaceSheet({ open, onClose }) {
 export default function Prayer() {
   const { S } = useApp();
   const [placeOpen, setPlaceOpen] = useState(false);
-  const [mapOpen, setMapOpen] = useState(false);
+  // Teilen aus der Mawaqit-App klappt nur, wenn die App richtig installiert ist (Android, sicherer Ursprung)
+  const canShare = window.isSecureContext && /android/i.test(navigator.userAgent);
+  const canPaste = window.isSecureContext && !!(navigator.clipboard && navigator.clipboard.readText);
   const [link, setLink] = useState('');
   const [src, setSrc] = useState(null);
   const [off, setOff] = useState(null);
@@ -84,8 +85,14 @@ export default function Prayer() {
     setSrc(v);
     if (v === 'calculated' || (S && S.mawaqit.slug)) save({ source: v });
   }
-  function useLink() {
-    const slug = slugFromLink(link);
+  async function paste() {
+    try {
+      const txt = await navigator.clipboard.readText();
+      if (slugFromLink(txt)) takeLink(txt); else { setLink(txt); toast(t('mosque_link_bad'), true); }
+    } catch (e) { toast(t('paste_denied'), true); }
+  }
+  function takeLink(text) {
+    const slug = slugFromLink(typeof text === 'string' ? text : link);
     if (!slug) { toast(t('mosque_link_bad'), true); return; }
     setLink('');
     save({ source: 'mawaqit', mawaqit: { slug, name: slug } });
@@ -124,26 +131,38 @@ export default function Prayer() {
           {source === 'mawaqit' ? <>
             <Section title={t('mosque_chosen')}>
               <IonList inset>
-                <IonItem>
-                  <span className="ico" slot="start"><IonIcon icon={S.mawaqit.slug ? checkmarkCircle : mapOutline} /></span>
+                <IonItem lines="none">
+                  <span className="ico" slot="start"><IonIcon icon={S.mawaqit.slug ? checkmarkCircle : searchOutline} /></span>
                   <IonLabel>
                     <h2 className="big">{S.mawaqit.slug ? (S.mawaqit.name || S.mawaqit.slug) : t('mosque_none')}</h2>
                     {S.mawaqit.slug && <p className="ltr-inline">mawaqit.net/{S.mawaqit.slug}</p>}
                   </IonLabel>
                 </IonItem>
-                <IonItem button detail detailIcon={chev} onClick={() => setMapOpen(true)}>
-                  <IonIcon icon={mapOutline} slot="start" className="accent" />
-                  <IonLabel>{t('mosque_map')}</IonLabel>
-                </IonItem>
               </IonList>
             </Section>
+
+            <Section title={t('mosque_how')}>
+              <div className="card-pad howto">
+                <ol className="steps">
+                  <li>{t('mosque_step1')}</li>
+                  <li>{t('mosque_step2')}</li>
+                  <li>{t(canShare ? 'mosque_step3_share' : 'mosque_step3_paste')}</li>
+                </ol>
+                <IonButton expand="block" shape="round" fill="outline" href="https://mawaqit.net/" target="_blank" className="mt">
+                  <IonIcon slot="start" icon={openOutline} />{t('mosque_open_app')}
+                </IonButton>
+              </div>
+            </Section>
+
             <Section title={t('mosque_link')} hint={t('mosque_link_hint')}>
               <div className="pad-x">
-                <div className="mq-link">
+                <div className="link-row">
                   <IonIcon icon={linkOutline} className="accent" />
                   <IonInput className="ltr" type="url" value={link} placeholder="https://mawaqit.net/…" onIonInput={e => setLink(e.detail.value || '')}
-                    onKeyDown={e => e.key === 'Enter' && useLink()} />
-                  <IonButton size="small" shape="round" onClick={useLink} disabled={!link.trim()}>{t('save')}</IonButton>
+                    onKeyDown={e => e.key === 'Enter' && takeLink()} />
+                  {link.trim()
+                    ? <IonButton size="small" shape="round" onClick={() => takeLink()}>{t('save')}</IonButton>
+                    : canPaste && <IonButton size="small" shape="round" fill="outline" onClick={paste}><IonIcon slot="start" icon={clipboardOutline} />{t('paste')}</IonButton>}
                 </div>
               </div>
             </Section>
@@ -182,7 +201,6 @@ export default function Prayer() {
           </Section>
         </>}
         <PlaceSheet open={placeOpen} onClose={() => setPlaceOpen(false)} />
-        <MosqueMap open={mapOpen} onClose={() => setMapOpen(false)} />
       </IonContent>
     </IonPage>
   );

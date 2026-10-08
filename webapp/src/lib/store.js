@@ -8,7 +8,6 @@ let state = {
   ST: null,         // /api/status
   online: false,
   stBase: 0,        // performance.now() beim letzten Status
-  now: Date.now(),  // läuft jede Sekunde weiter (für Uhr und Countdowns)
   installEvt: null, // Chrome-Installationsangebot
   toast: null,      // { text, err, id }
   ask: null,        // { title, text, danger, resolve }
@@ -21,6 +20,12 @@ export function set(part) {
 export const get = () => state;
 const subscribe = l => { listeners.add(l); return () => listeners.delete(l); };
 export const useApp = () => useSyncExternalStore(subscribe, get);
+
+// Sekundentakt getrennt vom übrigen Zustand: nur Seiten mit Uhr oder Countdown zeichnen jede Sekunde neu
+let now = Date.now();
+const tickers = new Set();
+setInterval(() => { now = Date.now(); tickers.forEach(l => l()); }, 1000);
+export const useNow = () => useSyncExternalStore(l => { tickers.add(l); return () => tickers.delete(l); }, () => now);
 
 export async function api(url, body) {
   const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };

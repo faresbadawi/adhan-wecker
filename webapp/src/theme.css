@@ -164,7 +164,7 @@ ion-button.play { --color: var(--ion-color-primary); --padding-start: 8px; --pad
 [dir=rtl] .ring svg { transform: rotate(-90deg) scaleY(-1); }
 .ring circle { fill: none; stroke-width: 7; }
 .ring .ring-bg { stroke: rgba(255, 255, 255, .08); }
-.ring .ring-fg { stroke: var(--ion-color-primary); stroke-linecap: round; transition: stroke-dashoffset .8s ease; filter: drop-shadow(0 0 6px rgba(var(--ion-color-primary-rgb), .5)); }
+.ring .ring-fg { stroke: var(--ion-color-primary); stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
 .ring-in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 18%; }
 .ring-in small { color: var(--muted); font-size: 13px; }
 .ring-in .pn { font-size: 30px; font-weight: 700; color: var(--accent-light); line-height: 1.2; }
@@ -266,31 +266,12 @@ html[lang=ar] .prow ion-toggle { font-family: var(--arabic); font-size: 20px; }
 details summary { color: var(--muted); padding: 12px 0 4px; cursor: pointer; }
 ion-progress-bar { height: 6px; border-radius: 6px; margin: 4px 0; --progress-background: var(--ion-color-primary); --background: var(--surface2); }
 
-/* ---------- Moscheekarte */
-ion-modal.map-modal { --height: 100%; --width: 100%; }
-.map-wrap { display: flex; flex-direction: column; height: 100%; }
-.map { flex: 0 0 46%; min-height: 220px; background: #0e1011; }
-.map-list { flex: 1; overflow-y: auto; padding: 8px 0 calc(16px + env(safe-area-inset-bottom)); background: #121414; }
-.mq { margin: 6px 12px; border-radius: 16px; background: var(--surface); overflow: hidden; }
-.mq.sel { box-shadow: 0 0 0 1.5px rgba(var(--ion-color-primary-rgb), .7); }
-.mq-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 0; background: none; color: var(--text); font: inherit; text-align: start; }
-.mq-name { flex: 1; min-width: 0; font-weight: 600; font-size: 15.5px; }
-.mq-name small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); margin-top: 2px; }
-.mq-dist { color: var(--accent-light); font-size: 13.5px; white-space: nowrap; }
-.mq-body { padding: 0 14px 12px; }
-.mq-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-.mq-actions ion-button { margin: 0; }
-.mq-link { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 2px 4px 2px 12px; border-radius: 12px; background: var(--surface2); }
-[dir=rtl] .mq-link { padding: 2px 12px 2px 4px; }
-.mq-link ion-icon { font-size: 18px; flex: none; }
-.mq-body .section-hint { margin: 8px 2px 0; }
-.mq-pin { color: var(--ion-color-primary); filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .6)); }
-.mq-pin svg { width: 30px; height: 30px; fill: #17191a; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.mq-pin svg .m { fill: none; }
-.mq-pin.sel svg { fill: var(--ion-color-primary); stroke: #17120e; }
-.leaflet-container { font: inherit; background: #0e1011; }
-.leaflet-control-attribution { background: rgba(0, 0, 0, .55) !important; color: #aaa !important; font-size: 10px; }
-.leaflet-control-attribution a { color: #ccc !important; }
+/* ---------- Mawaqit-Link einfügen */
+.link-row { display: flex; align-items: center; gap: 8px; padding: 2px 4px 2px 12px; border-radius: 14px; background: var(--surface); }
+[dir=rtl] .link-row { padding: 2px 12px 2px 4px; }
+.link-row > ion-icon { font-size: 18px; flex: none; }
+.link-row ion-input { flex: 1; min-width: 0; }
+.link-row ion-button { flex: none; min-width: 64px; margin: 4px 0; }
 
 /* ---------- Eigenes Hintergrundbild zuschneiden (crop.js, Vollbild über allem) */
 .cropper { position: fixed; inset: 0; z-index: 30000; background: #000; display: flex; flex-direction: column; align-items: center; gap: 14px;
@@ -326,8 +307,16 @@ ion-modal.map-modal { --height: 100%; --width: 100%; }
   ion-content::part(scroll) { padding-left: max(0px, calc((100% - 680px) / 2)); padding-right: max(0px, calc((100% - 680px) / 2)); }
 }
 .tiles + .section-title { margin-top: 26px; }
-.dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6); }
 .banner { flex-wrap: wrap; }
 .banner > .grow { flex: 1 1 150px; }
-.mq-link ion-input { flex: 1; min-width: 0; }
-.mq-link ion-button { flex: none; min-width: 64px; margin: 4px 0; }
+.crash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 30px; text-align: center; background: var(--bg); color: var(--text); }
+.crash button { border: 0; border-radius: 999px; padding: 12px 26px; background: var(--ion-color-primary); color: var(--ion-color-primary-contrast); font: inherit; font-weight: 600; }
+.big-steps { gap: 18px; }
+.big-steps li b { display: block; font-weight: 600; margin-bottom: 2px; }
+.big-steps .muted { display: block; font-size: 13px; margin-top: 4px; }
+.card-pad.intro p { margin: 0; line-height: 1.55; }
+.card-pad.done { display: flex; align-items: center; gap: 12px; }
+.card-pad.done ion-icon { font-size: 30px; flex: none; }
+.howto .steps { margin-bottom: 4px; }
+.banner { position: relative; padding-inline-end: 40px !important; }
+.banner > ion-button[fill=clear] { position: absolute; top: 2px; inset-inline-end: 0; margin: 0; }

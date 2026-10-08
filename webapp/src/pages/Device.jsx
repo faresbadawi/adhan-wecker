@@ -1,44 +1,22 @@
 // Gerät: Infos, App installieren, Update-Datei hochladen, Neustart und Werkseinstellungen
 import { useRef, useState } from 'react';
 import { IonPage, IonContent, IonList, IonItem, IonLabel, IonNote, IonButton, IonIcon, IonProgressBar } from '@ionic/react';
-import { downloadOutline, cloudUploadOutline, powerOutline, copyOutline } from 'ionicons/icons';
+import { downloadOutline, cloudUploadOutline, powerOutline } from 'ionicons/icons';
 import { Bar } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t } from '../lib/i18n.js';
-import { useApp, set, api, toast, confirmBox, duration, mb, signal, elapsed, isStandalone, isIOS, appMode } from '../lib/store.js';
-
-const FLAG_URL = 'chrome://flags/#unsafely-treat-insecure-origin-as-secure';
-
-function Copy({ value }) {
-  const ref = useRef(null);
-  async function copy() {
-    try { await navigator.clipboard.writeText(value); }
-    catch (e) { ref.current.select(); document.execCommand('copy'); } // ohne HTTPS keine Clipboard-API
-    toast(t('copied'));
-  }
-  return (
-    <div className="copy">
-      <input ref={ref} className="ltr" readOnly value={value} />
-      <IonButton size="small" fill="outline" shape="round" onClick={copy}><IonIcon slot="start" icon={copyOutline} />{t('copy')}</IonButton>
-    </div>
-  );
-}
+import { useApp, api, toast, confirmBox, duration, mb, signal, elapsed, isStandalone, useNow } from '../lib/store.js';
+import { reloadApp } from '../lib/errors.js';
 
 export default function Device() {
   const st = useApp();
-  const { ST, online, installEvt } = st;
+  useNow(); // Uhr und Countdowns jede Sekunde
+  const { ST, online } = st;
   const d = ST && ST.device, w = ST && ST.wifi;
   const wifiOk = online && w && w.connected;
-  const secure = window.isSecureContext;
   const fileRef = useRef(null);
   const [up, setUp] = useState(null); // { pct, text, busy }
 
-  async function install() {
-    if (!installEvt) return;
-    installEvt.prompt();
-    await installEvt.userChoice;
-    set({ installEvt: null });
-  }
   async function update(e) {
     const f = e.target.files[0]; e.target.value = '';
     if (!f) return;
@@ -52,7 +30,7 @@ export default function Device() {
       setUp({ pct, text: `${t('update_running')} ${pct}%`, busy: true });
     };
     xhr.onload = () => {
-      if (xhr.status === 200) { setUp({ pct: 100, text: t('update_ok'), busy: true }); toast(t('update_ok')); setTimeout(() => location.reload(), 15000); }
+      if (xhr.status === 200) { setUp({ pct: 100, text: t('update_ok'), busy: true }); toast(t('update_ok')); setTimeout(() => reloadApp(), 15000); }
       else { setUp({ pct: 0, text: t('update_fail'), busy: false }); toast(t('update_fail'), true); }
     };
     xhr.onerror = () => setUp({ pct: 0, text: t('update_fail'), busy: false });
@@ -70,29 +48,6 @@ export default function Device() {
   const kv = (label, value, ltr) => (
     <IonItem><IonLabel>{label}</IonLabel><IonNote slot="end" className={ltr ? 'ltr' : ''}>{value}</IonNote></IonItem>
   );
-
-  let installBody;
-  if (isStandalone()) installBody = <p>{t('installed')}</p>;
-  else if (installEvt) installBody = <IonButton shape="round" onClick={install}><IonIcon slot="start" icon={downloadOutline} />{t('install')}</IonButton>;
-  else if (isIOS()) installBody = <p>{t('install_hint_ios')}</p>;
-  else if (secure) installBody = <p>{t('install_menu')}</p>;
-  else if (appMode()) installBody = <ol className="steps"><li>{t('sc_1')}</li><li>{t('sc_2')}</li><li>{t('sc_3')}</li></ol>;
-  else installBody = <>
-    <ol className="steps">
-      <li>{t('sc_0')}<div className="mt"><IonButton size="small" shape="round" href="/?app=1#/settings/device" target="_self"><IonIcon slot="start" icon={downloadOutline} />{t('sc_open')}</IonButton></div></li>
-      <li>{t('sc_1')}</li><li>{t('sc_2')}</li><li>{t('sc_3')}</li>
-    </ol>
-    <p className="muted">{t('install_ip')}</p>
-    <details>
-      <summary>{t('sc_adv')}</summary>
-      <p className="muted">{t('install_why')}</p>
-      <ol className="steps">
-        <li>{t('install_s1')}<Copy value={FLAG_URL} /></li>
-        <li>{t('install_s2')}<Copy value={location.origin} /></li>
-        <li>{t('install_s3')}</li>
-      </ol>
-    </details>
-  </>;
 
   return (
     <IonPage>
@@ -113,8 +68,13 @@ export default function Device() {
           </IonList>
         </Section>
 
-        <Section title={secure || isIOS() || isStandalone() ? t('install') : t('install_android')}>
-          <div className="card-pad">{installBody}</div>
+        <Section title={t('install')}>
+          <IonList inset>
+            <IonItem routerLink="/install" detail>
+              <span className="ico" slot="start"><IonIcon icon={downloadOutline} /></span>
+              <IonLabel>{t(isStandalone() ? 'installed_short' : 'inst_title')}</IonLabel>
+            </IonItem>
+          </IonList>
         </Section>
 
         <Section title={t('firmware_update')}>

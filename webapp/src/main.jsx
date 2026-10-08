@@ -11,9 +11,12 @@ import '@ionic/react/css/padding.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 import '@ionic/react/css/palettes/dark.always.css';
-import 'leaflet/dist/leaflet.css';
 import './theme.css';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { installErrorReporting } from './lib/errors.js';
+
+installErrorReporting();
 
 let l = 'ar';
 try { l = localStorage.getItem('lang') || 'ar'; } catch (e) { /* privat */ }
@@ -24,4 +27,4 @@ setupIonicReact({ mode: 'ios', swipeBackEnabled: true, hardwareBackButton: true 
 // Service Worker gibt es nur in sicheren Kontexten (HTTPS oder als sicher markierter Ursprung)
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);

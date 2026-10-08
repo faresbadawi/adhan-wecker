@@ -733,6 +733,36 @@ namespace web
         s_server.send(200, "application/json", "{}");
     }
 
+    // Fehlerprotokoll der Web-App: die letzten Fehler vom Handy, nur im RAM (zur Fehlersuche abrufbar)
+    static constexpr int CLIENT_LOG_N = 20;
+    static String s_clientLog[CLIENT_LOG_N];
+    static int s_clientLogNext = 0;
+
+    static void clientLogAdd()
+    {
+        String line = s_server.arg("plain");
+        if (line.length() > 900)
+            line = line.substring(0, 900);
+        s_clientLog[s_clientLogNext] = String(millis() / 1000) + "s " + line;
+        s_clientLogNext = (s_clientLogNext + 1) % CLIENT_LOG_N;
+        s_server.send(200, "application/json", "{}");
+    }
+
+    static void clientLogSend()
+    {
+        JsonDocument doc;
+        JsonArray list = doc.to<JsonArray>();
+        for (int i = 0; i < CLIENT_LOG_N; i++)
+        {
+            const String &e = s_clientLog[(s_clientLogNext + i) % CLIENT_LOG_N];
+            if (e.length())
+                list.add(e);
+        }
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+
     // Sprache von Web-App und Uhr; die Uhr startet neu, damit alle Seiten in der neuen Sprache entstehen
     static void deviceLang()
     {
@@ -759,6 +789,8 @@ namespace web
         s_server.on("/api/azan/test", HTTP_POST, azanTest);
         s_server.on("/api/screenshot", HTTP_GET, sendScreenshot);
         s_server.on("/api/led", HTTP_POST, ledSet);
+        s_server.on("/api/clientlog", HTTP_POST, clientLogAdd);
+        s_server.on("/api/clientlog", HTTP_GET, clientLogSend);
         s_server.on("/api/azan/stop", HTTP_POST, azanStop);
         s_server.on("/api/azan/preview", HTTP_POST, azanPreview);
         s_server.on("/api/azan/voices", HTTP_GET, sendVoices);
