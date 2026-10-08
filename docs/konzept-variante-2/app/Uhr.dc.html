@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>App – Uhr</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#1F7A6E; text-decoration: none}</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FBF8F2; color: #1E2524; font-family: 'Readex Pro', system-ui, sans-serif">
+  <div style="padding: 22px 22px 0; display: flex; flex-direction: column">
+    <span style="font-size: 13px; color: #6B6458">azan-clock.local · Firmware 2.0</span>
+    <span style="font-size: 32px; font-weight: 600; letter-spacing: -0.5px">Uhr</span>
+  </div>
+
+  <div style="margin: 14px 22px 0; border-radius: 22px; overflow: hidden; background: #1E2524; padding: 12px">
+    <div style="position: relative; height: 210px; border-radius: 12px; overflow: hidden; background: #FBF8F2">
+      <svg width="322" height="210" viewBox="0 0 480 320" style="position: absolute; left: 0; top: 0">
+        <path d="M40 236 C 110 50, 370 50, 440 236" fill="none" stroke="#1E2524" stroke-opacity="0.2" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"></path>
+        <path d="M40 236 C 110 50, 370 50, 440 236" fill="none" stroke="#1F7A6E" stroke-width="4" pathLength="100" stroke-dasharray="53 100" stroke-linecap="round"></path>
+        <circle cx="258" cy="97" r="11" fill="#E7B54A"></circle>
+      </svg>
+      <div style="position: absolute; left: 0; right: 0; top: 76px; text-align: center; font-size: 50px; font-weight: 200; line-height: 1">13:40</div>
+      <div style="position: absolute; left: 0; right: 0; top: 136px; text-align: center; font-size: 11px; color: #6B6458">Asr 16:08 · in 2 Std. 28 Min.</div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 4px 0; color: #C8C2B5; font-size: 12px"><span>Live-Vorschau · Seite „Heute“</span><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #2E8B57"></span>verbunden</span></div>
+  </div>
+
+  <div style="margin: 18px 22px 0; display: flex; flex-direction: column">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+      <a href="{{r.href}}" style="{{r.style}}">
+        <span style="width: 36px; height: 36px; border-radius: 11px; background: #E8F1EE; display: flex; align-items: center; justify-content: center; flex: none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1F7A6E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{r.icon}}"></path></svg></span>
+        <span style="flex: 1; font-size: 16px; color: #1E2524">{{r.label}}</span>
+        <span style="font-size: 14px; color: #6B6458">{{r.value}}</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A9A397" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"></path></svg>
+      </a>
+    </sc-for>
+  </div>
+
+  <nav style="position: absolute; left: 12px; right: 12px; bottom: 16px; height: 68px; border-radius: 24px; background: #1E2524; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; text-align: center; font-size: 11px">
+    <a href="Heute.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #A9A397"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2"></path></svg>Heute</a>
+    <a href="Gebete.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #A9A397"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 21V11a8 8 0 0 1 16 0v10M9 21v-5a3 3 0 0 1 6 0v5M3 21h18"></path></svg>Gebete</a>
+    <a href="Wecker.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #A9A397"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="7.5"></circle><path d="M12 9.5V13l2.2 1.6"></path></svg>Wecker</a>
+    <a href="Uhr.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #FBF8F2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E7B54A" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="13" rx="3"></rect><path d="M8 21h8"></path></svg>Uhr</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [
+      ['Gestaltung', 'Nach Tageszeit', 'Gestaltung.dc.html', 'M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.6-1-2.7 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3Z'],
+      ['Seiten auf der Uhr', '7 von 7', '#', 'M4 5h16v14H4zM9 5v14'],
+      ['Helligkeit & Nachtuhr', 'ab Isha', '#', 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z'],
+      ['Sprache', 'Deutsch', '#', 'M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18'],
+      ['WLAN', 'FRITZ!Box', '#', 'M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0'],
+      ['Design-Variante', 'Bilal (2)', '#', 'M4 4h7v7H4zM13 13h7v7h-7zM13 4h7v7h-7z'],
+      ['Gerät & Update', '2,5 MB frei', '#', 'M12 4v11M7 10l5 5 5-5M5 20h14'],
+    ];
+    const rows = data.map(([label, value, href, icon], i) => ({
+      label, value, href, icon,
+      style: 'display: flex; align-items: center; gap: 12px; padding: 11px 0; min-height: 44px;' + (i ? ' border-top: 1px solid #E6DFD1;' : ''),
+    }));
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

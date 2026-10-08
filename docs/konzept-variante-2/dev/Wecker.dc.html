@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Uhr – Wecker klingelt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes rise{0%{transform:translateY(60px);opacity:.35}100%{transform:translateY(0);opacity:1}}
+.sun{position:absolute;left:50%;bottom:-260px;width:520px;height:360px;margin-left:-260px;border-radius:50%;background:#F0A39A;opacity:.9;animation:rise 6s ease-out infinite alternate}
+@media (prefers-reduced-motion: reduce){.sun{animation:none}}
+</style>
+</helmet>
+<div style="width: 480px; height: 320px; position: relative; overflow: hidden; background: #1B2347; color: #EEF0F7; font-family: 'Readex Pro', system-ui, sans-serif">
+  <span class="sun"></span>
+  <div style="position: absolute; left: 0; right: 0; top: 22px; text-align: center; font-size: 15px; color: #A7AFD0">Arbeit · Montag bis Freitag</div>
+  <div style="position: absolute; left: 0; right: 0; top: 50px; text-align: center; font-size: 96px; font-weight: 200; line-height: 1">05:30</div>
+  <div style="position: absolute; left: 24px; right: 24px; bottom: 22px; display: flex; gap: 12px">
+    <button style="flex: 2; height: 64px; border: 0; border-radius: 18px; background: #EEF0F7; color: #1B2347; font: inherit; font-size: 19px; cursor: pointer">Schlummern · 10 Min.</button>
+    <button style="flex: 1; height: 64px; border: 0; border-radius: 18px; background: #1B2347; color: #EEF0F7; font: inherit; font-size: 19px; cursor: pointer">Aus</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":480,"height":320}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

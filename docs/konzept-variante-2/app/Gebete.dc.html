@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>App – Gebete</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;600&amp;family=Aref+Ruqaa:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#1F7A6E}</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FBF8F2; color: #1E2524; font-family: 'Readex Pro', system-ui, sans-serif">
+  <div style="padding: 22px 22px 0; display: flex; flex-direction: column">
+    <span style="font-size: 13px; color: #6B6458">Peine · Muslim World League</span>
+    <span style="font-size: 32px; font-weight: 600; letter-spacing: -0.5px">Gebete</span>
+  </div>
+
+  <div style="margin: 12px 22px 0; display: flex; flex-direction: column">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+      <div style="{{r.rowStyle}}">
+        <div style="display: flex; flex-direction: column; flex: 1">
+          <span style="font-size: 17px">{{r.name}}</span>
+          <span style="font-size: 12px; color: #6B6458">Azan {{r.vol}}</span>
+        </div>
+        <span style="font-family: 'Aref Ruqaa', serif; font-size: 18px; color: #6B6458" lang="ar">{{r.ar}}</span>
+        <span style="width: 58px; text-align: right; font-size: 19px; font-weight: 300">{{r.time}}</span>
+        <span style="{{r.toggleStyle}}"><span style="{{r.knobStyle}}"></span></span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin: 20px 22px 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #6B6458">Muezzin</div>
+  <div style="margin: 8px 22px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <button style="height: 66px; border-radius: 16px; border: 2px solid #1F7A6E; background: #E8F1EE; color: #1E2524; font: inherit; font-size: 14px; display: flex; align-items: center; gap: 10px; padding: 0 12px; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="#1F7A6E"><path d="M8 5v14l11-7z"></path></svg>Islam Sobhi</button>
+    <button style="height: 66px; border-radius: 16px; border: 1px solid #E2DACB; background: #FBF8F2; color: #1E2524; font: inherit; font-size: 14px; display: flex; align-items: center; gap: 10px; padding: 0 12px; text-align: left; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="#6B6458"><path d="M8 5v14l11-7z"></path></svg>Mishary Alafasy</button>
+  </div>
+
+  <div style="margin: 18px 22px 0; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid #E6DFD1">
+      <span style="flex: 1; font-size: 15px">Erinnerung vor dem Azan</span>
+      <span style="display: inline-flex; align-items: center; gap: 8px"><button aria-label="weniger" style="width: 36px; height: 36px; border-radius: 50%; border: 0; background: #EFE9DD; font: inherit; cursor: pointer">−</button><span style="width: 52px; text-align: center; font-size: 15px">10 Min.</span><button aria-label="mehr" style="width: 36px; height: 36px; border-radius: 50%; border: 0; background: #EFE9DD; font: inherit; cursor: pointer">+</button></span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; padding: 15px 0; border-top: 1px solid #E6DFD1">
+      <span style="flex: 1; font-size: 15px">Berechnung &amp; Ort</span><span style="font-size: 14px; color: #6B6458">MWL · Peine</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A9A397" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"></path></svg>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; padding: 15px 0; border-top: 1px solid #E6DFD1; border-bottom: 1px solid #E6DFD1">
+      <span style="flex: 1; font-size: 15px">Korrekturen &amp; Mawaqit-Moschee</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A9A397" stroke-width="2" stroke-linecap="round"><path d="m9 6 6 6-6 6"></path></svg>
+    </div>
+  </div>
+
+  <nav style="position: absolute; left: 12px; right: 12px; bottom: 16px; height: 68px; border-radius: 24px; background: #1E2524; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; text-align: center; font-size: 11px">
+    <a href="Heute.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #A9A397; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2"></path></svg>Heute</a>
+    <a href="Gebete.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #FBF8F2; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E7B54A" stroke-width="1.8" stroke-linecap="round"><path d="M4 21V11a8 8 0 0 1 16 0v10M9 21v-5a3 3 0 0 1 6 0v5M3 21h18"></path></svg>Gebete</a>
+    <a href="Wecker.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #A9A397; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="7.5"></circle><path d="M12 9.5V13l2.2 1.6"></path></svg>Wecker</a>
+    <a href="Uhr.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; color: #A9A397; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="13" rx="3"></rect><path d="M8 21h8"></path></svg>Uhr</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const data = [
+      ['Fajr', 'الفجر', '05:54', '60 %', true],
+      ['Jumu’a', 'الجمعة', '13:07', '80 %', true],
+      ['Asr', 'العصر', '16:08', '80 %', false],
+      ['Maghrib', 'المغرب', '18:48', '80 %', true],
+      ['Isha', 'العشاء', '20:21', '70 %', true],
+    ];
+    const rows = data.map(([name, ar, time, vol, on], i) => ({
+      name, ar, time, vol: on ? vol : 'aus',
+      rowStyle: 'display: flex; align-items: center; gap: 12px; padding: 12px 0;' + (i ? ' border-top: 1px solid #E6DFD1;' : ''),
+      toggleStyle: 'width: 46px; height: 28px; border-radius: 999px; position: relative; flex: none; background: ' + (on ? '#1F7A6E' : '#D9D1C2'),
+      knobStyle: 'position: absolute; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #FFFFFF; ' + (on ? 'left: 21px' : 'left: 3px'),
+    }));
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>
