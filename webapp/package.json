@@ -1,20 +1,25 @@
 {
   "name": "smart-azan-wecker-app",
   "private": true,
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "module",
-  "description": "Web-App (PWA) der Smart Azan Wecker – Framework7 + Svelte, gebaut mit Vite nach ../data/www",
+  "description": "Web-App (PWA) der Smart Azan Wecker – React + Ionic, gebaut mit Vite nach ../data/www",
   "scripts": {
     "dev": "vite",
     "build": "node scripts/clean.js && vite build && node scripts/gzip.js"
   },
   "dependencies": {
-    "framework7": "^9.2.0",
-    "framework7-svelte": "^9.2.0"
+    "@ionic/react": "^9.0.7",
+    "@ionic/react-router": "^9.0.7",
+    "ionicons": "^8.1.0",
+    "leaflet": "1.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^6.30.6",
+    "react-router-dom": "^6.30.6"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^7.3.1",
-    "svelte": "^5.57.2",
+    "@vitejs/plugin-react": "^6.1.2",
     "vite": "^8.3.4"
   }
 }

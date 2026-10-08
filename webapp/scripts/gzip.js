@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const out = fileURLToPath(new URL('../../data/www/', import.meta.url));
 let before = 0, after = 0;
-for (const dir of ['assets', 'css']) {
+for (const dir of ['assets']) {
   for (const f of readdirSync(join(out, dir))) {
     if (!/\.(js|css)$/.test(f)) continue;
     const p = join(out, dir, f), data = readFileSync(p), gz = gzipSync(data, { level: 9 });

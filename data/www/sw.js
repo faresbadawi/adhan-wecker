@@ -1,5 +1,5 @@
 // Service Worker: hält die App-Hülle offline bereit. Gerätedaten (/api) kommen immer frisch von der Uhr.
-const CACHE = "azan-wecker-v2";
+const CACHE = "azan-wecker-v3";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", e => {
