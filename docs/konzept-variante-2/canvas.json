@@ -8,6 +8,7 @@
   "designSystems": [],
   "boards": {
     "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 1780, "title": "Konzept: Die Uhr folgt dem Himmel"},
+    "Muster.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 1120, "title": "Islamische Muster – Auswahl"},
     "dev/Heute-Fajr.dc.html": {"x": 0, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Heute (Fajr, Dämmerung)"},
     "dev/Heute-Dhuhr.dc.html": {"x": 560, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Heute (Dhuhr, Tag)"},
     "dev/Heute-Maghrib-ar.dc.html": {"x": 1120, "y": 2140, "w": 480, "h": 320, "title": "Uhr · Heute (Maghrib, Arabisch)"},
@@ -27,6 +28,7 @@
   },
   "order": [
     "Main.dc.html",
+    "Muster.dc.html",
     "dev/Heute-Fajr.dc.html", "dev/Heute-Dhuhr.dc.html", "dev/Heute-Maghrib-ar.dc.html", "dev/Gebete.dc.html",
     "dev/Nachtuhr.dc.html", "dev/Wetter.dc.html", "dev/Kalender.dc.html", "dev/Mond.dc.html",
     "dev/Azan.dc.html", "dev/Erinnerung.dc.html", "dev/Wecker.dc.html",
