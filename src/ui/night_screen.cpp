@@ -5,12 +5,12 @@ namespace night_screen
 {
     using namespace theme;
 
-    static constexpr lv_coord_t CARD_W = 214, CARD_H = 78, CARD_Y = 42;
-    static constexpr lv_coord_t SIDE_W = 112; // Fajr und Sonnenaufgang links und rechts vom Rahmen
+    // Zeitleiste der Nacht: Maghrib (0) ... Mitte (1/2) ... letztes Drittel (2/3) ... Fajr (1)
+    static constexpr lv_coord_t LINE_X0 = 48, LINE_X1 = SCREEN_W - 48, LINE_Y = 214;
 
     static lv_obj_t *s_content, *s_loading;
-    static lv_obj_t *s_time, *s_state, *s_countdown;
-    static lv_obj_t *s_fajr, *s_sunrise;
+    static lv_obj_t *s_time, *s_state, *s_countdown, *s_sunrise;
+    static lv_obj_t *s_tMaghrib, *s_tMidnight, *s_tFajr, *s_now;
 
     // Zahlen immer von links nach rechts, auch in der arabischen Anzeige
     static lv_obj_t *digits(lv_obj_t *parent, const lv_font_t *font, Role role)
@@ -26,22 +26,51 @@ namespace night_screen
         lv_label_set_text_fmt(l, "%02d:%02d", m / 60, m % 60);
     }
 
-    // Name über Uhrzeit, mittig in einer Spalte der Breite SIDE_W
-    static lv_obj_t *sideCell(lv_obj_t *parent, lv_coord_t x, int nameId)
+    // Position auf der Leiste; Arabisch von rechts nach links (Maghrib rechts)
+    static lv_coord_t lineX(float f)
     {
-        lv_obj_t *c = box(parent);
-        lv_obj_set_pos(c, x, CARD_Y + 11);
-        lv_obj_set_size(c, SIDE_W, 56);
-        lv_obj_t *name = image(c, lang::text(nameId), Role::ACCENT);
-        lv_obj_align(name, LV_ALIGN_TOP_MID, 0, 0);
-        lv_obj_t *t = digits(c, &font_josefin_25, Role::MAIN);
-        lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 26);
+        const lv_coord_t x = LINE_X0 + (lv_coord_t)((LINE_X1 - LINE_X0) * f);
+        return lang::rtl() ? SCREEN_W - x : x;
+    }
+
+    static lv_obj_t *bar(lv_obj_t *parent, lv_coord_t x0, lv_coord_t x1, lv_coord_t h, lv_opa_t opa)
+    {
+        lv_obj_t *b = box(parent);
+        lv_obj_set_pos(b, LV_MIN(x0, x1), LINE_Y - h / 2);
+        lv_obj_set_size(b, LV_ABS(x1 - x0), h);
+        lv_obj_set_style_radius(b, h / 2, 0);
+        setRole(b, Role::ACCENT);
+        lv_obj_set_style_bg_opa(b, opa, 0);
+        return b;
+    }
+
+    // Name und Uhrzeit über einem Punkt der Leiste
+    static lv_obj_t *mark(lv_obj_t *parent, float f, const lv_img_dsc_t *name)
+    {
+        const lv_coord_t x = lineX(f);
+        lv_obj_t *tick = box(parent);
+        lv_obj_set_size(tick, 2, 14);
+        lv_obj_set_pos(tick, x - 1, LINE_Y - 7);
+        setRole(tick, Role::MUTED);
+        lv_obj_set_style_bg_opa(tick, LV_OPA_COVER, 0);
+
+        lv_obj_t *col = box(parent);
+        lv_obj_set_size(col, 120, LV_SIZE_CONTENT);
+        lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_flex_align(col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_row(col, 0, 0);
+        image(col, name, Role::MUTED);
+        lv_obj_t *t = digits(col, &font_josefin_20, Role::MAIN);
+        // Enden nach innen bündig, damit nichts über den Rand ragt
+        lv_coord_t left = x - 60;
+        left = LV_MAX(MARGIN - 10, LV_MIN(left, SCREEN_W - MARGIN + 10 - 120));
+        lv_obj_set_pos(col, left, LINE_Y - 56);
         return t;
     }
 
     void create(lv_obj_t *parent)
     {
-        lv_obj_align(image(parent, lang::text(TXT_NIGHT_TITLE), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 6);
+        lv_obj_align(image(parent, lang::text(TXT_NIGHT_TITLE), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 8);
 
         s_loading = image(parent, lang::text(TXT_LOADING), Role::MUTED);
         lv_obj_align(s_loading, LV_ALIGN_CENTER, 0, 0);
@@ -50,44 +79,50 @@ namespace night_screen
         lv_obj_set_size(s_content, SCREEN_W, SCREEN_H);
         lv_obj_add_flag(s_content, LV_OBJ_FLAG_HIDDEN);
 
-        // Mitte: Beginn des letzten Drittels in doppeltem Rahmen
-        lv_obj_t *card = box(s_content);
-        lv_obj_set_size(card, CARD_W, CARD_H);
-        lv_obj_align(card, LV_ALIGN_TOP_MID, 0, CARD_Y);
-        lv_obj_set_style_radius(card, 16, 0);
-        setRole(card, Role::ACCENT);
-        lv_obj_set_style_border_opa(card, LV_OPA_COVER, 0);
-        lv_obj_set_style_border_width(card, 2, 0);
-        lv_obj_set_style_outline_width(card, 1, 0);
-        lv_obj_set_style_outline_pad(card, 4, 0);
-        lv_obj_set_style_outline_opa(card, LV_OPA_50, 0);
-        lv_obj_set_style_outline_color(card, lv_obj_get_style_border_color(card, 0), 0);
-        s_time = digits(card, &font_clock_64, Role::MAIN);
-        lv_obj_center(s_time);
+        // Beginn des letzten Drittels groß, darunter der Countdown
+        s_time = digits(s_content, &font_clock_64, Role::MAIN);
+        lv_obj_align(s_time, LV_ALIGN_TOP_MID, 0, 52);
 
-        // Fajr und Sonnenaufgang beiderseits, in Leserichtung (Arabisch: Fajr rechts)
-        const lv_coord_t xFirst = lang::rtl() ? SCREEN_W - MARGIN - SIDE_W : MARGIN;
-        const lv_coord_t xSecond = lang::rtl() ? MARGIN : SCREEN_W - MARGIN - SIDE_W;
-        s_fajr = sideCell(s_content, xFirst, TXT_NIGHTCOL_0);
-        s_sunrise = sideCell(s_content, xSecond, TXT_NIGHTCOL_1);
-
-        // Countdown bzw. "jetzt"
         lv_obj_t *row = box(s_content);
-        lv_obj_set_size(row, LV_SIZE_CONTENT, 34);
+        lv_obj_set_size(row, LV_SIZE_CONTENT, 32);
         lv_obj_set_style_base_dir(row, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
         lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
         lv_obj_set_flex_align(row, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(row, 10, 0);
-        lv_obj_align(row, LV_ALIGN_TOP_MID, 0, 126);
+        lv_obj_align(row, LV_ALIGN_TOP_MID, 0, 122);
         s_state = image(row, lang::text(TXT_NIGHT_IN), Role::MUTED);
         s_countdown = digits(row, &font_josefin_25, Role::ACCENT);
 
-        divider(s_content, SCREEN_W / 2, 168, SCREEN_W / 2 - MARGIN);
+        // Zeitleiste: ganze Nacht dünn, letztes Drittel kräftig
+        bar(s_content, lineX(0), lineX(1), 2, LV_OPA_40);
+        bar(s_content, lineX(2.0f / 3), lineX(1), 8, LV_OPA_COVER);
+        s_tMaghrib = mark(s_content, 0, prayerName(model::MAGHRIB, false));
+        s_tMidnight = mark(s_content, 0.5f, lang::text(TXT_MIDNIGHT_LBL));
+        s_tFajr = mark(s_content, 1, prayerName(model::FAJR, false));
 
-        // Vers zum Nachtgebet
-        lv_obj_t *verse = image(s_content, lang::text(TXT_VERSE), Role::MAIN);
-        lv_obj_align(verse, LV_ALIGN_TOP_MID, 0, 178);
-        lv_obj_align_to(image(s_content, lang::text(TXT_VERSE_SRC), Role::ACCENT), verse, LV_ALIGN_OUT_BOTTOM_MID, 0, 8);
+        // Beschriftung des hervorgehobenen Abschnitts unter der Leiste
+        const lv_img_dsc_t *thirdTxt = lang::text(TXT_LASTTHIRD_LBL);
+        lv_obj_t *third = image(s_content, thirdTxt, Role::ACCENT);
+        lv_obj_set_pos(third, (lineX(2.0f / 3) + lineX(1)) / 2 - thirdTxt->header.w / 2, LINE_Y + 10);
+
+        // Punkt für "jetzt"
+        s_now = box(s_content);
+        lv_obj_set_size(s_now, 14, 14);
+        lv_obj_set_style_radius(s_now, LV_RADIUS_CIRCLE, 0);
+        setRole(s_now, Role::MAIN);
+        lv_obj_set_style_bg_opa(s_now, LV_OPA_COVER, 0);
+        lv_obj_add_flag(s_now, LV_OBJ_FLAG_HIDDEN);
+
+        // Sonnenaufgang klein unten
+        lv_obj_t *sun = box(s_content);
+        lv_obj_set_size(sun, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+        lv_obj_set_style_base_dir(sun, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
+        lv_obj_set_flex_flow(sun, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(sun, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_column(sun, 8, 0);
+        image(sun, prayerName(model::SUNRISE, false), Role::MUTED);
+        s_sunrise = digits(sun, &font_josefin_20, Role::MUTED);
+        lv_obj_align(sun, LV_ALIGN_TOP_MID, 0, 262);
     }
 
     void set(const model::NightTimes &n)
@@ -102,7 +137,9 @@ namespace night_screen
         lv_obj_add_flag(s_loading, LV_OBJ_FLAG_HIDDEN);
 
         setClockText(s_time, n.lastThird);
-        setClockText(s_fajr, n.fajr);
+        setClockText(s_tMaghrib, n.maghrib);
+        setClockText(s_tMidnight, n.midnight);
+        setClockText(s_tFajr, n.fajr);
         setClockText(s_sunrise, n.sunrise);
 
         if (n.secondsToLastThird > 0)
@@ -117,5 +154,16 @@ namespace night_screen
             lv_img_set_src(s_state, lang::text(TXT_NIGHT_NOW));
             lv_obj_add_flag(s_countdown, LV_OBJ_FLAG_HIDDEN);
         }
+
+        // "jetzt" auf der Leiste, nur während der Nacht
+        const float len = (float)(n.fajr - n.maghrib);
+        const float pos = ((float)n.lastThird - n.secondsToLastThird / 60.0f - n.maghrib) / (len > 0 ? len : 1);
+        if (pos >= 0 && pos <= 1)
+        {
+            lv_obj_set_pos(s_now, lineX(pos) - 7, LINE_Y - 7);
+            lv_obj_clear_flag(s_now, LV_OBJ_FLAG_HIDDEN);
+        }
+        else
+            lv_obj_add_flag(s_now, LV_OBJ_FLAG_HIDDEN);
     }
 }

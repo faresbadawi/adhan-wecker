@@ -20,7 +20,8 @@ namespace moon_screen
     static lv_color_t *s_buf = nullptr;
     static int s_lastAge10 = -1;
 
-    static lv_coord_t mx(lv_coord_t x) { return lang::rtl() ? SCREEN_W - x : x; }
+    // Mond immer links, Text rechts – in allen Sprachen gleich
+    static lv_coord_t mx(lv_coord_t x) { return x; }
 
     // Mondalter in Tagen (0 = Neumond), Referenz-Neumond 6. Januar 2000, 18:14 UTC
     static double moonAge(time_t now)
@@ -65,23 +66,6 @@ namespace moon_screen
         lv_obj_invalidate(s_canvas);
     }
 
-    static void anim_opa(void *obj, int32_t v) { lv_obj_set_style_opa((lv_obj_t *)obj, (lv_opa_t)v, 0); }
-
-    static void breathe(lv_obj_t *obj, int32_t from, int32_t to, uint32_t ms, uint32_t delay)
-    {
-        lv_anim_t a;
-        lv_anim_init(&a);
-        lv_anim_set_var(&a, obj);
-        lv_anim_set_exec_cb(&a, anim_opa);
-        lv_anim_set_values(&a, from, to);
-        lv_anim_set_time(&a, ms);
-        lv_anim_set_playback_time(&a, ms);
-        lv_anim_set_delay(&a, delay);
-        lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
-        lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
-        lv_anim_start(&a);
-    }
-
     void create(lv_obj_t *parent)
     {
         lv_obj_align(image(parent, lang::text(TXT_MOON_TITLE), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 8);
@@ -93,13 +77,13 @@ namespace moon_screen
         lv_obj_set_style_radius(s_glow, LV_RADIUS_CIRCLE, 0);
         setRole(s_glow, Role::ACCENT);
         lv_obj_set_style_bg_opa(s_glow, LV_OPA_COVER, 0);
-        breathe(s_glow, 20, 70, 3500, 0);
+        lv_obj_set_style_bg_opa(s_glow, LV_OPA_30, 0);
 
         // Achtstern-Ornament um den Mond, blendet versetzt zum Schein langsam auf und ab
         // (Drehen von Alphamasken verträgt LVGL 8 nicht)
         s_orn = image(parent, &img_moon_orn, Role::ACCENT);
         lv_obj_set_pos(s_orn, mx(CX) - img_moon_orn.header.w / 2, CY - img_moon_orn.header.h / 2);
-        breathe(s_orn, 90, 230, 5000, 1200);
+        lv_obj_set_style_img_opa(s_orn, LV_OPA_80, 0);
 
         // Mondscheibe
         s_buf = (lv_color_t *)heap_caps_malloc(LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(MOON, MOON), MALLOC_CAP_SPIRAM);
@@ -118,14 +102,14 @@ namespace moon_screen
             setRole(st, Role::MAIN);
             lv_obj_set_style_bg_opa(st, LV_OPA_COVER, 0);
             lv_obj_set_pos(st, mx(STARS[i][0]), STARS[i][1]);
-            breathe(st, 30, 255, 1600 + i * 370, i * 450);
+            lv_obj_set_style_bg_opa(st, i % 2 ? LV_OPA_50 : LV_OPA_COVER, 0);
         }
 
         // Hijri-Datum groß, an der anderen Seite
         const lv_coord_t TX = 262; // linker Rand der Textspalte (LTR)
         lv_obj_t *col = box(parent);
         lv_obj_set_size(col, SCREEN_W - TX - MARGIN, 236);
-        lv_obj_set_pos(col, lang::rtl() ? MARGIN : TX, 60);
+        lv_obj_set_pos(col, TX, 60);
         lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
         lv_obj_set_flex_align(col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_row(col, 4, 0);

@@ -72,8 +72,8 @@ namespace ui
         night_screen::create(s_page[PAGE_NIGHT]);
         moon_screen::create(s_page[PAGE_MOON]);
 
-        const Page order[] = {PAGE_NIGHT, PAGE_PRAYER, PAGE_CLOCK, PAGE_WEATHER, PAGE_CALENDAR};
-        setPages(order, 5);
+        const Page order[] = {PAGE_PRAYER, PAGE_CLOCK, PAGE_WEATHER, PAGE_CALENDAR, PAGE_NIGHT, PAGE_MOON};
+        setPages(order, 6);
         showPage(PAGE_PRAYER);
     }
 

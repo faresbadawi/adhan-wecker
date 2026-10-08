@@ -1,6 +1,6 @@
 // Seite "Mond & Hijri": aktuelle Mondphase (berechnet und gezeichnet), Hijri-Datum groß,
 // Leiste mit allen Tagen des Hijri-Monats (Weiße Tage 13.–15. hervorgehoben).
-// Sanfte Bewegung: Schein um den Mond, langsam drehendes Achtstern-Ornament, funkelnde Sterne.
+// Ruhig ohne Bewegung: Mond mit Schein und Achtstern-Ornament immer links, Datum und Angaben rechts.
 #pragma once
 #include <lvgl.h>
 #include <time.h>

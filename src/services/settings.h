@@ -123,7 +123,7 @@ namespace settings
 
     // Reihenfolge aller Inhaltsseiten als Text, z. B. "night,prayer,clock,weather,calendar,-moon"
     // ("-" = ausgeblendet). Schlüssel: clock, prayer, weather, calendar, night, moon.
-    // Ohne gespeicherte Folge wird sie aus pageOrder/show*/showNight abgeleitet.
+    // Ohne gespeicherte Folge: prayer,clock,weather,calendar,night,moon.
     String pageLayout();
     bool setPageLayout(const String &layout); // erhöht version()
 

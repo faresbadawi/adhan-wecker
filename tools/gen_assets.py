@@ -411,6 +411,8 @@ TEXTS = {
     "alarm": (30, True, {"ar": "المنبه", "de": "Wecker", "en": "Alarm"}),
     "alarm_stop": (22, False, {"ar": "المس الشاشة لإيقاف المنبه", "de": "Bildschirm berühren, um den Wecker zu beenden",
                                "en": "Touch the screen to stop the alarm"}),
+    "midnight_lbl": (18, False, {"ar": "منتصف الليل", "de": "Mitte der Nacht", "en": "Midnight"}),
+    "lastthird_lbl": (18, False, {"ar": "الثلث الأخير", "de": "Letztes Drittel", "en": "Last third"}),
     "night_title": (30, True, {"ar": "الثلث الأخير من الليل", "de": "Letztes Drittel der Nacht", "en": "Last third of the night"}),
     "night_in": (22, False, {"ar": "يبدأ بعد", "de": "beginnt in", "en": "starts in"}),
     "night_now": (22, False, {"ar": "الآن، حتى الفجر", "de": "Jetzt, bis Fajr", "en": "Now, until Fajr"}),

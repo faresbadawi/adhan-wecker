@@ -316,17 +316,8 @@ namespace settings
         p.end();
         if (l.length())
             return l;
-        // abgeleitet aus den alten Feldern: Nachtseite links neben den Gebetszeiten, Mond ausgeblendet
-        const Settings st = get();
-        const bool vis[PAGE_ID_COUNT] = {st.showClock, st.showPrayerTimes, st.showWeather, st.showCalendar};
-        for (int i = 0; i < PAGE_ID_COUNT; i++)
-        {
-            const int id = st.pageOrder[i];
-            if (id == PAGE_ID_PRAYER)
-                l += String(st.showNight ? "" : "-") + "night,";
-            l += String(vis[id] ? "" : "-") + PAGE_KEYS[id] + ",";
-        }
-        return l + "-moon";
+        // Standard: Gebetszeiten, Uhr, Wetter, Kalender, letztes Drittel der Nacht, Mond & Hijri
+        return "prayer,clock,weather,calendar,night,moon";
     }
 
     bool setPageLayout(const String &layout)
