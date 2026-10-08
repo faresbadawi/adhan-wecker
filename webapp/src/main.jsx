@@ -18,6 +18,25 @@ import { installErrorReporting } from './lib/errors.js';
 
 installErrorReporting();
 
+// Schutz gegen fremde Änderungen an der Seite (z. B. Browser-Übersetzung, die Texte in <font> verpackt):
+// React will dann Knoten entfernen oder einfügen, die nicht mehr dort hängen, und stürzt ab.
+// Bekannte Abhilfe (facebook/react#11538): solche Aufrufe still übergehen statt abzustürzen.
+if (typeof Node === 'function' && Node.prototype) {
+  const remove = Node.prototype.removeChild;
+  Node.prototype.removeChild = function (child) {
+    if (child.parentNode !== this) {
+      if (child.parentNode) return remove.call(child.parentNode, child);
+      return child;
+    }
+    return remove.call(this, child);
+  };
+  const insert = Node.prototype.insertBefore;
+  Node.prototype.insertBefore = function (node, ref) {
+    if (ref && ref.parentNode !== this) return this.appendChild(node);
+    return insert.call(this, node, ref);
+  };
+}
+
 let l = 'ar';
 try { l = localStorage.getItem('lang') || 'ar'; } catch (e) { /* privat */ }
 setLang(l);
