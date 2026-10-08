@@ -20,6 +20,7 @@
 #include "ui/calendar_screen.h"
 #include "ui/clock_screen.h"
 #include "ui/lang.h"
+#include "ui/night_screen.h"
 #include "ui/prayer_screen.h"
 #include "ui/settings_screen.h"
 #include "ui/theme.h"
@@ -47,7 +48,7 @@ static void applySettings()
     visible[settings::PAGE_ID_PRAYER] = st.showPrayerTimes;
     visible[settings::PAGE_ID_WEATHER] = st.showWeather;
     visible[settings::PAGE_ID_CALENDAR] = st.showCalendar;
-    ui::setPages(st.pageOrder, visible);
+    ui::setPages(st.pageOrder, visible, st.showNight);
 
     if (strcmp(shownBackground, st.background) != 0)
     {
@@ -151,8 +152,13 @@ static void refreshEverySecond(const struct tm &now)
         const bool wasRinging = alarmclock::ringing();
         alarmclock::update(now, st, azan::status().state != azan::State::IDLE);
         if (alarmclock::ringing() != wasRinging)
+        {
+            const int idx = alarmclock::ringingIndex();
+            // Nachtwecker: Name in der Anzeigesprache
+            const char *night = lang::rtl() ? "الثلث الأخير من الليل" : lang::get() == lang::Lang::DE ? "Letztes Drittel der Nacht" : "Last third of the night";
             alarm_screen::show(alarmclock::ringing(), now.tm_hour, now.tm_min,
-                               settings::alarmName(alarmclock::ringingIndex()).c_str());
+                               idx == alarmclock::TAHAJJUD ? night : settings::alarmName(idx).c_str());
+        }
         if (alarmclock::ringing() != wasRinging)
             settingsChanged = true; // Helligkeit sofort umschalten (Wecker: volle Helligkeit)
         const int next = alarmclock::nextAlarmMinutes(now, st);
@@ -173,6 +179,12 @@ static void refreshEverySecond(const struct tm &now)
         weather::get(w);
         prayer_screen::setWeather(w);
         weather_screen::setWeather(w);
+    }
+
+    {
+        model::NightTimes n;
+        prayers::night(now, n);
+        night_screen::set(n);
     }
 
     if (s_today.valid)
@@ -217,7 +229,7 @@ static void refreshAzan(const struct tm &now)
 // Entwicklungshilfen über Serial:
 //   S  Bildschirmfoto senden (python tools/screenshot.py)
 //   A  Azan für das nächste Gebet sofort starten (zum Testen)
-//   1..5  Seite Uhr / Gebetszeiten / Wetter / Kalender / Einstellungen zeigen
+//   1..6  Seite Uhr / Gebetszeiten / Wetter / Kalender / Einstellungen / Nacht zeigen
 //   X  Wecker und Azan stoppen
 static void handleSerial()
 {
@@ -243,7 +255,7 @@ static void handleSerial()
         alarm_screen::show(false, 0, 0);
         return;
     }
-    if (cmd >= '1' && cmd <= '5')
+    if (cmd >= '1' && cmd <= '6')
     {
         ui::showPage((ui::Page)(cmd - '1'));
         return;

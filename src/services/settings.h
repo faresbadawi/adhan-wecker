@@ -91,7 +91,7 @@ namespace settings
         Alarm alarms[MAX_ALARMS];
     };
 
-    struct Settings : SettingsV5
+    struct SettingsV6 : SettingsV5
     {
         // Lautstärke des Azans je Gebet (Fajr, Dhuhr, Asr, Maghrib, Isha) in Prozent;
         // volume (0..21) gilt für den Wecker
@@ -99,6 +99,19 @@ namespace settings
         // Nachts (ab Isha bis Fajr) dunkler: nightBrightness in Prozent (5..100)
         bool autoDim;
         uint8_t nightBrightness;
+    };
+
+    struct SettingsV7 : SettingsV6
+    {
+        // Nachtseite (letztes Drittel der Nacht, Sonnenaufgang) links neben den Gebetszeiten
+        bool showNight;
+    };
+
+    struct Settings : SettingsV7
+    {
+        // Wecker zum Beginn des letzten Nachtdrittels (Tahajjud), tahajjudOffset Minuten später (0..60)
+        bool tahajjudAlarm;
+        uint8_t tahajjudOffset;
     };
 
     // Lädt aus dem NVS, sonst Standardwerte aus config.h.

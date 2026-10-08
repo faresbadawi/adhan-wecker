@@ -34,6 +34,14 @@ namespace weather_screen
         return r;
     }
 
+    // Zahlen mit Einheit immer von links nach rechts ("15°/10°", "78 %"), auch auf Arabisch
+    static lv_obj_t *digits(lv_obj_t *parent, const lv_font_t *font, Role role)
+    {
+        lv_obj_t *l = label(parent, font, role, "");
+        lv_obj_set_style_base_dir(l, LV_BASE_DIR_LTR, 0);
+        return l;
+    }
+
     // Detail rechts neben der Temperatur: Symbol und Wert (Gegenseite zum großen Symbol)
     static lv_obj_t *detail(lv_obj_t *parent, int row, const lv_img_dsc_t *icon)
     {
@@ -45,7 +53,7 @@ namespace weather_screen
         lv_obj_set_style_pad_column(r, 10, 0);
         lv_obj_align(r, lang::rtl() ? LV_ALIGN_TOP_LEFT : LV_ALIGN_TOP_RIGHT, lang::rtl() ? MARGIN : -MARGIN, 52 + row * 40);
         image(r, icon, Role::ACCENT);
-        return label(r, &font_josefin_25, Role::MAIN, "");
+        return digits(r, &font_josefin_25, Role::MAIN);
     }
 
     void create(lv_obj_t *parent)
@@ -64,7 +72,7 @@ namespace weather_screen
         // Oben: großes Symbol, daneben Temperatur und Beschreibung (an der Anfangsseite der Sprache)
         s_icon = image(s_content, nullptr, Role::ACCENT);
         alignStart(s_icon, MARGIN, 50);
-        s_temp = label(s_content, &font_temp_64, Role::MAIN, "");
+        s_temp = digits(s_content, &font_temp_64, Role::MAIN);
         alignStart(s_temp, 144, 50);
         s_sky = image(s_content, nullptr, Role::MAIN);
         alignStart(s_sky, 146, 124);
@@ -78,20 +86,26 @@ namespace weather_screen
 
         // Vorhersage ohne Kästen, nur durch feine senkrechte Linien getrennt;
         // in Leserichtung: "heute" auf Arabisch ganz rechts, sonst ganz links
-        static const int NAMES[DAYS] = {TXT_TODAY, TXT_TOMORROW, TXT_AFTER};
+        static const int NAMES[DAYS] = {TXT_DAY_0, TXT_DAY_1, TXT_DAY_2};
         for (int i = 0; i < DAYS; i++)
         {
             lv_obj_t *name = image(s_content, lang::text(NAMES[i]), Role::ACCENT);
-            lv_obj_set_pos(name, colX(i) + (COL_W - lang::text(NAMES[i])->header.w) / 2, 206);
-            lv_obj_t *r = cell(s_content, i, 244, 44);
+            lv_obj_set_pos(name, colX(i) + (COL_W - lang::text(NAMES[i])->header.w) / 2, 197);
+            // Symbol über den Temperaturen, mittig in der Spalte
+            lv_obj_t *r = box(s_content);
+            lv_obj_set_pos(r, colX(i), 238);
+            lv_obj_set_size(r, COL_W, 72);
+            lv_obj_set_flex_flow(r, LV_FLEX_FLOW_COLUMN);
+            lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+            lv_obj_set_style_pad_row(r, 0, 0);
             s_dayIcon[i] = image(r, nullptr, Role::ACCENT);
-            s_dayRange[i] = label(r, &font_josefin_25, Role::MAIN, ""); // passt mit Symbol in die Spalte
+            s_dayRange[i] = digits(r, &font_josefin_25, Role::MAIN);
             if (i < DAYS - 1)
             {
                 lv_obj_t *sep = box(s_content);
                 setRole(sep, Role::ACCENT);
-                lv_obj_set_pos(sep, colX(i) + (lang::rtl() ? 0 : COL_W) - 1, 208);
-                lv_obj_set_size(sep, 2, 80);
+                lv_obj_set_pos(sep, colX(i) + (lang::rtl() ? 0 : COL_W) - 1, 200);
+                lv_obj_set_size(sep, 2, 98);
                 lv_obj_set_style_bg_opa(sep, LV_OPA_50, 0);
             }
         }

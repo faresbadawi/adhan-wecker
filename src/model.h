@@ -58,6 +58,20 @@ namespace model
         int8_t hijriMonth = 0, hijriDay = 0;
     };
 
+    // Die Nacht von Maghrib bis Fajr, eingeteilt in Drittel.
+    // Zeiten in Minuten seit Mitternacht (Ortszeit), Zeiten nach Mitternacht über 1440.
+    struct NightTimes
+    {
+        bool valid = false;
+        int32_t maghrib = 0;    // Beginn der Nacht
+        int32_t midnight = 0;   // Mitte der Nacht
+        int32_t lastThird = 0;  // Beginn des letzten Drittels
+        int32_t fajr = 0;       // Ende der Nacht
+        int32_t sunrise = 0;    // nächster Sonnenaufgang
+        int32_t lengthMin = 0;  // Länge der Nacht
+        int32_t secondsToLastThird = 0; // negativ: das letzte Drittel läuft schon
+    };
+
     enum class Sky : uint8_t
     {
         CLEAR,

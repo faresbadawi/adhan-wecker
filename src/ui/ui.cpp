@@ -1,6 +1,7 @@
 #include "ui.h"
 #include "calendar_screen.h"
 #include "clock_screen.h"
+#include "night_screen.h"
 #include "prayer_screen.h"
 #include "settings_screen.h"
 #include "theme.h"
@@ -67,22 +68,28 @@ namespace ui
         weather_screen::create(s_page[PAGE_WEATHER]);
         calendar_screen::create(s_page[PAGE_CALENDAR]);
         settings_screen::create(s_page[PAGE_SETTINGS]);
+        night_screen::create(s_page[PAGE_NIGHT]);
 
         const uint8_t order[4] = {PAGE_CLOCK, PAGE_PRAYER, PAGE_WEATHER, PAGE_CALENDAR};
         const bool visible[4] = {true, true, true, true};
-        setPages(order, visible);
+        setPages(order, visible, true);
         showPage(PAGE_PRAYER);
     }
 
-    void setPages(const uint8_t order[4], const bool visible[4])
+    void setPages(const uint8_t order[4], const bool visible[4], bool night)
     {
         lv_obj_t *active = lv_tileview_get_tile_act(s_tiles);
 
         // sichtbare Seiten in der gewünschten Reihenfolge, Einstellungen immer zuletzt
         s_shownCount = 0;
         for (int i = 0; i < 4; i++)
-            if (order[i] < 4 && visible[order[i]])
-                s_shown[s_shownCount++] = (Page)order[i];
+        {
+            if (order[i] >= 4 || !visible[order[i]])
+                continue;
+            if (order[i] == PAGE_PRAYER && night)
+                s_shown[s_shownCount++] = PAGE_NIGHT;
+            s_shown[s_shownCount++] = (Page)order[i];
+        }
         s_shown[s_shownCount++] = PAGE_SETTINGS;
 
         // Ausgeblendete Seiten unterhalb ablegen: LVGL bestimmt die aktive Seite nach dem Wischen

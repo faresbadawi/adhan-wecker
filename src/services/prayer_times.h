@@ -17,6 +17,10 @@ namespace prayers
     // Nächstes der fünf Gebete ab `now`. Nach Isha: Fajr des Folgetags (mit heutiger Fajr-Zeit genähert).
     void next(const struct tm &now, const model::PrayerDay &day, model::Prayer &prayer, int32_t &secondsLeft);
 
+    // Nacht (Maghrib bis Fajr) mit Mitte und letztem Drittel. Bis Fajr gilt die laufende Nacht,
+    // danach die kommende. false, solange keine Zeiten vorliegen.
+    bool night(const struct tm &now, model::NightTimes &out);
+
     // Wird erhöht, sobald neue Zeiten geladen wurden.
     uint32_t version();
 }

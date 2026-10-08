@@ -309,6 +309,54 @@ namespace prayers
         secondsLeft = day.minutes[model::FAJR] * 60 + 24 * 3600 - nowSec;
     }
 
+    bool night(const struct tm &now, model::NightTimes &out)
+    {
+        out = {};
+        // Tage um Heute herum; mktime rechnet über Monatsgrenzen
+        auto dayAt = [&](int offset, model::PrayerDay &d) {
+            struct tm t = now;
+            t.tm_mday += offset;
+            t.tm_hour = 12;
+            t.tm_isdst = -1;
+            mktime(&t);
+            return forDay(t, d);
+        };
+        model::PrayerDay today, tomorrow, evening;
+        if (!dayAt(0, today) || !dayAt(1, tomorrow))
+            return false;
+
+        const int32_t nowSec = now.tm_hour * 3600 + now.tm_min * 60 + now.tm_sec;
+        // Vor Fajr gehört die Zeit noch zur Nacht, die gestern Abend begann
+        const bool before = nowSec < today.minutes[model::FAJR] * 60;
+        int32_t frameSec = nowSec;
+        int32_t fajr = today.minutes[model::FAJR];
+        if (before)
+        {
+            if (!dayAt(-1, evening))
+                return false;
+            frameSec += 24 * 3600;
+            fajr += 24 * 60;
+        }
+        else
+        {
+            evening = today;
+            fajr = tomorrow.minutes[model::FAJR] + 24 * 60;
+        }
+
+        out.maghrib = evening.minutes[model::MAGHRIB];
+        out.fajr = fajr;
+        out.lengthMin = fajr - out.maghrib;
+        if (out.lengthMin <= 0)
+            return false;
+        out.midnight = out.maghrib + (out.lengthMin + 1) / 2;
+        out.lastThird = out.maghrib + (out.lengthMin * 2 + 1) / 3;
+        out.sunrise = nowSec < today.minutes[model::SUNRISE] * 60 ? today.minutes[model::SUNRISE]
+                                                                  : tomorrow.minutes[model::SUNRISE] + 24 * 60;
+        out.secondsToLastThird = out.lastThird * 60 - frameSec;
+        out.valid = true;
+        return true;
+    }
+
     // Auch Änderungen der Einstellungen (z. B. Korrekturen) zählen als neue Zeiten
     uint32_t version() { return s_version + settings::version(); }
 }

@@ -14,13 +14,15 @@ namespace ui
         PAGE_WEATHER,
         PAGE_CALENDAR,
         PAGE_SETTINGS,
+        PAGE_NIGHT, // fest links neben den Gebetszeiten, nicht in der Reihenfolge einstellbar
         PAGE_COUNT
     };
 
     void begin(const char *city);
 
     // order: die vier Seiten von links nach rechts, visible: je Seite (Index = Page) sichtbar
-    void setPages(const uint8_t order[4], const bool visible[4]);
+    // night: Nachtseite links neben den Gebetszeiten
+    void setPages(const uint8_t order[4], const bool visible[4], bool night);
 
     // Zeigt die Seite, falls sichtbar
     void showPage(Page p);

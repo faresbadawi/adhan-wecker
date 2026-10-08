@@ -96,6 +96,9 @@ namespace web
             av[AZAN_KEYS[i]] = st.azanVolume[i];
         doc["brightness"] = st.brightness;
         doc["autoDim"] = st.autoDim;
+        doc["showNight"] = st.showNight;
+        doc["tahajjud"]["on"] = st.tahajjudAlarm;
+        doc["tahajjud"]["offset"] = st.tahajjudOffset;
         doc["nightBrightness"] = st.nightBrightness;
         doc["background"] = st.background;
         JsonObject col = doc["colors"].to<JsonObject>();
@@ -168,6 +171,9 @@ namespace web
             st.azanVolume[i] = av[AZAN_KEYS[i]] | st.azanVolume[i];
         st.brightness = doc["brightness"] | st.brightness;
         st.autoDim = doc["autoDim"] | st.autoDim;
+        st.showNight = doc["showNight"] | st.showNight;
+        st.tahajjudAlarm = doc["tahajjud"]["on"] | st.tahajjudAlarm;
+        st.tahajjudOffset = doc["tahajjud"]["offset"] | st.tahajjudOffset;
         st.nightBrightness = doc["nightBrightness"] | st.nightBrightness;
         if (doc["background"].is<const char *>())
             strlcpy(st.background, doc["background"], sizeof(st.background));
@@ -503,6 +509,22 @@ namespace web
                 doc["prayer"]["holiday"] = h == model::NO_HOLIDAY ? "" : HOLIDAY_KEYS[h];
                 doc["prayer"]["friday"] = now.tm_wday == 5;
             }
+
+            // Letztes Drittel der Nacht: Beginn, Ende (Fajr), Sonnenaufgang und Sekunden bis zum Beginn (negativ: läuft)
+            model::NightTimes n;
+            if (prayers::night(now, n))
+            {
+                auto hm = [&](int32_t m) {
+                    m = ((m % 1440) + 1440) % 1440;
+                    snprintf(b, sizeof(b), "%02d:%02d", m / 60, m % 60);
+                    return String(b);
+                };
+                doc["night"]["lastThird"] = hm(n.lastThird);
+                doc["night"]["fajr"] = hm(n.fajr);
+                doc["night"]["sunrise"] = hm(n.sunrise);
+                doc["night"]["seconds"] = n.secondsToLastThird;
+                doc["night"]["alarm"] = st.tahajjudAlarm;
+            }
         }
 
         doc["azan"]["playing"] = azan::status().state == azan::State::PLAYING;
@@ -662,7 +684,7 @@ namespace web
     static void sendScreenshot()
     {
         const int page = s_server.arg("page").toInt();
-        if (page >= 1 && page <= 5)
+        if (page >= 1 && page <= 6)
         {
             ui::showPage((ui::Page)(page - 1));
             for (int i = 0; i < 40; i++) // Wischanimation abwarten

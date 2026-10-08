@@ -380,13 +380,14 @@ TEXTS = {
     "feels": (22, False, {"ar": "الإحساس", "de": "Gefühlt", "en": "Feels like"}),
     "humidity": (22, False, {"ar": "الرطوبة", "de": "Feuchte", "en": "Humidity"}),
     "wind": (22, False, {"ar": "الرياح", "de": "Wind", "en": "Wind"}),
-    "today": (22, False, {"ar": "اليوم", "de": "Heute", "en": "Today"}),
-    "tomorrow": (22, False, {"ar": "غدًا", "de": "Morgen", "en": "Tomorrow"}),
-    "after": (22, False, {"ar": "بعد غد", "de": "Übermorgen", "en": "Day after"}),
     "no_weather": (24, False, {"ar": "جارٍ تحميل الطقس …", "de": "Wetter wird geladen …", "en": "Loading weather …"}),
     "alarm": (30, True, {"ar": "المنبه", "de": "Wecker", "en": "Alarm"}),
     "alarm_stop": (22, False, {"ar": "المس الشاشة لإيقاف المنبه", "de": "Bildschirm berühren, um den Wecker zu beenden",
                                "en": "Touch the screen to stop the alarm"}),
+    "night_title": (30, True, {"ar": "الثلث الأخير من الليل", "de": "Letztes Drittel der Nacht", "en": "Last third of the night"}),
+    "night_in": (22, False, {"ar": "يبدأ بعد", "de": "beginnt in", "en": "starts in"}),
+    "night_now": (22, False, {"ar": "الآن، حتى الفجر", "de": "Jetzt, bis Fajr", "en": "Now, until Fajr"}),
+    "verse_src": (18, False, {"ar": "سورة الإسراء ١٧:٧٩", "de": "Sure Al-Isra 17:79", "en": "Surah Al-Isra 17:79"}),
     "settings": (30, True, {"ar": "الإعدادات", "de": "Einstellungen", "en": "Settings"}),
     "network": (22, False, {"ar": "الشبكة", "de": "Netzwerk", "en": "Network"}),
     "web": (22, False, {"ar": "صفحة الإعدادات", "de": "Einstellungsseite", "en": "Settings page"}),
@@ -434,6 +435,14 @@ HOLIDAYS = {
 
 # Wortlisten mit gemeinsamer Grundlinie: Schlüssel -> (Größe, fett, {Sprache: Liste})
 LISTS = {
+    "nightcol": (20, False, {  # neben dem Rahmen der Nachtseite
+        "ar": ["الفجر", "الشروق"],
+        "de": ["Fajr", "Sonnenaufgang"],
+        "en": ["Fajr", "Sunrise"]}),
+    "day": (22, False, {  # heute, morgen, übermorgen: gemeinsame Grundlinie trotz Zeichen über/unter den Buchstaben
+        "ar": ["اليوم", "غدًا", "بعد غد"],
+        "de": ["Heute", "Morgen", "Übermorgen"],
+        "en": ["Today", "Tomorrow", "Day after"]}),
     "prayer": (22, False, PRAYER_NAMES),
     "prayer_lg": (34, False, PRAYER_NAMES),
     "holiday": (20, False, HOLIDAYS),
@@ -460,6 +469,14 @@ LISTS = {
         "en": ["Clear", "Partly cloudy", "Cloudy", "Fog", "Drizzle", "Rain", "Snow", "Thunderstorm"]}),
 }
 
+# Mehrzeilige Texte: Schlüssel -> (Größe, Zeilenabstand, {Sprache: Text mit \n})
+PARAGRAPHS = {
+    "verse": ((27, 19), (40, 21), {  # Größe, Zeilenabstand (Arabisch, Latein)
+        "ar": "وَمِنَ اللَّيْلِ فَتَهَجَّدْ بِهِ نَافِلَةً لَّكَ\nعَسَىٰ أَن يَبْعَثَكَ رَبُّكَ مَقَامًا مَّحْمُودًا",
+        "de": "„Und in einem Teil der Nacht verrichte das Tahajjud-Gebet\nals Zusatz für dich. Vielleicht erweckt dich dein Herr\nzu einem gepriesenen Rang.“",
+        "en": "“And from part of the night, pray with it as an extra for you;\nperhaps your Lord will raise you to a praised station.”"}),
+}
+
 LATIN_SCALE = 0.8  # lateinische Schrift wirkt bei gleicher Pixelgröße größer als Amiri
 
 
@@ -482,6 +499,27 @@ def text_bbox(lang, text, font):
     return font.getbbox(text, anchor="ls", direction="ltr", language=lang)
 
 
+def write_paragraph(name, lang, text, font, pitch):
+    """Mehrzeiliger, zentrierter Text (Zeilen durch \n getrennt) mit festem Zeilenabstand."""
+    lines = text.split("\n")
+    boxes = [text_bbox(lang, t, font) for t in lines]
+    widths = [b[2] - b[0] for b in boxes]
+    top = min(b[1] for b in boxes)
+    bottom = max(b[3] for b in boxes)
+    w, h = max(widths) + 2, (len(lines) - 1) * pitch + bottom - top + 2
+    mask = Image.new("L", (w, h), 0)
+    d = ImageDraw.Draw(mask)
+    for i, (t, b, lw) in enumerate(zip(lines, boxes, widths)):
+        y = 1 - top + i * pitch
+        x = w / 2 - (b[0] + b[2]) / 2  # Zeile mittig
+        if lang == "ar":
+            d.text((x, y), t, font=font, fill=255, anchor="rs", direction="rtl", language="ar")
+        else:
+            d.text((x, y), t, font=font, fill=255, anchor="ls", direction="ltr", language=lang)
+    write_image_c(name, np.asarray(mask, np.uint8).tobytes(), w, h, "LV_IMG_CF_ALPHA_8BIT")
+    return mask
+
+
 def write_text(name, lang, text, font, band=None):
     """Schriftzug als 8-Bit-Alphamaske; LVGL zeichnet ihn in der Farbe der Farbgruppe (img_recolor).
     `band` = (oben, unten) relativ zur Grundlinie, damit mehrere Wörter auf derselben Grundlinie stehen."""
@@ -500,11 +538,14 @@ def write_text(name, lang, text, font, band=None):
 
 def write_texts(masks):
     """Alle Texte in allen Sprachen + Tabelle ui_texts[Sprache][TextId] (src/ui/assets/texts.h)."""
-    ids = list(TEXTS) + [f"{k}_{i}" for k, (_, _, d) in LISTS.items() for i in range(len(d["ar"]))]
+    ids = list(TEXTS) + list(PARAGRAPHS) + [f"{k}_{i}" for k, (_, _, d) in LISTS.items() for i in range(len(d["ar"]))]
     for lang in LANGS:
         for key, (size, bold, tr) in TEXTS.items():
             font, _ = text_font(lang, size, bold)
             masks[f"{lang}_{key}"] = write_text(f"img_{lang}_{key}", lang, tr[lang], font)
+        for key, (size, pitch, tr) in PARAGRAPHS.items():
+            font, _ = text_font(lang, size, False)
+            masks[f"{lang}_{key}"] = write_paragraph(f"img_{lang}_{key}", lang, tr[lang], font, pitch[0] if lang == "ar" else pitch[1])
         for key, (size, bold, tr) in LISTS.items():
             font, _ = text_font(lang, size, bold)
             boxes = [text_bbox(lang, t, font) for t in tr[lang]]

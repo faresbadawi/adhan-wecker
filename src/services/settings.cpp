@@ -7,13 +7,23 @@
 namespace settings
 {
     // Bei jeder Änderung des Struct-Aufbaus erhöhen (ältere Fassungen werden in begin() übernommen).
-    static constexpr uint16_t LAYOUT_VERSION = 6;
+    static constexpr uint16_t LAYOUT_VERSION = 8;
     static constexpr const char *KEY = "settings";
 
     struct Stored
     {
         uint16_t layout;
         Settings s;
+    };
+    struct StoredV7
+    {
+        uint16_t layout;
+        SettingsV7 s;
+    };
+    struct StoredV6
+    {
+        uint16_t layout;
+        SettingsV6 s;
     };
     struct StoredV5
     {
@@ -65,6 +75,20 @@ namespace settings
         memcpy(s.pageOrder, order, sizeof(order));
     }
 
+    // Standardwerte der mit Fassung 8 hinzugekommenen Felder: kein Nachtwecker
+    static void setV8Defaults(Settings &s)
+    {
+        s.tahajjudAlarm = false;
+        s.tahajjudOffset = 0;
+    }
+
+    // Standardwerte der mit Fassung 7 hinzugekommenen Felder: Nachtseite an
+    static void setV7Defaults(Settings &s)
+    {
+        s.showNight = true;
+        setV8Defaults(s);
+    }
+
     // Standardwerte der mit Fassung 6 hinzugekommenen Felder: Fajr und Isha leiser (die Leute schlafen),
     // nachts dunkler
     static void setV6Defaults(Settings &s)
@@ -73,6 +97,7 @@ namespace settings
         memcpy(s.azanVolume, vol, sizeof(vol));
         s.autoDim = true;
         s.nightBrightness = 20;
+        setV7Defaults(s);
     }
 
     // Standardwerte der mit Fassung 5 hinzugekommenen Felder: keine Wecker
@@ -144,13 +169,15 @@ namespace settings
                offsetOk(s.dhuhrOffset) && offsetOk(s.asrOffset) && offsetOk(s.maghribOffset) &&
                offsetOk(s.ishaOffset) && s.volume <= 21 && s.brightness >= 5 && s.brightness <= 100 &&
                s.colorMain <= 0xFFFFFF && s.colorAccent <= 0xFFFFFF && s.colorMuted <= 0xFFFFFF &&
-               validOrder(s.pageOrder) && s.prayerSource <= SOURCE_MAWAQIT && validAlarms(s);
+               validOrder(s.pageOrder) && s.prayerSource <= SOURCE_MAWAQIT && validAlarms(s) && s.tahajjudOffset <= 60;
     }
 
     void begin()
     {
         s_lock = xSemaphoreCreateMutex();
         Stored st;
+        StoredV7 v7;
+        StoredV6 v6;
         StoredV5 v5;
         StoredV4 v4;
         StoredV3 v3;
@@ -159,6 +186,24 @@ namespace settings
         if (storage::loadBlob(KEY, &st, sizeof(st)) && st.layout == LAYOUT_VERSION && valid(st.s))
         {
             s_current = st.s;
+        }
+        else if (storage::loadBlob(KEY, &v7, sizeof(v7)) && v7.layout == 7)
+        {
+            // Fassung 7 übernehmen, Nachtwecker ist neu
+            s_current = defaults();
+            static_cast<SettingsV7 &>(s_current) = v7.s;
+            setV8Defaults(s_current);
+            if (!valid(s_current))
+                s_current = defaults();
+        }
+        else if (storage::loadBlob(KEY, &v6, sizeof(v6)) && v6.layout == 6)
+        {
+            // Fassung 6 übernehmen, Nachtseite ist neu
+            s_current = defaults();
+            static_cast<SettingsV6 &>(s_current) = v6.s;
+            setV7Defaults(s_current);
+            if (!valid(s_current))
+                s_current = defaults();
         }
         else if (storage::loadBlob(KEY, &v5, sizeof(v5)) && v5.layout == 5)
         {

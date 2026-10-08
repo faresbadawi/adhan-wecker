@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "audio_manager.h"
 #include "config.h"
+#include "prayer_times.h"
 #include "storage.h"
 
 namespace alarmclock
@@ -14,6 +15,7 @@ namespace alarmclock
     static bool s_ringing = false;
     static int s_index = -1;
     static uint32_t s_startedMs = 0;
+    static time_t s_tahajjudFired = 0; // letztes Klingeln des Nachtweckers
     static int64_t s_fired[settings::MAX_ALARMS]; // je Wecker: Datum + Minute des letzten Klingelns
     static bool s_firedInit = false;
     static int s_snoozeIndex = -1; // geschlummerter Wecker, -1 = keiner
@@ -33,8 +35,11 @@ namespace alarmclock
         s_index = index;
         s_startedMs = millis();
         s_fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "alarm.mp3", s_path, sizeof(s_path));
-        const settings::Alarm &a = st.alarms[index];
-        Serial.printf("Wecker %02d:%02d: %s\n", a.hour, a.minute, s_fs ? s_path : "keine alarm.mp3");
+        if (index == TAHAJJUD)
+            Serial.printf("Wecker letztes Nachtdrittel: %s\n", s_fs ? s_path : "keine alarm.mp3");
+        else
+            Serial.printf("Wecker %02d:%02d: %s\n", st.alarms[index].hour, st.alarms[index].minute,
+                          s_fs ? s_path : "keine alarm.mp3");
         s_rampVolume = min<int>(START_VOLUME, st.volume);
         audio::setVolume(s_rampVolume);
         play();
@@ -77,7 +82,9 @@ namespace alarmclock
         // Geschlummert: nach Ablauf wieder klingeln (nicht, wenn der Wecker inzwischen gelöscht oder aus ist)
         if (s_snoozeIndex >= 0)
         {
-            if (s_snoozeIndex >= st.alarmCount || !st.alarms[s_snoozeIndex].enabled)
+            const bool gone = s_snoozeIndex == TAHAJJUD ? !st.tahajjudAlarm
+                                                        : s_snoozeIndex >= st.alarmCount || !st.alarms[s_snoozeIndex].enabled;
+            if (gone)
                 s_snoozeIndex = -1;
             else if ((int32_t)(millis() - s_snoozeAtMs) >= 0)
             {
@@ -101,6 +108,20 @@ namespace alarmclock
                 s_fired[i] = minuteKey;
                 if (first < 0)
                     first = i;
+            }
+        }
+        // Nachtwecker: zum Beginn des letzten Drittels (plus Verschiebung), einmal pro Nacht
+        if (first < 0 && st.tahajjudAlarm)
+        {
+            model::NightTimes n;
+            struct tm copy = now;
+            const time_t nowT = mktime(&copy);
+            if (prayers::night(now, n) && n.secondsToLastThird + (int32_t)st.tahajjudOffset * 60 <= 0 &&
+                n.secondsToLastThird + (int32_t)st.tahajjudOffset * 60 > -120 &&
+                (s_tahajjudFired == 0 || nowT - s_tahajjudFired > 6 * 3600))
+            {
+                s_tahajjudFired = nowT;
+                first = TAHAJJUD;
             }
         }
         if (first >= 0)
@@ -156,6 +177,20 @@ namespace alarmclock
                     best = m;
                 }
                 break;
+            }
+        }
+        if (st.tahajjudAlarm)
+        {
+            model::NightTimes n;
+            if (prayers::night(now, n))
+            {
+                const int32_t left = n.secondsToLastThird + (int32_t)st.tahajjudOffset * 60;
+                const int delta = (left + 59) / 60; // Minuten bis zum Klingeln
+                if (left > 0 && delta < bestDelta)
+                {
+                    bestDelta = delta;
+                    best = (nowMin + delta) % (24 * 60);
+                }
             }
         }
         if (s_snoozeIndex >= 0)

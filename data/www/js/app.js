@@ -154,6 +154,10 @@ const wifiState = () => {
 const deviceState = () => `<span class="dot ${online ? "ok" : ""}"></span>${t(online ? "device_online" : "device_offline")}`;
 // Abschnitt: Überschrift über einer abgerundeten Gruppe
 const card = (title, icon, body, cls = "") => `<section class="sec ${cls}"><h2>${esc(title)}</h2><div class="group">${body}</div></section>`;
+// Aufklappbarer Abschnitt (übersichtlicher bei langen Seiten); summary = kurze Beschreibung des Inhalts
+const fold = (title, summary, body, open = false) => `<details class="sec fold" ${open ? "open" : ""}>
+  <summary><span class="ft"><b>${esc(title)}</b>${summary ? `<small>${esc(summary)}</small>` : ""}</span><span class="chev">${I.chevron}</span></summary>
+  <div class="group">${body}</div></details>`;
 const toggle = (attrs, on) => `<label class="toggle"><input type="checkbox" ${attrs} ${on ? "checked" : ""}><span></span></label>`;
 const range = (id, v, min, max, suffix = "") =>
   `<div class="range"><input type="range" id="${id}" min="${min}" max="${max}" value="${v}"><output id="${id}Val">${v}${suffix}</output></div>`;
@@ -206,6 +210,15 @@ VIEWS.dashboard = () => {
     <button class="chip" data-go="location">${wxIcon}<div><b class="num ltr">${wx ? wx.temp + "°" : "—"}</b><small>${wx ? t("sky_" + wx.sky) : t("weather_now")}</small></div></button>
     <button class="chip" data-go="wifi">${I.wifi}<div><b>${ST && online && ST.wifi.connected ? bars(ST.wifi.bars) : "—"}</b><small>${t(ST && online && ST.wifi.connected ? "wifi_on" : "wifi_off")}</small></div></button>
   </div>
+  ${ST && ST.night ? card(t("night_page"), I.moon, `<div class="night">
+      <div class="nmain"><small>${t("night_start")}</small><b class="num ltr">${esc(ST.night.lastThird)}</b></div>
+      <div class="nside"><div><small>${t("fajr")}</small><b class="num ltr">${esc(ST.night.fajr)}</b></div>
+        <div><small>${t("sunrise")}</small><b class="num ltr">${esc(ST.night.sunrise)}</b></div></div></div>
+    <div class="ncd" id="nCount"></div>
+    <button class="item link" data-go="alarm"><span class="ico">${I.bell}</span><span class="name">${t("night_alarm")}</span>
+      <span class="val">${t(ST.night.alarm ? "on" : "off")}</span><span class="chev">${I.chevron}</span></button>
+    <p class="verse" lang="ar" dir="rtl">وَمِنَ اللَّيْلِ فَتَهَجَّدْ بِهِ نَافِلَةً لَّكَ عَسَىٰ أَن يَبْعَثَكَ رَبُّكَ مَقَامًا مَّحْمُودًا</p>
+    ${lang() === "ar" ? "" : `<p class="hint vtr">${t("verse_tr")}</p>`}`, "nightcard") : ""}
   ${card(t("today_times"), I.prayer, p ? `<div class="list plist">${ALL_TIMES.map(k => {
     const past = k !== next && toMin(p.times[k]) <= now && next !== "fajr";
     return `<div class="prow ${k === next ? "next" : past ? "past" : ""}"><span class="pi">${PRAYER_ICON[k]}</span>
@@ -229,6 +242,12 @@ function tick() {
   const [h, m, s] = ST.time.clock.split(":").map(Number);
   const tot = (h * 3600 + m * 60 + s + el) % 86400;
   c.textContent = `${String(Math.floor(tot / 3600)).padStart(2, "0")}:${String(Math.floor(tot % 3600 / 60)).padStart(2, "0")}`;
+  const nc = $("nCount");
+  if (nc && ST.night) {
+    const left = ST.night.seconds - el;
+    nc.textContent = left > 0 ? `${t("night_in")} ${duration(left)}` : t("night_running");
+    nc.classList.toggle("run", left <= 0);
+  }
   const cd = $("dCount");
   if (cd && ST.prayer && ST.prayer.next) cd.textContent = duration(Math.max(0, ST.prayer.next.seconds - el));
   // Balken: Anteil der Zeit vom vorigen Gebet bis zum nächsten
@@ -362,16 +381,18 @@ VIEWS.location.bind = () => {
 };
 
 VIEWS.display = () => `
-  ${card(t("pages"), I.display, `<div class="list" id="pages"></div><p class="hint">${t("pages_hint")}</p>`)}
-  ${card(t("background"), I.image, `<div class="bgs" id="bgs">${loading("")}</div>`)}
-  ${card(t("presets"), I.palette, `<div class="themes" id="presets"></div>`)}
-  ${card(t("custom_colors"), I.palette, `<div class="list" id="customCols"></div>`)}
-  ${card(t("brightness"), I.sun, `<div class="vol">${I.sun}${range("brightness", S.brightness, 5, 100, "%")}</div>
+  ${card(t("pages"), I.display, `<div class="list" id="pages"></div>
+    <div class="item"><span class="pico">${I.moon}</span><span class="name">${t("night_page")}</span>${toggle(`id="showNight"`, S.showNight)}</div>
+    <p class="hint">${t("pages_hint")} ${t("night_page_hint")}</p>`)}
+  ${fold(t("background"), "", `<div class="bgs" id="bgs">${loading("")}</div>`)}
+  ${fold(t("presets"), "", `<div class="themes" id="presets"></div>`)}
+  ${fold(t("custom_colors"), "", `<div class="list" id="customCols"></div>`)}
+  ${fold(t("brightness"), "", `<div class="vol">${I.sun}${range("brightness", S.brightness, 5, 100, "%")}</div>
     <div class="item"><span class="name">${t("auto_dim")}</span>${toggle(`id="autoDim"`, S.autoDim)}</div>
     <div id="nightBox" ${S.autoDim ? "" : "hidden"}><label class="f">${t("night_brightness")}</label>
       <div class="vol">${I.moon}${range("nightBrightness", S.nightBrightness, 5, 100, "%")}</div></div>
     <p class="hint">${t("auto_dim_hint")}</p>`)}
-  ${card(t("led"), I.palette, `<div class="item"><span class="ledglow" id="ledGlow"></span><span class="name">${t("led_on")}</span>${toggle(`id="ledOn"`, led.on)}</div>
+  ${fold(t("led"), "", `<div class="item"><span class="ledglow" id="ledGlow"></span><span class="name">${t("led_on")}</span>${toggle(`id="ledOn"`, led.on)}</div>
     <div class="swatches big" id="ledSw">${LED_PRESETS.map(c => `<button data-c="${c}" style="--c:${c}" aria-label="${c}"></button>`).join("")}</div>
     <label class="f">${t("hue")}</label><input type="range" class="slider hue" id="ledHue" min="0" max="359" value="0">
     <label class="f">${t("led_bri")}</label><div class="range"><input type="range" class="slider" id="ledBri" min="5" max="100" value="${led.bri}"><output id="ledBriVal">${led.bri}%</output></div>
@@ -595,6 +616,7 @@ VIEWS.display.bind = () => {
     [pages[i], pages[j]] = [pages[j], pages[i]];
     render(); save({ pages });
   };
+  $("showNight").onchange = () => save({ showNight: $("showNight").checked });
   $("pages").onchange = e => { const c = e.target; if (c.dataset.on === undefined) return; pages[c.dataset.on].on = c.checked; render(); save({ pages }); };
 
   // Hintergründe; das eigene Bild ("custom") steht vorne, die Kachel "+" lädt ein neues hoch (ersetzt das alte)
@@ -749,10 +771,24 @@ VIEWS.audio.bind = () => {
 VIEWS.alarm = () => `
   ${card(t("alarm_times"), I.bell, `<div class="list" id="alarms"></div>
     <div class="actions"><button class="btn" id="alarmAdd">${I.plus}${t("alarm_add")}</button></div><p class="hint">${t("alarm_hint")}</p>`)}
+  ${card(t("tj_title"), I.moon, `<div class="item"><span class="pico">${I.moon}</span><span class="name">${t("tj_on")}</span>${toggle(`id="tjOn"`, (S.tahajjud || {}).on)}</div>
+    <div class="item" id="tjBox" ${(S.tahajjud || {}).on ? "" : "hidden"}><span class="name">${t("tj_offset")}</span>
+      <div class="stepper"><button data-d="-1">−</button><span id="tjOff"></span><button data-d="1">+</button></div></div>
+    <p class="hint">${t("tj_hint")}</p>`)}
   ${card(t("alarm_tone"), I.music, `<div class="list" id="sounds">${loading("")}</div>
     <div class="vol">${I.audio}${range("volume", volPct(S.volume), 0, 100, "%")}</div>
     <p class="hint">${t("alarm_volume_hint")}</p>`)}`;
 VIEWS.alarm.bind = () => {
+  // Wecker zum letzten Drittel der Nacht: Schalter und Verzögerung (0..60 Minuten in Fünferschritten)
+  const tj = Object.assign({ on: false, offset: 0 }, S.tahajjud);
+  const showTj = () => { const el = $("tjOff"); el.textContent = tj.offset ? "+" + tj.offset : "0"; el.classList.toggle("nz", tj.offset > 0); };
+  showTj();
+  $("tjOn").onchange = () => { tj.on = $("tjOn").checked; $("tjBox").hidden = !tj.on; save({ tahajjud: tj }); };
+  $("tjBox").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    tj.offset = Math.max(0, Math.min(60, tj.offset + 5 * Number(b.dataset.d)));
+    showTj(); saveLater({ tahajjud: tj });
+  };
   // Wecker-Lautstärke: beim Loslassen speichern und den gewählten Weckton abspielen
   $("volume").oninput = () => $("volumeVal").textContent = $("volume").value + "%";
   $("volume").onchange = async () => {

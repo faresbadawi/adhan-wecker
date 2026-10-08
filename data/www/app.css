@@ -407,3 +407,30 @@ main { padding-top: calc(28px + env(safe-area-inset-top)); padding-bottom: calc(
 /* Fortschritt beim Update */
 .upbar { height: 8px; border-radius: 8px; background: var(--surface2); overflow: hidden; margin: 12px 0 6px; }
 .upbar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .2s; }
+
+/* ---------- Aufklappbare Abschnitte */
+.fold { margin-bottom: 14px; }
+.fold > summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--surface); border: 1px solid rgba(255, 255, 255, .11); border-radius: var(--radius); padding: 14px 16px;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold .ft { display: flex; flex-direction: column; gap: 2px; }
+.fold .ft b { font-size: 16px; }
+.fold .ft small { color: var(--muted); font-size: 13px; }
+.fold .chev svg { width: 18px; height: 18px; color: var(--dim); transition: transform .2s; transform: rotate(90deg); }
+.fold[open] .chev svg { transform: rotate(-90deg); }
+.fold[open] > summary { border-end-start-radius: 0; border-end-end-radius: 0; border-bottom-color: transparent; }
+.fold > .group { border-top: 0; border-start-start-radius: 0; border-start-end-radius: 0; padding-top: 10px; }
+
+/* ---------- Karte: letztes Drittel der Nacht */
+.night { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0 6px; }
+.night small { display: block; color: var(--muted); font-size: 13px; margin-bottom: 2px; }
+.night .nmain b { font-size: 44px; font-weight: 300; color: var(--gold2); letter-spacing: 1px; line-height: 1.1; }
+.night .nside { display: flex; gap: 22px; }
+.night .nside b { font-size: 20px; font-weight: 500; }
+.ncd { color: var(--muted); font-size: 15px; padding: 2px 0 10px; }
+.ncd.run { color: var(--gold2); font-weight: 600; }
+.verse { font-family: var(--arabic); font-size: 20px; line-height: 2; text-align: center; color: var(--text); margin: 10px 0 4px; }
+.vtr { font-style: italic; text-align: center; }
+.nightcard { }

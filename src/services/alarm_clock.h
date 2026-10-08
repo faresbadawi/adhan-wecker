@@ -7,6 +7,9 @@
 
 namespace alarmclock
 {
+    // Index des Weckers zum letzten Nachtdrittel (nach den eigenen Weckern)
+    constexpr int TAHAJJUD = settings::MAX_ALARMS;
+
     // Jede Sekunde aufrufen. azanActive: läuft gerade ein Azan, wartet der Wecker.
     void update(const struct tm &now, const settings::Settings &st, bool azanActive);
 
