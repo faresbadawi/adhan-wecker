@@ -8,6 +8,7 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include "audio_manager.h"
+#include "alarm_clock.h"
 #include "azan_controller.h"
 #include "config.h"
 #include "ui/lang.h"
@@ -128,6 +129,23 @@ namespace web
                 start = end + 1;
             }
         }
+
+        // Zeitzone des Ortes und automatischer Seitenwechsel
+        doc["timezone"] = settings::timezoneName();
+        doc["rotate"]["seconds"] = settings::rotateSeconds();
+        {
+            JsonArray rp = doc["rotate"]["pages"].to<JsonArray>();
+            const String l = settings::rotatePages();
+            int start = 0;
+            while (start < (int)l.length())
+            {
+                int end = l.indexOf(',', start);
+                if (end < 0)
+                    end = l.length();
+                rp.add(l.substring(start, end));
+                start = end + 1;
+            }
+        }
         String out;
         serializeJson(doc, out);
         s_server.send(200, "application/json", out);
@@ -159,9 +177,9 @@ namespace web
         // Nur übergebene Felder ändern, der Rest bleibt
         settings::Settings st = settings::get();
         if (doc["city"].is<const char *>())
-            strlcpy(st.city, doc["city"], sizeof(st.city));
+            utf8Copy(st.city, doc["city"] | "", sizeof(st.city));
         if (doc["country"].is<const char *>())
-            strlcpy(st.country, doc["country"], sizeof(st.country));
+            utf8Copy(st.country, doc["country"] | "", sizeof(st.country));
         st.latitude = doc["latitude"] | st.latitude;
         st.longitude = doc["longitude"] | st.longitude;
         st.calculationMethod = doc["method"] | st.calculationMethod;
@@ -241,6 +259,30 @@ namespace web
             if (!settings::setPageLayout(layout))
             {
                 s_server.send(400, "application/json", "{\"error\":\"pages\"}");
+                return;
+            }
+        }
+
+        // Zeitzone: {"timezone": {"name": "Europe/Istanbul", "posix": "<+03>-3"}}
+        if (doc["timezone"].is<JsonObject>() &&
+            !settings::setTimezone(doc["timezone"]["name"] | "", doc["timezone"]["posix"] | ""))
+        {
+            s_server.send(400, "application/json", "{\"error\":\"timezone\"}");
+            return;
+        }
+        // Seitenwechsel: {"rotate": {"seconds": 60, "pages": ["prayer", "clock"]}}
+        if (doc["rotate"].is<JsonObject>())
+        {
+            String l;
+            for (JsonVariant v : doc["rotate"]["pages"].as<JsonArray>())
+            {
+                if (l.length())
+                    l += ",";
+                l += v.as<const char *>();
+            }
+            if (!settings::setRotate(doc["rotate"]["seconds"] | 0, l))
+            {
+                s_server.send(400, "application/json", "{\"error\":\"rotate\"}");
                 return;
             }
         }
@@ -625,6 +667,13 @@ namespace web
     }
 
     // Azan-Test aus der App: läuft wie zur Gebetszeit (Anzeige auf der Uhr, Stopp durch Tippen oder App)
+    // Wecker zur Probe: klingelt sofort mit Fenster auf der Uhr (Stoppen/Schlummern wie gewohnt)
+    static void alarmTest()
+    {
+        alarmclock::test(settings::get());
+        s_server.send(200, "application/json", "{}");
+    }
+
     static void azanTest()
     {
         JsonDocument doc;
@@ -812,6 +861,7 @@ namespace web
         s_server.on("/api/device/reset", HTTP_POST, deviceReset);
         s_server.on("/api/device/lang", HTTP_POST, deviceLang);
         s_server.on("/api/azan/test", HTTP_POST, azanTest);
+        s_server.on("/api/alarm/test", HTTP_POST, alarmTest);
         s_server.on("/api/screenshot", HTTP_GET, sendScreenshot);
         s_server.on("/api/led", HTTP_POST, ledSet);
         s_server.on("/api/clientlog", HTTP_POST, clientLogAdd);

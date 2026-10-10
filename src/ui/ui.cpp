@@ -134,6 +134,28 @@ namespace ui
         updateDots();
     }
 
+    bool nextPage(uint32_t mask)
+    {
+        if (s_shownCount < 2)
+            return false;
+        lv_obj_t *active = lv_tileview_get_tile_act(s_tiles);
+        int cur = 0;
+        for (int i = 0; i < s_shownCount; i++)
+            if (s_page[s_shown[i]] == active)
+                cur = i;
+        for (int step = 1; step < s_shownCount; step++)
+        {
+            const Page p = s_shown[(cur + step) % s_shownCount];
+            if (mask & (1u << p))
+            {
+                lv_obj_set_tile(s_tiles, s_page[p], LV_ANIM_ON);
+                updateDots();
+                return true;
+            }
+        }
+        return false;
+    }
+
     uint8_t *snapshot(uint32_t &size, uint16_t &w, uint16_t &h)
     {
         // lv_snapshot erfasst nur den Bildschirm, nicht lv_layer_top (Overlays, Seitenpunkte):

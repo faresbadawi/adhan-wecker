@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "config.h"
 #include "net_lock.h"
+#include "settings.h"
 
 namespace timemgr
 {
@@ -24,21 +25,32 @@ namespace timemgr
         return mktime(&t);
     }
 
+    // Zeitzone des eingestellten Ortes (POSIX-Regel aus den Einstellungen)
+    static String s_tz;
+    void applyTimezone()
+    {
+        const String tz = settings::timezone();
+        if (tz == s_tz)
+            return;
+        s_tz = tz;
+        setenv("TZ", s_tz.c_str(), 1);
+        tzset();
+        Serial.printf("Zeitzone: %s\n", s_tz.c_str());
+    }
+
     void begin(bool demo)
     {
         s_demo = demo;
         if (demo)
         {
-            setenv("TZ", TZ_INFO, 1);
-            tzset();
+            applyTimezone();
             s_demoBase = localEpoch(2026, 10, 1, 18, 42, 0);
             s_demoMillis = millis();
         }
         else
         {
             // Zeitzone sofort, SNTP erst in update() (siehe dort)
-            setenv("TZ", TZ_INFO, 1);
-            tzset();
+            applyTimezone();
         }
     }
 
@@ -55,7 +67,7 @@ namespace timemgr
         IPAddress ip;
         WiFi.hostByName(NTP_SERVER_1, ip);
         xSemaphoreGive(netlock::handle());
-        configTzTime(TZ_INFO, NTP_SERVER_1, NTP_SERVER_2);
+        configTzTime(s_tz.c_str(), NTP_SERVER_1, NTP_SERVER_2);
         s_sntpStarted = true;
     }
 

@@ -328,3 +328,7 @@ ion-item p.far { color: var(--ion-color-primary); }
 .far-hint ion-label { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
 .small-spin { width: 22px; height: 22px; margin: 0 8px; flex: none; }
 .mosque-chip { color: var(--accent-light); margin-inline-start: 4px; overflow: hidden; text-overflow: ellipsis; }
+/* Seitenwechsel: Auswahl der Zeitspanne kompakt */
+.rot-seg { width: auto; min-width: 210px; }
+.rot-seg ion-segment-button { min-width: 48px; --padding-start: 4px; --padding-end: 4px; min-height: 32px; }
+.rot-seg ion-label { font-size: 13px; padding: 2px 0; }

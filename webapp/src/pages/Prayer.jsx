@@ -10,7 +10,8 @@ import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t, lang } from '../lib/i18n.js';
 import { METHODS, PRAYERS } from '../lib/constants.js';
-import { useApp, save, saveLater, toast, parseMawaqit, resolveMosque, cachedMosque, km } from '../lib/store.js';
+import { useApp, save, saveLater, toast, parseMawaqit, resolveMosque, cachedMosque } from '../lib/store.js';
+import { takeSearchedPlace, takeMosque } from '../lib/place.js';
 
 // Ort suchen (Open-Meteo-Geocoding, direkt vom Handy) und antippen
 function PlaceSheet({ open, onClose }) {
@@ -31,11 +32,7 @@ function PlaceSheet({ open, onClose }) {
     return () => { clearTimeout(id); ctl.abort(); };
   }, [q]);
   async function pick(p) {
-    const ok = await save({
-      city: p.name, country: p.country_code || '', latitude: Number(p.latitude.toFixed(4)), longitude: Number(p.longitude.toFixed(4)),
-      source: 'calculated',
-    }, true);
-    if (ok) { toast(t('place_saved')); onClose(); }
+    if (await takeSearchedPlace(p)) { toast(t('place_saved')); onClose(); }
   }
   const sep = lang() === 'ar' ? '، ' : ', ';
   return (
@@ -103,7 +100,7 @@ export default function Prayer() {
     setBusy(false);
     if (!m) { toast(t('mosque_not_found'), true); return true; }
     setLink(''); setSrc('mawaqit'); setInfo(m);
-    if (await save({ source: 'mawaqit', mawaqit: { slug: m.slug, name: m.name } }, true)) toast(t('mosque_taken') + ': ' + m.name);
+    if (await takeMosque(m)) toast(t('mosque_taken'));
     return true;
   }
   function onLinkInput(v) {
@@ -116,10 +113,6 @@ export default function Prayer() {
       if (!await takeText(txt)) { setLink(txt); toast(t('mosque_link_bad'), true); }
     } catch (e) { toast(t('paste_denied'), true); }
   }
-  // Entfernung der Moschee vom eingestellten Ort (Hinweis, wenn Zeiten und Ort nicht zusammenpassen)
-  const dist = info && S && info.lat ? km(S.latitude, S.longitude, info.lat, info.lon) : null;
-  const far = dist !== null && dist > 50;
-  const fmtKm = d => Math.round(d).toLocaleString(lang() === 'ar' ? 'ar-u-nu-latn' : lang());
   function step(k, d) {
     const n = { ...off, [k]: Math.max(-30, Math.min(30, (off[k] || 0) + d)) };
     setOff(n);
@@ -158,12 +151,9 @@ export default function Prayer() {
                   <span className="ico" slot="start"><IonIcon icon={S.mawaqit.slug ? checkmarkCircle : searchOutline} /></span>
                   <IonLabel>
                     <h2 className="big">{S.mawaqit.slug ? ((info && info.name) || S.mawaqit.name || S.mawaqit.slug) : t('mosque_none')}</h2>
-                    {S.mawaqit.slug && dist !== null && (
-                      <p className={far ? 'far' : ''}>{t('mosque_distance').replace('{km}', fmtKm(dist)).replace('{place}', S.city)}{info.country ? ` · ${info.country}` : ''}</p>
-                    )}
+                    {S.mawaqit.slug && <p>{S.city}{S.country ? ` · ${S.country}` : ''}</p>}
                   </IonLabel>
                 </IonItem>
-                {far && <IonItem lines="none" className="far-hint"><IonLabel className="ion-text-wrap">{t('mosque_far_hint')}</IonLabel></IonItem>}
               </IonList>
             </Section>
 

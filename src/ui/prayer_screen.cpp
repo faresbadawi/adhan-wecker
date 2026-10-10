@@ -6,7 +6,6 @@ extern "C"
 {
     extern const lv_img_dsc_t *const img_wifi_list[2];
     LV_IMG_DECLARE(img_alarm);
-    LV_IMG_DECLARE(img_mosque);
 }
 
 namespace prayer_screen
@@ -25,7 +24,6 @@ namespace prayer_screen
     static lv_obj_t *s_azan, *s_azanName;
     static void (*s_onAzanTap)() = nullptr;
     static lv_obj_t *s_wxIcon, *s_wxTemp, *s_city;
-    static lv_obj_t *s_title, *s_mosqueRow, *s_mosque; // Titel oder (bei Mawaqit) Symbol und Name der Moschee
     static lv_obj_t *s_wifiIcon;
     static lv_obj_t *s_alarmRow, *s_alarmTime;
     static void createWifiOverlay(lv_obj_t *scr)
@@ -119,23 +117,8 @@ namespace prayer_screen
         lv_obj_add_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
 
         // Oben rechts: Titel und Stadt
-        s_title = image(scr, lang::text(TXT_TITLE), Role::ACCENT);
-        lv_obj_align(s_title, LV_ALIGN_TOP_RIGHT, -MARGIN, 20);
-
-        // Statt des Titels: Moschee, deren Zeiten gelten (Mawaqit). Symbol fest am rechten Rand,
-        // Name links daneben (wird bei jeder Änderung neu ausgerichtet, siehe setMosque)
-        s_mosqueRow = image(scr, &img_mosque, Role::ACCENT);
-        lv_obj_align(s_mosqueRow, LV_ALIGN_TOP_RIGHT, -MARGIN, 24);
-        s_mosque = label(scr, &font_josefin_20, Role::ACCENT, "");
-        // Festes, großzügiges Feld, rechtsbündig am Symbol; Schreibrichtung aus dem Namen (lateinisch oder arabisch).
-        // Mit Inhaltsbreite misst LVGL gemischte Richtungen zu knapp und schneidet den Anfang ab.
-        lv_obj_set_width(s_mosque, 230);
-        lv_label_set_long_mode(s_mosque, LV_LABEL_LONG_DOT);
-        lv_obj_set_style_text_align(s_mosque, LV_TEXT_ALIGN_RIGHT, 0);
-        lv_obj_set_style_base_dir(s_mosque, LV_BASE_DIR_AUTO, 0);
-        lv_obj_align_to(s_mosque, s_mosqueRow, LV_ALIGN_OUT_LEFT_MID, -8, 0);
-        lv_obj_add_flag(s_mosqueRow, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(s_mosque, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_t *title = image(scr, lang::text(TXT_TITLE), Role::ACCENT);
+        lv_obj_align(title, LV_ALIGN_TOP_RIGHT, -MARGIN, 20);
 
         // Oben rechts unter dem Titel: Wetter klein (Symbol + Temperatur + Stadt)
         lv_obj_t *wx = box(scr);
@@ -278,42 +261,6 @@ namespace prayer_screen
     }
 
     void setCity(const char *city) { lv_label_set_text(s_city, city); }
-
-    void setMosque(const char *name)
-    {
-        const bool show = name && name[0];
-        if (show)
-        {
-            // lange Namen kürzen (höchstens 24 Zeichen, UTF-8-sicher) und mit "..." enden lassen
-            String n(name);
-            int chars = 0, cut = -1;
-            for (int i = 0; i < (int)n.length(); i++)
-                if (((uint8_t)n[i] & 0xC0) != 0x80 && ++chars == 25)
-                {
-                    cut = i;
-                    break;
-                }
-            if (cut > 0)
-            {
-                n = n.substring(0, cut);
-                n.trim();
-                n += "...";
-            }
-            lv_label_set_text(s_mosque, n.c_str());
-        }
-        if (show)
-        {
-            lv_obj_add_flag(s_title, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(s_mosqueRow, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_clear_flag(s_mosque, LV_OBJ_FLAG_HIDDEN);
-        }
-        else
-        {
-            lv_obj_clear_flag(s_title, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(s_mosqueRow, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(s_mosque, LV_OBJ_FLAG_HIDDEN);
-        }
-    }
 
     void setWifi(const model::WifiInfo &w)
     {

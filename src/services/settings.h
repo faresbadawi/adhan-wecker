@@ -131,6 +131,18 @@ namespace settings
     String alarmName(int i);
     void setAlarmName(int i, const String &name);
 
+    // Zeitzone des Ortes (eigener NVS-Bereich "place"): POSIX-Regel für die Uhr, z. B. "<+03>-3",
+    // und der IANA-Name zur Anzeige, z. B. "Europe/Istanbul". Ohne Eintrag: TZ_INFO aus config.h (Deutschland).
+    String timezone();
+    String timezoneName();
+    bool setTimezone(const String &name, const String &posix); // erhöht version()
+
+    // Seiten automatisch wechseln (NVS-Bereich "ui"): alle seconds Sekunden ohne Berührung zur nächsten
+    // der gewählten Seiten (Schlüssel wie bei pageLayout, kommagetrennt). seconds = 0: aus.
+    uint16_t rotateSeconds();
+    String rotatePages();
+    bool setRotate(uint16_t seconds, const String &pages); // erhöht version()
+
     // Steigt bei jeder Änderung; Dienste vergleichen damit, ob sie neu laden müssen.
     uint32_t version();
 }

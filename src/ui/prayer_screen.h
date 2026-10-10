@@ -13,8 +13,6 @@ namespace prayer_screen
     void setNext(model::Prayer p, int32_t secondsLeft);
     void setWeather(const model::Weather &w);
     void setCity(const char *city);
-    // Gewählte Mawaqit-Moschee oben rechts statt des Titels; leer = Titel "Gebetszeiten"
-    void setMosque(const char *name);
 
     // WLAN-Symbol mit Signalstärke (Antippen öffnet die Einstellungsseite)
     void setWifi(const model::WifiInfo &w);

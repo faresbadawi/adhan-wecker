@@ -35,8 +35,8 @@ namespace alarmclock
         s_index = index;
         s_startedMs = millis();
         s_fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "alarm.mp3", s_path, sizeof(s_path));
-        if (index == TAHAJJUD)
-            Serial.printf("Wecker letztes Nachtdrittel: %s\n", s_fs ? s_path : "keine alarm.mp3");
+        if (index == TAHAJJUD || index == TEST)
+            Serial.printf("Wecker %s: %s\n", index == TEST ? "Probe" : "letztes Nachtdrittel", s_fs ? s_path : "keine alarm.mp3");
         else
             Serial.printf("Wecker %02d:%02d: %s\n", st.alarms[index].hour, st.alarms[index].minute,
                           s_fs ? s_path : "keine alarm.mp3");
@@ -138,6 +138,12 @@ namespace alarmclock
             s_snoozeIndex = -1; // ein neuer Termin ersetzt eine laufende Schlummerzeit
             startRinging(first, st);
         }
+    }
+
+    void test(const settings::Settings &st)
+    {
+        s_snoozeIndex = -1;
+        startRinging(TEST, st);
     }
 
     void stop()

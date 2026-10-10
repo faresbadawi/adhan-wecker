@@ -8,6 +8,7 @@ import { homeOutline, alarmOutline, volumeHighOutline } from 'ionicons/icons';
 import { t, lang } from './lib/i18n.js';
 import { set, get, refreshStatus, loadSettings, applyTheme, save, confirmBox, toast, parseMawaqit, resolveMosque } from './lib/store.js';
 import Hosts from './components/Hosts.jsx';
+import { takeMosque } from './lib/place.js';
 import Home from './pages/Home.jsx';
 import Prayer from './pages/Prayer.jsx';
 import Alarm from './pages/Alarm.jsx';
@@ -53,7 +54,7 @@ export default function App() {
         location.hash = '#/prayer';
         const m = await resolveMosque(shared);
         if (!m) toast(t('mosque_not_found'), true);
-        else if (await confirmBox(t('mosque_take'), m.name)) await save({ source: 'mawaqit', mawaqit: { slug: m.slug, name: m.name } });
+        else if (await confirmBox(t('mosque_take'), m.name)) await takeMosque(m);
       }
     })();
 

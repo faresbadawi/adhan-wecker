@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   IonPage, IonContent, IonList, IonItem, IonLabel, IonToggle, IonReorderGroup, IonReorder, IonRange, IonIcon, IonNote, IonSpinner,
+  IonSegment, IonSegmentButton, IonCheckbox,
 } from '@ionic/react';
 import { addOutline, trashOutline, sunnyOutline, moonOutline, lockClosedOutline, chevronForward, chevronBack } from 'ionicons/icons';
 import { Bar } from '../components/Header.jsx';
@@ -50,6 +51,17 @@ export default function Display() {
   function togglePage(i, on) {
     const list = pages.map((p, j) => (j === i ? { ...p, on } : p));
     setPages(list); save({ pages: list }, true);
+  }
+
+  // Seiten automatisch wechseln: Intervall und beteiligte Seiten
+  const ROT_STEPS = [30, 60, 120, 300];
+  const rot = (S && S.rotate) || { seconds: 0, pages: [] };
+  const rotOn = rot.seconds > 0;
+  const setRot = part => save({ rotate: { seconds: rot.seconds || 60, pages: rot.pages, ...part } }, true);
+  const rotLabel = sec => (sec < 60 ? `${sec} ${t('seconds_short')}` : `${sec / 60} ${t('minutes_short')}`);
+  function toggleRotPage(id, on) {
+    const list = pages.map(p => p.id).filter(k => (k === id ? on : rot.pages.includes(k)));
+    setRot({ pages: list });
   }
 
   // Hintergründe; das eigene Bild ("custom") steht vorne, "+" lädt ein neues hoch (ersetzt das alte)
@@ -116,6 +128,28 @@ export default function Display() {
                 <span className="ico" slot="start"><IonIcon icon={lockClosedOutline} /></span>
                 <IonLabel>{t('page_settings')}</IonLabel>
               </IonItem>
+            </IonList>
+          </Section>
+
+          <Section title={t('rotate_title')} hint={t('rotate_hint')}>
+            <IonList inset>
+              <IonItem>
+                <IonToggle checked={rotOn} onIonChange={e => setRot({ seconds: e.detail.checked ? (rot.seconds || 60) : 0, pages: rot.pages.length ? rot.pages : ['prayer', 'clock', 'weather'] })}>{t('rotate_on')}</IonToggle>
+              </IonItem>
+              {rotOn && <>
+                <IonItem>
+                  <IonLabel>{t('rotate_every')}</IonLabel>
+                  <IonSegment slot="end" className="rot-seg" value={String(rot.seconds)} onIonChange={e => setRot({ seconds: Number(e.detail.value) })}>
+                    {ROT_STEPS.map(v => <IonSegmentButton key={v} value={String(v)}><IonLabel>{rotLabel(v)}</IonLabel></IonSegmentButton>)}
+                  </IonSegment>
+                </IonItem>
+                {pages.filter(p => p.on).map(p => (
+                  <IonItem key={p.id}>
+                    <span className="ico" slot="start"><Svg html={PAGE_ICON[p.id] || ''} /></span>
+                    <IonCheckbox checked={rot.pages.includes(p.id)} onIonChange={e => toggleRotPage(p.id, e.detail.checked)} justify="space-between">{t('page_' + p.id)}</IonCheckbox>
+                  </IonItem>
+                ))}
+              </>}
             </IonList>
           </Section>
 

@@ -32,13 +32,17 @@ static constexpr int PIN_BOOT_BUTTON = 0;
 static model::PrayerDay s_today;
 
 // Einstellungen auf Display, Farben und Audio anwenden (beim Start und nach jeder Änderung)
+// Automatischer Seitenwechsel (0 = aus) und die beteiligten Seiten als Bitmaske (1 << ui::Page)
+static uint16_t s_rotateSec = 0;
+static uint32_t s_rotateMask = 0;
+
 static void applySettings()
 {
     static char shownBackground[sizeof(settings::Settings::background)] = "";
     const settings::Settings st = settings::get();
 
     prayer_screen::setCity(st.city);
-    prayer_screen::setMosque(st.prayerSource == settings::SOURCE_MAWAQIT && st.mawaqitSlug[0] ? st.mawaqitName : "");
+    timemgr::applyTimezone(); // Ortszeit des eingestellten Ortes (z. B. Türkei bei einer Moschee dort)
     weather_screen::setCity(st.city);
     theme::setPalette(st.colorMain, st.colorAccent, st.colorMuted);
     lcd::setBrightness(st.brightness);
@@ -63,6 +67,23 @@ static void applySettings()
             start = end + 1;
         }
         ui::setPages(order, count);
+
+        // Automatischer Seitenwechsel: Intervall und beteiligte Seiten
+        s_rotateSec = settings::rotateSeconds();
+        s_rotateMask = 0;
+        const String rot = settings::rotatePages();
+        start = 0;
+        while (start < (int)rot.length())
+        {
+            int end = rot.indexOf(',', start);
+            if (end < 0)
+                end = rot.length();
+            const String key = rot.substring(start, end);
+            for (int k = 0; k < 6; k++)
+                if (key == KEYS[k])
+                    s_rotateMask |= 1u << PAGES[k];
+            start = end + 1;
+        }
     }
 
     if (strcmp(shownBackground, st.background) != 0)
@@ -187,14 +208,23 @@ static void refreshEverySecond(const struct tm &now)
             const int idx = alarmclock::ringingIndex();
             // Nachtwecker: Name in der Anzeigesprache
             const char *night = lang::rtl() ? "الثلث الأخير من الليل" : lang::get() == lang::Lang::DE ? "Letztes Drittel der Nacht" : "Last third of the night";
+            const char *test = lang::rtl() ? "تجربة المنبه" : lang::get() == lang::Lang::DE ? "Probewecker" : "Test alarm";
             alarm_screen::show(alarmclock::ringing(), now.tm_hour, now.tm_min,
-                               idx == alarmclock::TAHAJJUD ? night : settings::alarmName(idx).c_str());
+                               idx == alarmclock::TAHAJJUD ? night : idx == alarmclock::TEST ? test : settings::alarmName(idx).c_str());
         }
         if (alarmclock::ringing() != wasRinging)
             settingsChanged = true; // Helligkeit sofort umschalten (Wecker: volle Helligkeit)
         const int next = alarmclock::nextAlarmMinutes(now, st);
         prayer_screen::setAlarm(next);
         clock_screen::setAlarm(next);
+    }
+
+    // Seiten automatisch wechseln, wenn das Display so lange nicht berührt wurde (nicht während Azan oder Wecker)
+    if (s_rotateSec && !alarmclock::ringing() && azan::status().state == azan::State::IDLE &&
+        lv_disp_get_inactive_time(nullptr) >= (uint32_t)s_rotateSec * 1000)
+    {
+        ui::nextPage(s_rotateMask);
+        lv_disp_trig_activity(nullptr); // nächstes Intervall beginnt jetzt
     }
 
     updateBrightness(now, settingsChanged);

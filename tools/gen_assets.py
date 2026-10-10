@@ -653,8 +653,6 @@ def main():
     write_icon_image("img_alarm_lg", ICONS["ALARM"], 56, IMG_WHITE)
     masks["ornament"] = write_ornament("img_moon_orn", 196)
     write_icon_image("img_snooze", ICONS["ALARM_SNOOZE"], 22, IMG_WHITE)
-    # Moschee (Mawaqit) oben auf der Gebetsseite
-    write_icon_image("img_mosque", ICONS["MOSQUE"], 22, IMG_WHITE)
     # Sonnenaufgang auf der Seite "Drittel der Nacht"
     write_icon_image("img_sunrise", ICONS["SUNRISE"], 34, IMG_WHITE)
     # Wetterdetails: gefühlte Temperatur, Luftfeuchte, Wind

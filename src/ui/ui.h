@@ -27,6 +27,10 @@ namespace ui
     // Zeigt die Seite, falls sichtbar
     void showPage(Page p);
 
+    // Automatischer Wechsel: zur nächsten sichtbaren Seite, deren Bit (1 << Page) in mask gesetzt ist
+    // (weich animiert). false, wenn es keine andere solche Seite gibt.
+    bool nextPage(uint32_t mask);
+
     // Bildschirmfoto inkl. Overlays als RGB565 (big-endian, LV_COLOR_16_SWAP) in einen PSRAM-Puffer.
     // Der Aufrufer gibt buf mit free() frei. Nur aus dem LVGL-Task (loop) aufrufen.
     uint8_t *snapshot(uint32_t &size, uint16_t &w, uint16_t &h);

@@ -65,6 +65,10 @@ export default function Alarm() {
     try { const r = await api('/api/preview', { name: n }); toast(r.ok ? t('tone_playing') : t('error'), !r.ok); }
     catch (e) { toast(t('offline'), true); }
   }
+  async function testAlarm() {
+    try { const r = await api('/api/alarm/test', {}); toast(r.ok ? t('alarm_test_running') : t('error'), !r.ok); }
+    catch (e) { toast(t('offline'), true); }
+  }
   async function setVolume(pct) {
     const ok = await save({ volume: Math.round(pct * 21 / 100) }, true);
     if (ok && sounds && sounds.selected) api('/api/preview', { name: sounds.selected }).catch(() => {});
@@ -102,6 +106,9 @@ export default function Alarm() {
                 </IonItemSliding>
               ))}
             </IonList>
+            <div className="pad-x btnrow mt">
+              <IonButton shape="round" fill="outline" onClick={testAlarm}><IonIcon slot="start" icon={play} />{t('alarm_test')}</IonButton>
+            </div>
             {alarms.length < MAX_ALARMS && (
               <div className="pad-x"><IonButton expand="block" fill="outline" shape="round" onClick={add}><IonIcon slot="start" icon={addOutline} />{t('alarm_add')}</IonButton></div>
             )}

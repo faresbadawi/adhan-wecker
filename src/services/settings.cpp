@@ -348,4 +348,85 @@ namespace settings
         s_version++;
         return true;
     }
+
+    String timezone()
+    {
+        Preferences p;
+        p.begin("place", true);
+        String tz = p.getString("tz", "");
+        p.end();
+        return tz.length() ? tz : String(TZ_INFO);
+    }
+
+    String timezoneName()
+    {
+        Preferences p;
+        p.begin("place", true);
+        String n = p.getString("tzname", "");
+        p.end();
+        return n.length() ? n : String("Europe/Berlin");
+    }
+
+    bool setTimezone(const String &name, const String &posix)
+    {
+        // POSIX-Regel: beginnt mit einem Namen (Buchstaben oder <...>), keine Steuerzeichen
+        if (posix.isEmpty() || posix.length() > 60 || name.length() > 48 || !(isalpha(posix[0]) || posix[0] == '<'))
+            return false;
+        for (char c : posix)
+            if (c < 32 || c > 126)
+                return false;
+        Preferences p;
+        p.begin("place", false);
+        p.putString("tz", posix);
+        p.putString("tzname", name);
+        p.end();
+        s_version++;
+        return true;
+    }
+
+    uint16_t rotateSeconds()
+    {
+        Preferences p;
+        p.begin("ui", true);
+        const uint16_t sec = p.getUShort("rot", 0);
+        p.end();
+        return sec;
+    }
+
+    String rotatePages()
+    {
+        Preferences p;
+        p.begin("ui", true);
+        String l = p.getString("rotpages", "prayer,clock,weather");
+        p.end();
+        return l;
+    }
+
+    bool setRotate(uint16_t seconds, const String &pages)
+    {
+        if ((seconds != 0 && (seconds < 15 || seconds > 3600)) || pages.length() > 80)
+            return false;
+        // nur bekannte Seiten
+        int start = 0;
+        while (start < (int)pages.length())
+        {
+            int end = pages.indexOf(',', start);
+            if (end < 0)
+                end = pages.length();
+            const String key = pages.substring(start, end);
+            bool known = false;
+            for (const char *k : PAGE_KEYS)
+                known |= key == k;
+            if (!known)
+                return false;
+            start = end + 1;
+        }
+        Preferences p;
+        p.begin("ui", false);
+        p.putUShort("rot", seconds);
+        p.putString("rotpages", pages);
+        p.end();
+        s_version++;
+        return true;
+    }
 }

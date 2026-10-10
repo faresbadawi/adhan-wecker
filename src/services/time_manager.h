@@ -1,4 +1,4 @@
-// Uhrzeit: NTP-Synchronisation in Zeitzone Europe/Berlin, im Demo-Modus simulierte Uhr.
+// Uhrzeit: NTP-Synchronisation in der Zeitzone des eingestellten Ortes (Standard Europe/Berlin), im Demo-Modus simulierte Uhr.
 #pragma once
 #include <time.h>
 
@@ -14,4 +14,6 @@ namespace timemgr
 
     // Nur Demo: Uhr auf eine Uhrzeit (Sekunden seit Mitternacht) des Demo-Tages setzen.
     void demoSetTimeOfDay(int seconds);
+    // Zeitzone aus den Einstellungen übernehmen (nach jeder Änderung aufrufen; ohne Änderung ohne Wirkung)
+    void applyTimezone();
 }
