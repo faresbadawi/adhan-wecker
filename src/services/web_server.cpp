@@ -93,18 +93,23 @@ namespace web
         col["accent"] = toHex(st.colorAccent);
         col["muted"] = toHex(st.colorMuted);
 
-        // Wecker: [{"on":true,"time":"06:30","days":127}] (days: Bit 0 = Sonntag)
+        // Wecker: [{"on":true,"name":"Arbeit","time":"06:30","days":127}] (days: Bit 0 = Sonntag)
         JsonArray alarms = doc["alarms"].to<JsonArray>();
-        for (int i = 0; i < st.alarmCount; i++)
         {
-            char t[6];
-            snprintf(t, sizeof(t), "%02d:%02d", st.alarms[i].hour, st.alarms[i].minute);
-            JsonObject a = alarms.add<JsonObject>();
-            a["on"] = st.alarms[i].enabled;
-            a["name"] = settings::alarmName(i);
-            a["time"] = t;
-            a["days"] = st.alarms[i].days;
+            static settings::AlarmEntry list[settings::ALARM_LIST_MAX];
+            const int n = settings::alarmList(list);
+            for (int i = 0; i < n; i++)
+            {
+                char t[6];
+                snprintf(t, sizeof(t), "%02d:%02d", list[i].hour, list[i].minute);
+                JsonObject a = alarms.add<JsonObject>();
+                a["on"] = list[i].enabled;
+                a["name"] = list[i].name;
+                a["time"] = t;
+                a["days"] = list[i].days;
+            }
         }
+        doc["alarmsMax"] = settings::ALARM_LIST_MAX;
 
         doc["source"] = st.prayerSource == settings::SOURCE_MAWAQIT ? "mawaqit" : "calculated";
         doc["mawaqit"]["slug"] = st.mawaqitSlug;
@@ -215,20 +220,22 @@ namespace web
         if (doc["alarms"].is<JsonArray>())
         {
             JsonArray alarms = doc["alarms"];
-            if (alarms.size() > settings::MAX_ALARMS)
+            static settings::AlarmEntry list[settings::ALARM_LIST_MAX];
+            const int n = alarms.size();
+            bool ok = n <= settings::ALARM_LIST_MAX;
+            for (int i = 0; ok && i < n; i++)
+            {
+                const char *t = alarms[i]["time"] | "00:00";
+                list[i].enabled = alarms[i]["on"] | true;
+                list[i].hour = atoi(t);
+                list[i].minute = strlen(t) >= 5 ? atoi(t + 3) : 0;
+                list[i].days = alarms[i]["days"] | 0x7F;
+                utf8Copy(list[i].name, alarms[i]["name"] | "", sizeof(list[i].name));
+            }
+            if (!ok || !settings::setAlarmList(list, n))
             {
                 s_server.send(400, "application/json", "{\"error\":\"alarms\"}");
                 return;
-            }
-            st.alarmCount = alarms.size();
-            for (int i = 0; i < st.alarmCount; i++)
-            {
-                const char *t = alarms[i]["time"] | "00:00";
-                st.alarms[i].enabled = alarms[i]["on"] | true;
-                st.alarms[i].hour = atoi(t);
-                st.alarms[i].minute = strlen(t) >= 5 ? atoi(t + 3) : 0;
-                st.alarms[i].days = alarms[i]["days"] | 0x7F;
-                settings::setAlarmName(i, alarms[i]["name"] | "");
             }
         }
 
@@ -667,13 +674,6 @@ namespace web
     }
 
     // Azan-Test aus der App: läuft wie zur Gebetszeit (Anzeige auf der Uhr, Stopp durch Tippen oder App)
-    // Wecker zur Probe: klingelt sofort mit Fenster auf der Uhr (Stoppen/Schlummern wie gewohnt)
-    static void alarmTest()
-    {
-        alarmclock::test(settings::get());
-        s_server.send(200, "application/json", "{}");
-    }
-
     static void azanTest()
     {
         JsonDocument doc;
@@ -861,7 +861,6 @@ namespace web
         s_server.on("/api/device/reset", HTTP_POST, deviceReset);
         s_server.on("/api/device/lang", HTTP_POST, deviceLang);
         s_server.on("/api/azan/test", HTTP_POST, azanTest);
-        s_server.on("/api/alarm/test", HTTP_POST, alarmTest);
         s_server.on("/api/screenshot", HTTP_GET, sendScreenshot);
         s_server.on("/api/led", HTTP_POST, ledSet);
         s_server.on("/api/clientlog", HTTP_POST, clientLogAdd);

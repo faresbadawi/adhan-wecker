@@ -54,6 +54,7 @@ namespace settings
     static SemaphoreHandle_t s_lock;
     static Settings s_current;
     static volatile uint32_t s_version = 1;
+    static void loadAlarms(); // Wecker-Liste, siehe unten
 
     // Standardwerte der mit Fassung 2 hinzugekommenen Felder (entspricht dem bisherigen Aussehen)
     static void setNewDefaults(Settings &s)
@@ -262,6 +263,7 @@ namespace settings
         s_current.mawaqitName[sizeof(s_current.mawaqitName) - 1] = 0;
         s_current.city[sizeof(s_current.city) - 1] = 0;
         s_current.country[sizeof(s_current.country) - 1] = 0;
+        loadAlarms();
         Serial.printf("Einstellungen: %s (%.4f, %.4f), Methode %d, Madhhab %d\n", s_current.city,
                       s_current.latitude, s_current.longitude, s_current.calculationMethod, s_current.madhhab);
     }
@@ -289,21 +291,73 @@ namespace settings
 
     uint32_t version() { return s_version; }
 
-    String alarmName(int i)
-    {
-        Preferences p;
-        p.begin("alarms", true);
-        String n = p.getString(("n" + String(i)).c_str(), "");
-        p.end();
-        return n;
-    }
+    // ---------- Wecker-Liste (im RAM gehalten, Änderungen sofort im NVS)
+    static AlarmEntry s_alarms[ALARM_LIST_MAX];
+    static int s_alarmCount = 0;
 
-    void setAlarmName(int i, const String &name)
+    static void loadAlarms()
     {
         Preferences p;
         p.begin("alarms", false);
-        p.putString(("n" + String(i)).c_str(), name.substring(0, 40));
+        const size_t len = p.getBytesLength("list");
+        if (len && len % sizeof(AlarmEntry) == 0 && len / sizeof(AlarmEntry) <= ALARM_LIST_MAX)
+        {
+            p.getBytes("list", s_alarms, len);
+            s_alarmCount = len / sizeof(AlarmEntry);
+        }
+        else
+        {
+            // Einmalig übernehmen: bis zu 4 Wecker aus dem alten Einstellungsblock, Namen aus n0..n3
+            s_alarmCount = 0;
+            for (int i = 0; i < s_current.alarmCount && i < MAX_ALARMS; i++)
+            {
+                AlarmEntry &e = s_alarms[s_alarmCount++];
+                e.enabled = s_current.alarms[i].enabled;
+                e.hour = s_current.alarms[i].hour;
+                e.minute = s_current.alarms[i].minute;
+                e.days = s_current.alarms[i].days;
+                const String n = p.getString(("n" + String(i)).c_str(), "");
+                strlcpy(e.name, n.c_str(), sizeof(e.name));
+            }
+            p.putBytes("list", s_alarms, s_alarmCount * sizeof(AlarmEntry));
+        }
         p.end();
+    }
+
+    int alarmList(AlarmEntry *out)
+    {
+        xSemaphoreTake(s_lock, portMAX_DELAY);
+        const int n = s_alarmCount;
+        memcpy(out, s_alarms, n * sizeof(AlarmEntry));
+        xSemaphoreGive(s_lock);
+        return n;
+    }
+
+    bool setAlarmList(const AlarmEntry *list, int count)
+    {
+        if (count < 0 || count > ALARM_LIST_MAX)
+            return false;
+        for (int i = 0; i < count; i++)
+            if (list[i].hour > 23 || list[i].minute > 59 || list[i].days > 0x7F)
+                return false;
+        xSemaphoreTake(s_lock, portMAX_DELAY);
+        memcpy(s_alarms, list, count * sizeof(AlarmEntry));
+        s_alarmCount = count;
+        xSemaphoreGive(s_lock);
+        Preferences p;
+        p.begin("alarms", false);
+        p.putBytes("list", s_alarms, count * sizeof(AlarmEntry));
+        p.end();
+        s_version++;
+        return true;
+    }
+
+    String alarmName(int i)
+    {
+        xSemaphoreTake(s_lock, portMAX_DELAY);
+        const String n = i >= 0 && i < s_alarmCount ? String(s_alarms[i].name) : String();
+        xSemaphoreGive(s_lock);
+        return n;
     }
 
     static const char *const PAGE_KEYS[] = {"clock", "prayer", "weather", "calendar", "night", "moon"};

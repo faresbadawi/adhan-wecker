@@ -16,7 +16,8 @@ namespace alarmclock
     static int s_index = -1;
     static uint32_t s_startedMs = 0;
     static time_t s_tahajjudFired = 0; // letztes Klingeln des Nachtweckers
-    static int64_t s_fired[settings::MAX_ALARMS]; // je Wecker: Datum + Minute des letzten Klingelns
+    static int64_t s_fired[settings::ALARM_LIST_MAX]; // je Wecker: Datum + Minute des letzten Klingelns
+    static settings::AlarmEntry s_list[settings::ALARM_LIST_MAX]; // Kopie der Wecker-Liste (jede Sekunde aktualisiert)
     static bool s_firedInit = false;
     static int s_snoozeIndex = -1; // geschlummerter Wecker, -1 = keiner
     static uint32_t s_snoozeAtMs = 0;
@@ -35,10 +36,10 @@ namespace alarmclock
         s_index = index;
         s_startedMs = millis();
         s_fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "alarm.mp3", s_path, sizeof(s_path));
-        if (index == TAHAJJUD || index == TEST)
-            Serial.printf("Wecker %s: %s\n", index == TEST ? "Probe" : "letztes Nachtdrittel", s_fs ? s_path : "keine alarm.mp3");
+        if (index == TAHAJJUD)
+            Serial.printf("Wecker letztes Nachtdrittel: %s\n", s_fs ? s_path : "keine alarm.mp3");
         else
-            Serial.printf("Wecker %02d:%02d: %s\n", st.alarms[index].hour, st.alarms[index].minute,
+            Serial.printf("Wecker %02d:%02d: %s\n", s_list[index].hour, s_list[index].minute,
                           s_fs ? s_path : "keine alarm.mp3");
         s_rampVolume = min<int>(START_VOLUME, st.volume);
         audio::setVolume(s_rampVolume);
@@ -56,6 +57,7 @@ namespace alarmclock
 
     void update(const struct tm &now, const settings::Settings &st, bool azanActive)
     {
+        const int count = settings::alarmList(s_list);
         if (!s_firedInit)
         {
             for (int64_t &k : s_fired)
@@ -92,7 +94,7 @@ namespace alarmclock
         if (s_snoozeIndex >= 0)
         {
             const bool gone = s_snoozeIndex == TAHAJJUD ? !st.tahajjudAlarm
-                                                        : s_snoozeIndex >= st.alarmCount || !st.alarms[s_snoozeIndex].enabled;
+                                                        : s_snoozeIndex >= count || !s_list[s_snoozeIndex].enabled;
             if (gone)
                 s_snoozeIndex = -1;
             else if ((int32_t)(millis() - s_snoozeAtMs) >= 0)
@@ -107,9 +109,9 @@ namespace alarmclock
         const int64_t minuteKey =
             ((int64_t)((now.tm_year + 1900) * 10000 + (now.tm_mon + 1) * 100 + now.tm_mday)) * 10000 + now.tm_hour * 60 + now.tm_min;
         int first = -1;
-        for (int i = 0; i < st.alarmCount; i++)
+        for (int i = 0; i < count; i++)
         {
-            const settings::Alarm &a = st.alarms[i];
+            const settings::AlarmEntry &a = s_list[i];
             if (a.enabled && (a.days & (1 << now.tm_wday)) && a.hour == now.tm_hour && a.minute == now.tm_min &&
                 s_fired[i] != minuteKey)
             {
@@ -140,12 +142,6 @@ namespace alarmclock
         }
     }
 
-    void test(const settings::Settings &st)
-    {
-        s_snoozeIndex = -1;
-        startRinging(TEST, st);
-    }
-
     void stop()
     {
         s_snoozeIndex = -1;
@@ -173,9 +169,10 @@ namespace alarmclock
     {
         const int nowMin = now.tm_hour * 60 + now.tm_min;
         int best = -1, bestDelta = 8 * 24 * 60;
-        for (int i = 0; i < st.alarmCount; i++)
+        const int count = settings::alarmList(s_list);
+        for (int i = 0; i < count; i++)
         {
-            const settings::Alarm &a = st.alarms[i];
+            const settings::AlarmEntry &a = s_list[i];
             if (!a.enabled || !a.days)
                 continue;
             const int m = a.hour * 60 + a.minute;

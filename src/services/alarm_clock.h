@@ -8,12 +8,7 @@
 namespace alarmclock
 {
     // Index des Weckers zum letzten Nachtdrittel (nach den eigenen Weckern)
-    constexpr int TAHAJJUD = settings::MAX_ALARMS;
-    // Index für den Probewecker aus der App
-    constexpr int TEST = settings::MAX_ALARMS + 1;
-
-    // Wecker jetzt zur Probe klingeln lassen (Fenster, Ton, langsam lauter) – Stoppen/Schlummern wie gewohnt
-    void test(const settings::Settings &st);
+    constexpr int TAHAJJUD = settings::ALARM_LIST_MAX;
 
     // Jede Sekunde aufrufen. azanActive: läuft gerade ein Azan, wartet der Wecker.
     void update(const struct tm &now, const settings::Settings &st, bool azanActive);

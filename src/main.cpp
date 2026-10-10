@@ -208,9 +208,8 @@ static void refreshEverySecond(const struct tm &now)
             const int idx = alarmclock::ringingIndex();
             // Nachtwecker: Name in der Anzeigesprache
             const char *night = lang::rtl() ? "الثلث الأخير من الليل" : lang::get() == lang::Lang::DE ? "Letztes Drittel der Nacht" : "Last third of the night";
-            const char *test = lang::rtl() ? "تجربة المنبه" : lang::get() == lang::Lang::DE ? "Probewecker" : "Test alarm";
             alarm_screen::show(alarmclock::ringing(), now.tm_hour, now.tm_min,
-                               idx == alarmclock::TAHAJJUD ? night : idx == alarmclock::TEST ? test : settings::alarmName(idx).c_str());
+                               idx == alarmclock::TAHAJJUD ? night : settings::alarmName(idx).c_str());
         }
         if (alarmclock::ringing() != wasRinging)
             settingsChanged = true; // Helligkeit sofort umschalten (Wecker: volle Helligkeit)

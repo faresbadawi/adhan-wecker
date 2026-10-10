@@ -25,5 +25,5 @@ export const THEME_SWATCHES = {
 };
 export const PRAYERS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 export const ALL_TIMES = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"];
-export const MAX_ALARMS = 4;
+export const MAX_ALARMS = 30; // die Uhr meldet ihre Höchstzahl als alarmsMax
 export const DAY_ORDER = [6, 0, 1, 2, 3, 4, 5]; // Samstag zuerst; Bit = tm_wday

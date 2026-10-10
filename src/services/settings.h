@@ -127,9 +127,22 @@ namespace settings
     String pageLayout();
     bool setPageLayout(const String &layout); // erhöht version()
 
-    // Name eines Weckers (frei wählbar, z. B. "Arbeit"); eigener NVS-Bereich "alarms"
+    // Wecker-Liste (NVS-Bereich "alarms", Schlüssel "list"), unabhängig vom festen Einstellungsblock.
+    // Ersetzt alarmCount/alarms in Settings (dort nur noch für die einmalige Übernahme alter Stände).
+    constexpr int ALARM_LIST_MAX = 30;
+    struct AlarmEntry
+    {
+        bool enabled;
+        uint8_t hour, minute;
+        uint8_t days;  // Bit 0 = Sonntag ... Bit 6 = Samstag (wie tm_wday)
+        char name[44]; // frei wählbar, z. B. "Arbeit" (UTF-8)
+    };
+    // Kopiert die Wecker nach out (Platz für ALARM_LIST_MAX) und liefert ihre Anzahl
+    int alarmList(AlarmEntry *out);
+    // Prüft, speichert dauerhaft und erhöht version()
+    bool setAlarmList(const AlarmEntry *list, int count);
+    // Name eines Weckers ("" wenn keiner)
     String alarmName(int i);
-    void setAlarmName(int i, const String &name);
 
     // Zeitzone des Ortes (eigener NVS-Bereich "place"): POSIX-Regel für die Uhr, z. B. "<+03>-3",
     // und der IANA-Name zur Anzeige, z. B. "Europe/Istanbul". Ohne Eintrag: TZ_INFO aus config.h (Deutschland).
