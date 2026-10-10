@@ -386,6 +386,9 @@ ARABIC_CHARS = "".join(chr(c) for c in (
     + list(range(0x0660, 0x066A)) + [0x067E, 0x0686, 0x0698, 0x06A9, 0x06AF, 0x06CC]
     + [c for c in range(0xFE70, 0xFEFD) if c not in (0xFE73, 0xFE75)]))
 GERMAN = "äöüÄÖÜß·•–°\u2236\u200e"
+# Weitere lateinische Buchstaben für frei eingegebene Namen (Moscheen, Orte): Türkisch, Französisch,
+# Spanisch, Bosnisch u. a. – Moscheenamen von Mawaqit kommen aus aller Welt
+LATIN_EXT = "çÇğĞıİşŞéèêëÉÈÊàâÀÂîïÎÏôÔûùÛÙœŒñÑáíóúÁÍÓÚćčĆČđĐšŠžŽłŁńŃśŚźŹżŻąęĄĘåÅøØæÆ’"
 DIGITS = "0123456789:-"
 TEMP = "0123456789-°C"
 
@@ -632,8 +635,8 @@ def main():
     # Arabische Ersatzschriften: frei eingegebener Text (z. B. Stadtname) erscheint damit auf Arabisch
     write_font("font_ar_19", "Amiri-Regular.ttf", 19, ARABIC_CHARS)
     write_font("font_ar_22", "Amiri-Regular.ttf", 22, ARABIC_CHARS)
-    write_font("font_josefin_20", "JosefinSans-Variable.ttf", 20, ASCII + GERMAN, weight=500, fallback="font_ar_22")
-    write_font("font_josefin_17", "JosefinSans-Variable.ttf", 17, ASCII + GERMAN, weight=500, fallback="font_ar_19")
+    write_font("font_josefin_20", "JosefinSans-Variable.ttf", 20, ASCII + GERMAN + LATIN_EXT, weight=500, fallback="font_ar_22")
+    write_font("font_josefin_17", "JosefinSans-Variable.ttf", 17, ASCII + GERMAN + LATIN_EXT, weight=500, fallback="font_ar_19")
 
 
     masks = {}
@@ -650,6 +653,8 @@ def main():
     write_icon_image("img_alarm_lg", ICONS["ALARM"], 56, IMG_WHITE)
     masks["ornament"] = write_ornament("img_moon_orn", 196)
     write_icon_image("img_snooze", ICONS["ALARM_SNOOZE"], 22, IMG_WHITE)
+    # Moschee (Mawaqit) oben auf der Gebetsseite
+    write_icon_image("img_mosque", ICONS["MOSQUE"], 22, IMG_WHITE)
     # Sonnenaufgang auf der Seite "Drittel der Nacht"
     write_icon_image("img_sunrise", ICONS["SUNRISE"], 34, IMG_WHITE)
     # Wetterdetails: gefühlte Temperatur, Luftfeuchte, Wind

@@ -72,7 +72,8 @@ export default function Home() {
 
         <section className="hero">
           <div className="hero-top">
-            <span className="loc"><Svg html={I.location} />{ST ? ST.location.city : '—'}</span>
+            <span className="loc"><Svg html={I.location} />{ST ? ST.location.city : '—'}
+              {S && S.source === 'mawaqit' && S.mawaqit.slug && <span className="mosque-chip">· {S.mawaqit.name || S.mawaqit.slug}</span>}</span>
             <span className="num ltr">{ST && ST.time ? clock : '--:--'}</span>
           </div>
           <div className="bism" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>

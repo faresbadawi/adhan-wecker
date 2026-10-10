@@ -32,7 +32,7 @@ namespace prayers
         uint8_t source;    // settings::PrayerSource
         uint32_t slugHash; // gewählte Mawaqit-Moschee
     };
-    static constexpr uint16_t CACHE_MAGIC = 0xA7A3;
+    static constexpr uint16_t CACHE_MAGIC = 0xA7A4; // erhöht: Mawaqit-Kalender mit 7 Zeiten werden jetzt richtig zugeordnet
 
     static uint32_t hashOf(const char *s) // FNV-1a
     {

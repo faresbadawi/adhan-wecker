@@ -38,6 +38,7 @@ static void applySettings()
     const settings::Settings st = settings::get();
 
     prayer_screen::setCity(st.city);
+    prayer_screen::setMosque(st.prayerSource == settings::SOURCE_MAWAQIT && st.mawaqitSlug[0] ? st.mawaqitName : "");
     weather_screen::setCity(st.city);
     theme::setPalette(st.colorMain, st.colorAccent, st.colorMuted);
     lcd::setBrightness(st.brightness);

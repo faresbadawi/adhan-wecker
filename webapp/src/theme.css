@@ -323,3 +323,8 @@ ion-progress-bar { height: 6px; border-radius: 6px; margin: 4px 0; --progress-ba
 .tj-at { color: var(--muted); font-size: 15px; }
 .tj-at.fajr { color: var(--ion-color-primary); font-weight: 600; }
 .stepper button:disabled { opacity: .3; }
+/* Gewählte Moschee: Entfernung zum Ort, Hinweis wenn weit weg */
+ion-item p.far { color: var(--ion-color-primary); }
+.far-hint ion-label { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.small-spin { width: 22px; height: 22px; margin: 0 8px; flex: none; }
+.mosque-chip { color: var(--accent-light); margin-inline-start: 4px; overflow: hidden; text-overflow: ellipsis; }

@@ -10,7 +10,7 @@ import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t, lang } from '../lib/i18n.js';
 import { METHODS, PRAYERS } from '../lib/constants.js';
-import { useApp, save, saveLater, toast, slugFromLink } from '../lib/store.js';
+import { useApp, save, saveLater, toast, parseMawaqit, resolveMosque, cachedMosque, km } from '../lib/store.js';
 
 // Ort suchen (Open-Meteo-Geocoding, direkt vom Handy) und antippen
 function PlaceSheet({ open, onClose }) {
@@ -85,18 +85,41 @@ export default function Prayer() {
     setSrc(v);
     if (v === 'calculated' || (S && S.mawaqit.slug)) save({ source: v });
   }
+  // Link oder geteilten Text einfügen: sobald darin eine Mawaqit-Moschee steckt, prüft die Uhr sie
+  // und übernimmt sie mit ihrem echten Namen (kein "Speichern" nötig)
+  const [busy, setBusy] = useState(false);
+  const [info, setInfo] = useState(null); // Angaben zur gewählten Moschee (Name, Land, Koordinaten)
+  useEffect(() => {
+    if (!S || !S.mawaqit.slug) { setInfo(null); return; }
+    const c = cachedMosque(S.mawaqit.slug);
+    if (c) { setInfo(c); return; }
+    resolveMosque({ slug: S.mawaqit.slug }).then(setInfo);
+  }, [S && S.mawaqit.slug]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function takeText(text) {
+    const ref = parseMawaqit(text);
+    if (!ref) return false;
+    setBusy(true);
+    const m = await resolveMosque(ref);
+    setBusy(false);
+    if (!m) { toast(t('mosque_not_found'), true); return true; }
+    setLink(''); setSrc('mawaqit'); setInfo(m);
+    if (await save({ source: 'mawaqit', mawaqit: { slug: m.slug, name: m.name } }, true)) toast(t('mosque_taken') + ': ' + m.name);
+    return true;
+  }
+  function onLinkInput(v) {
+    setLink(v);
+    if (parseMawaqit(v)) takeText(v); // eingefügter Text mit Link: sofort übernehmen
+  }
   async function paste() {
     try {
       const txt = await navigator.clipboard.readText();
-      if (slugFromLink(txt)) takeLink(txt); else { setLink(txt); toast(t('mosque_link_bad'), true); }
+      if (!await takeText(txt)) { setLink(txt); toast(t('mosque_link_bad'), true); }
     } catch (e) { toast(t('paste_denied'), true); }
   }
-  function takeLink(text) {
-    const slug = slugFromLink(typeof text === 'string' ? text : link);
-    if (!slug) { toast(t('mosque_link_bad'), true); return; }
-    setLink('');
-    save({ source: 'mawaqit', mawaqit: { slug, name: slug } });
-  }
+  // Entfernung der Moschee vom eingestellten Ort (Hinweis, wenn Zeiten und Ort nicht zusammenpassen)
+  const dist = info && S && info.lat ? km(S.latitude, S.longitude, info.lat, info.lon) : null;
+  const far = dist !== null && dist > 50;
+  const fmtKm = d => Math.round(d).toLocaleString(lang() === 'ar' ? 'ar-u-nu-latn' : lang());
   function step(k, d) {
     const n = { ...off, [k]: Math.max(-30, Math.min(30, (off[k] || 0) + d)) };
     setOff(n);
@@ -134,10 +157,13 @@ export default function Prayer() {
                 <IonItem lines="none">
                   <span className="ico" slot="start"><IonIcon icon={S.mawaqit.slug ? checkmarkCircle : searchOutline} /></span>
                   <IonLabel>
-                    <h2 className="big">{S.mawaqit.slug ? (S.mawaqit.name || S.mawaqit.slug) : t('mosque_none')}</h2>
-                    {S.mawaqit.slug && <p className="ltr-inline">mawaqit.net/{S.mawaqit.slug}</p>}
+                    <h2 className="big">{S.mawaqit.slug ? ((info && info.name) || S.mawaqit.name || S.mawaqit.slug) : t('mosque_none')}</h2>
+                    {S.mawaqit.slug && dist !== null && (
+                      <p className={far ? 'far' : ''}>{t('mosque_distance').replace('{km}', fmtKm(dist)).replace('{place}', S.city)}{info.country ? ` · ${info.country}` : ''}</p>
+                    )}
                   </IonLabel>
                 </IonItem>
+                {far && <IonItem lines="none" className="far-hint"><IonLabel className="ion-text-wrap">{t('mosque_far_hint')}</IonLabel></IonItem>}
               </IonList>
             </Section>
 
@@ -158,11 +184,10 @@ export default function Prayer() {
               <div className="pad-x">
                 <div className="link-row">
                   <IonIcon icon={linkOutline} className="accent" />
-                  <IonInput className="ltr" type="url" value={link} placeholder="https://mawaqit.net/…" onIonInput={e => setLink(e.detail.value || '')}
-                    onKeyDown={e => e.key === 'Enter' && takeLink()} />
-                  {link.trim()
-                    ? <IonButton size="small" shape="round" onClick={() => takeLink()}>{t('save')}</IonButton>
-                    : canPaste && <IonButton size="small" shape="round" fill="outline" onClick={paste}><IonIcon slot="start" icon={clipboardOutline} />{t('paste')}</IonButton>}
+                  <IonInput value={link} placeholder={t('mosque_link_ph')} onIonInput={e => onLinkInput(e.detail.value || '')} disabled={busy}
+                    onKeyDown={e => e.key === 'Enter' && takeText(link).then(ok => ok || toast(t('mosque_link_bad'), true))} />
+                  {busy ? <IonSpinner name="crescent" className="small-spin" />
+                    : canPaste && !link.trim() && <IonButton size="small" shape="round" fill="outline" onClick={paste}><IonIcon slot="start" icon={clipboardOutline} />{t('paste')}</IonButton>}
                 </div>
               </div>
             </Section>

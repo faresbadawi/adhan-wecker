@@ -133,6 +133,20 @@ namespace web
         s_server.send(200, "application/json", out);
     }
 
+    // UTF-8-Text kürzen, ohne ein Zeichen in der Mitte zu zerschneiden (arabische Namen: 2 Byte je Buchstabe)
+    static void utf8Copy(char *dst, const char *src, size_t size)
+    {
+        size_t n = strlen(src);
+        if (n >= size)
+        {
+            n = size - 1;
+            while (n > 0 && ((uint8_t)src[n] & 0xC0) == 0x80)
+                n--; // nicht vor einem Folgebyte abschneiden
+        }
+        memcpy(dst, src, n);
+        dst[n] = 0;
+    }
+
     static void receiveSettings()
     {
         JsonDocument doc;
@@ -206,7 +220,7 @@ namespace web
         if (doc["mawaqit"]["slug"].is<const char *>())
             strlcpy(st.mawaqitSlug, doc["mawaqit"]["slug"], sizeof(st.mawaqitSlug));
         if (doc["mawaqit"]["name"].is<const char *>())
-            strlcpy(st.mawaqitName, doc["mawaqit"]["name"], sizeof(st.mawaqitName));
+            utf8Copy(st.mawaqitName, doc["mawaqit"]["name"] | "", sizeof(st.mawaqitName));
         if (st.prayerSource == settings::SOURCE_MAWAQIT && !st.mawaqitSlug[0])
         {
             s_server.send(400, "application/json", "{\"error\":\"mosque\"}");
@@ -344,16 +358,27 @@ namespace web
         s_restartAt = millis() + 1500;
     }
 
-    // Moscheesuche auf Mawaqit (der Browser darf Mawaqit wegen CORS nicht direkt abfragen)
-    static void searchMosques()
+    // Mawaqit-Moschee prüfen: {"slug": "..."} oder {"id": "24653"} (Nummer aus dem App-Link).
+    // Antwort: {"slug","name","country","timezone","lat","lon"}; 404, wenn es die Moschee nicht gibt.
+    static void resolveMosque()
     {
-        const settings::Settings st = settings::get();
-        String out;
-        if (!mawaqit::search(s_server.arg("q").c_str(), st.latitude, st.longitude, out))
+        JsonDocument in;
+        deserializeJson(in, s_server.arg("plain"));
+        mawaqit::Info info;
+        if (!mawaqit::resolve(in["slug"] | "", in["id"] | "", info))
         {
-            s_server.send(502, "application/json", "{\"error\":\"mawaqit\"}");
+            s_server.send(404, "application/json", "{\"error\":\"mawaqit\"}");
             return;
         }
+        JsonDocument doc;
+        doc["slug"] = info.slug;
+        doc["name"] = info.name;
+        doc["country"] = info.country;
+        doc["timezone"] = info.timezone;
+        doc["lat"] = info.latitude;
+        doc["lon"] = info.longitude;
+        String out;
+        serializeJson(doc, out);
         s_server.send(200, "application/json", out);
     }
 
@@ -798,7 +823,7 @@ namespace web
         s_server.on("/api/sounds", HTTP_GET, sendSounds);
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);
-        s_server.on("/api/mawaqit/search", HTTP_GET, searchMosques);
+        s_server.on("/api/mawaqit/resolve", HTTP_POST, resolveMosque);
         s_server.on("/api/backgrounds", HTTP_GET, sendBackgrounds);
         s_server.on("/api/update", HTTP_POST, updateDone, updateData);
         s_server.on("/api/background/upload", HTTP_POST, backgroundUploadDone, backgroundUploadData);

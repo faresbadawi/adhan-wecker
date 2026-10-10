@@ -120,8 +120,29 @@ export function km(lat1, lon1, lat2, lon2) {
   const a = Math.sin((lat2 - lat1) * d / 2) ** 2 + Math.cos(lat1 * d) * Math.cos(lat2 * d) * Math.sin((lon2 - lon1) * d / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
-// Moschee-Kennung aus einem Mawaqit-Link (https://mawaqit.net/de/<kennung>)
-export const slugFromLink = s => {
-  const m = (s || '').trim().match(/mawaqit\.net\/(?:[a-z]{2}\/)?([a-z0-9][a-z0-9._-]*)/i);
-  return m ? m[1].toLowerCase() : '';
-};
+// Mawaqit-Moschee aus einem Link oder dem ganzen geteilten Text der Mawaqit-App finden.
+// Der geteilte Text enthält oft zwei Links: die Moscheeseite (…/en/kocatepe-camii-…) und einen App-Link (…/ar/id/24653).
+// Bevorzugt wird die Moscheeseite; sonst die Nummer aus dem App-Link (die Uhr löst sie auf).
+const NOT_SLUG = new Set(['id', 'm', 'w', 'mosque', 'search']);
+export function parseMawaqit(text) {
+  let id = '';
+  for (const m of (text || '').matchAll(/mawaqit\.net\/(?:[a-z]{2}\/)?(?:id\/(\d+)|([a-z0-9][a-z0-9._-]*))/gi)) {
+    if (m[1]) { id = id || m[1]; continue; }
+    const slug = m[2].toLowerCase();
+    if (!NOT_SLUG.has(slug)) return { slug };
+  }
+  return id ? { id } : null;
+}
+
+// Moschee bei der Uhr prüfen lassen: liefert {slug, name, country, timezone, lat, lon} oder null
+export async function resolveMosque(ref) {
+  try {
+    const r = await api('/api/mawaqit/resolve', ref);
+    if (!r.ok || !r.data || !r.data.slug) return null;
+    try { localStorage.setItem('mosque:' + r.data.slug, JSON.stringify(r.data)); } catch (e) { /* privat */ }
+    return r.data;
+  } catch (e) { return null; }
+}
+export function cachedMosque(slug) {
+  try { return JSON.parse(localStorage.getItem('mosque:' + slug) || 'null'); } catch (e) { return null; }
+}

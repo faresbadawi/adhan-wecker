@@ -6,7 +6,7 @@ import { IonReactHashRouter } from '@ionic/react-router';
 import { Route, Navigate } from 'react-router-dom';
 import { homeOutline, alarmOutline, volumeHighOutline } from 'ionicons/icons';
 import { t, lang } from './lib/i18n.js';
-import { set, get, refreshStatus, loadSettings, applyTheme, save, confirmBox, slugFromLink } from './lib/store.js';
+import { set, get, refreshStatus, loadSettings, applyTheme, save, confirmBox, toast, parseMawaqit, resolveMosque } from './lib/store.js';
 import Hosts from './components/Hosts.jsx';
 import Home from './pages/Home.jsx';
 import Prayer from './pages/Prayer.jsx';
@@ -26,11 +26,7 @@ const mosque = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' 
 // Aus der Mawaqit-App geteilte Moschee (Web Share Target, siehe manifest.json): ?title=…&text=…&url=…
 function sharedMosque() {
   const q = new URLSearchParams(location.search);
-  const all = [q.get('url'), q.get('text'), q.get('title')].filter(Boolean).join(' ');
-  const slug = slugFromLink(all);
-  if (!slug) return null;
-  const name = (q.get('title') || (q.get('text') || '').replace(/https?:\/\/\S+/g, '')).trim().split('\n')[0].slice(0, 60);
-  return { slug, name: name || slug };
+  return parseMawaqit([q.get('url'), q.get('text'), q.get('title')].filter(Boolean).join('\n'));
 }
 
 export default function App() {
@@ -55,7 +51,9 @@ export default function App() {
       if (shared) {
         history.replaceState(null, '', '/?app=1#/prayer');
         location.hash = '#/prayer';
-        if (await confirmBox(t('mosque_take'), shared.name)) await save({ source: 'mawaqit', mawaqit: shared });
+        const m = await resolveMosque(shared);
+        if (!m) toast(t('mosque_not_found'), true);
+        else if (await confirmBox(t('mosque_take'), m.name)) await save({ source: 'mawaqit', mawaqit: { slug: m.slug, name: m.name } });
       }
     })();
 

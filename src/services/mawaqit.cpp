@@ -49,41 +49,6 @@ namespace mawaqit
         return out;
     }
 
-    bool search(const char *query, float lat, float lon, String &outJson)
-    {
-        String url = "https://mawaqit.net/api/2.0/mosque/search?";
-        if (query && query[0])
-            url += "word=" + urlEncode(query);
-        else
-            url += "lat=" + String(lat, 4) + "&lon=" + String(lon, 4);
-
-        String body;
-        if (!get(url, body))
-            return false;
-
-        JsonDocument filter;
-        JsonObject f = filter.add<JsonObject>();
-        f["name"] = f["slug"] = f["localisation"] = f["proximity"] = true;
-        JsonDocument doc;
-        if (deserializeJson(doc, body, DeserializationOption::Filter(filter)))
-            return false;
-
-        JsonDocument out;
-        JsonArray list = out.to<JsonArray>();
-        for (JsonObject m : doc.as<JsonArray>())
-        {
-            if (list.size() >= 15)
-                break;
-            JsonObject o = list.add<JsonObject>();
-            o["name"] = m["name"];
-            o["slug"] = m["slug"];
-            o["address"] = m["localisation"];
-            o["distance"] = m["proximity"] | 0;
-        }
-        serializeJson(out, outJson);
-        return true;
-    }
-
     // Findet das JSON-Objekt hinter "confData =" (Klammern zählen, Zeichenketten beachten)
     static bool findConfData(const String &html, int &start, int &end)
     {
@@ -163,11 +128,15 @@ namespace mawaqit
         {
             const int d = atoi(day.key().c_str());
             JsonArray t = day.value();
-            if (d < 1 || d > 31 || t.size() < 6)
+            const int n = t.size();
+            if (d < 1 || d > 31 || n < 6)
                 return false;
+            // Meist 6 Zeiten [Fajr, Shuruq, Dhuhr, Asr, Maghrib, Isha]; manche Moscheen (z. B. Türkei) haben 7 mit einer
+            // zusätzlichen Zeit nach Fajr. Deshalb: Fajr = erste, Sonnenaufgang und die vier Gebete = die letzten fünf.
+            const int idx[6] = {0, n - 5, n - 4, n - 3, n - 2, n - 1};
             for (int p = 0; p < 6; p++)
             {
-                const int m = parseHHMM(t[p]);
+                const int m = parseHHMM(t[idx[p]]);
                 if (m < 0)
                     return false;
                 minutes[d - 1][p] = m;
@@ -175,5 +144,56 @@ namespace mawaqit
             days = max(days, d);
         }
         return days >= 28;
+    }
+
+    bool resolve(const char *slug, const char *id, Info &out)
+    {
+        String url = "https://mawaqit.net/de/";
+        if (id && id[0])
+            url += "id/" + urlEncode(id);
+        else if (slug && slug[0])
+            url += urlEncode(slug);
+        else
+            return false;
+        String html;
+        if (!get(url, html))
+            return false;
+
+        // Kennung aus <link rel="canonical" href="https://mawaqit.net/xx/<slug>"> (der App-Link enthält nur eine Nummer)
+        out.slug = slug && slug[0] ? String(slug) : String();
+        const int c = html.indexOf("rel=\"canonical\"");
+        if (c >= 0)
+        {
+            const int h = html.indexOf("href=\"", c);
+            const int e = h >= 0 ? html.indexOf('"', h + 6) : -1;
+            if (h >= 0 && e > h)
+            {
+                const String href = html.substring(h + 6, e);
+                const int last = href.lastIndexOf('/');
+                const String tail = href.substring(last + 1);
+                if (tail.length() && tail != "id")
+                    out.slug = tail;
+            }
+        }
+
+        int start, end;
+        if (!out.slug.length() || !findConfData(html, start, end) || html.indexOf("\"calendar\"", start) < 0)
+            return false;
+        JsonDocument filter;
+        filter["name"] = filter["latitude"] = filter["longitude"] = filter["countryCode"] = filter["timezone"] = true;
+        JsonDocument doc;
+        const DeserializationError err = deserializeJson(doc, html.c_str() + start, end - start, DeserializationOption::Filter(filter));
+        html = String();
+        if (err)
+            return false;
+        out.name = doc["name"] | "";
+        out.country = doc["countryCode"] | "";
+        out.timezone = doc["timezone"] | "";
+        out.latitude = doc["latitude"] | 0.0f;
+        out.longitude = doc["longitude"] | 0.0f;
+        out.name.trim();
+        if (!out.name.length())
+            out.name = out.slug;
+        return true;
     }
 }
