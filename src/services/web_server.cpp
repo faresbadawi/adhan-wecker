@@ -170,7 +170,7 @@ namespace web
         st.autoDim = doc["autoDim"] | st.autoDim;
         st.showNight = doc["showNight"] | st.showNight;
         st.tahajjudAlarm = doc["tahajjud"]["on"] | st.tahajjudAlarm;
-        st.tahajjudOffset = doc["tahajjud"]["offset"] | st.tahajjudOffset;
+        st.tahajjudOffset = (uint8_t)constrain(doc["tahajjud"]["offset"] | (int)st.tahajjudOffset, 0, 255);
         st.nightBrightness = doc["nightBrightness"] | st.nightBrightness;
         if (doc["background"].is<const char *>())
             strlcpy(st.background, doc["background"], sizeof(st.background));

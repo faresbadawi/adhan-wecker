@@ -45,6 +45,15 @@ namespace alarmclock
         play();
     }
 
+    // Verschiebung des Nachtweckers in Sekunden, höchstens bis zur Fajr-Zeit
+    static int32_t tahajjudShift(const model::NightTimes &n, const settings::Settings &st)
+    {
+        int32_t untilFajr = n.fajr - n.lastThird;
+        if (untilFajr < 0)
+            untilFajr += 24 * 60;
+        return (int32_t)min<int32_t>(st.tahajjudOffset, untilFajr) * 60;
+    }
+
     void update(const struct tm &now, const settings::Settings &st, bool azanActive)
     {
         if (!s_firedInit)
@@ -116,8 +125,8 @@ namespace alarmclock
             model::NightTimes n;
             struct tm copy = now;
             const time_t nowT = mktime(&copy);
-            if (prayers::night(now, n) && n.secondsToLastThird + (int32_t)st.tahajjudOffset * 60 <= 0 &&
-                n.secondsToLastThird + (int32_t)st.tahajjudOffset * 60 > -120 &&
+            if (prayers::night(now, n) && n.secondsToLastThird + tahajjudShift(n, st) <= 0 &&
+                n.secondsToLastThird + tahajjudShift(n, st) > -120 &&
                 (s_tahajjudFired == 0 || nowT - s_tahajjudFired > 6 * 3600))
             {
                 s_tahajjudFired = nowT;
@@ -184,7 +193,7 @@ namespace alarmclock
             model::NightTimes n;
             if (prayers::night(now, n))
             {
-                const int32_t left = n.secondsToLastThird + (int32_t)st.tahajjudOffset * 60;
+                const int32_t left = n.secondsToLastThird + tahajjudShift(n, st);
                 const int delta = (left + 59) / 60; // Minuten bis zum Klingeln
                 if (left > 0 && delta < bestDelta)
                 {

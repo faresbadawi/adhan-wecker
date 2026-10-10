@@ -109,7 +109,7 @@ namespace settings
 
     struct Settings : SettingsV7
     {
-        // Wecker zum Beginn des letzten Nachtdrittels (Tahajjud), tahajjudOffset Minuten später (0..60)
+        // Wecker zum Beginn des letzten Nachtdrittels (Tahajjud), tahajjudOffset Minuten später (0..255, höchstens bis Fajr)
         bool tahajjudAlarm;
         uint8_t tahajjudOffset;
     };

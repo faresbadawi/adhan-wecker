@@ -320,3 +320,6 @@ ion-progress-bar { height: 6px; border-radius: 6px; margin: 4px 0; --progress-ba
 .howto .steps { margin-bottom: 4px; }
 .banner { position: relative; padding-inline-end: 40px !important; }
 .banner > ion-button[fill=clear] { position: absolute; top: 2px; inset-inline-end: 0; margin: 0; }
+.tj-at { color: var(--muted); font-size: 15px; }
+.tj-at.fajr { color: var(--ion-color-primary); font-weight: 600; }
+.stepper button:disabled { opacity: .3; }

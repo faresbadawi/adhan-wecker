@@ -106,6 +106,19 @@ static uint8_t azanMask()
     return mask;
 }
 
+// Ist in dieser Minute ein (eingeschalteter) Azan fällig? Dann hat er Vorrang vor einem Wecker derselben Zeit.
+static bool azanDueNow(const struct tm &now)
+{
+    if (!s_today.valid)
+        return false;
+    const uint8_t mask = azanMask();
+    const int nowMin = now.tm_hour * 60 + now.tm_min;
+    for (int i = 0; i < 5; i++)
+        if ((mask & (1 << i)) && s_today.minutes[model::DAILY_PRAYERS[i]] == nowMin)
+            return true;
+    return false;
+}
+
 // Kalender mit den Hijri-Tagen aus dem Gebetszeiten-Cache füllen
 static void refreshCalendar(const struct tm &now)
 {
@@ -166,7 +179,8 @@ static void refreshEverySecond(const struct tm &now)
     {
         const settings::Settings st = settings::get();
         const bool wasRinging = alarmclock::ringing();
-        alarmclock::update(now, st, azan::status().state != azan::State::IDLE);
+        // Azan läuft oder ist genau jetzt fällig: Wecker dieser Minute entfällt, der Azan wird gezeigt
+        alarmclock::update(now, st, azan::status().state != azan::State::IDLE || azanDueNow(now));
         if (alarmclock::ringing() != wasRinging)
         {
             const int idx = alarmclock::ringingIndex();

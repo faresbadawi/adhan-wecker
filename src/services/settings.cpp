@@ -169,7 +169,7 @@ namespace settings
                offsetOk(s.dhuhrOffset) && offsetOk(s.asrOffset) && offsetOk(s.maghribOffset) &&
                offsetOk(s.ishaOffset) && s.volume <= 21 && s.brightness >= 5 && s.brightness <= 100 &&
                s.colorMain <= 0xFFFFFF && s.colorAccent <= 0xFFFFFF && s.colorMuted <= 0xFFFFFF &&
-               validOrder(s.pageOrder) && s.prayerSource <= SOURCE_MAWAQIT && validAlarms(s) && s.tahajjudOffset <= 60;
+               validOrder(s.pageOrder) && s.prayerSource <= SOURCE_MAWAQIT && validAlarms(s); // tahajjudOffset: 0..255 Minuten, beim Klingeln auf die Fajr-Zeit begrenzt
     }
 
     void begin()

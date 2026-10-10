@@ -10,12 +10,12 @@ import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t } from '../lib/i18n.js';
 import { MAX_ALARMS, DAY_ORDER } from '../lib/constants.js';
-import { useApp, api, save, saveLater, toast, confirmBox } from '../lib/store.js';
+import { useApp, api, save, saveLater, toast, confirmBox, toMin, two } from '../lib/store.js';
 
 const volPct = v => Math.round(v * 100 / 21); // Decoder 0..21 <-> Prozent
 
 export default function Alarm() {
-  const { S } = useApp();
+  const { S, ST } = useApp();
   const [alarms, setAlarms] = useState(null);
   const [tj, setTj] = useState(null);
   const [edit, setEdit] = useState(-1); // Index des Weckers, dessen Zeit gerade gewählt wird
@@ -48,6 +48,11 @@ export default function Alarm() {
     if (edit >= 0 && pick !== alarms[edit].time) patch(edit, { time: pick });
     setEdit(-1);
   }
+  // Nachtwecker: höchstens bis zur Fajr-Zeit verschieben (die Uhr begrenzt ebenso)
+  const night = ST && ST.night;
+  const tjMax = night ? Math.min(255, ((toMin(night.fajr) - toMin(night.lastThird)) + 1440) % 1440) : 255;
+  const tjAt = night && tj ? (() => { const m = (toMin(night.lastThird) + Math.min(tj.offset, tjMax)) % 1440; return `${two(Math.floor(m / 60))}:${two(m % 60)}`; })() : '';
+  const tjAtFajr = !!night && tj && tj.offset >= tjMax;
   const tjSet = (part, later) => { const n = { ...tj, ...part }; setTj(n); (later ? saveLater : save)({ tahajjud: n }, later); };
 
   const toneName = n => (t('tone_' + n) === 'tone_' + n ? n : t('tone_' + n));
@@ -108,16 +113,23 @@ export default function Alarm() {
                 <span className="ico" slot="start"><IonIcon icon={moonOutline} /></span>
                 <IonToggle checked={tj.on} onIonChange={e => tjSet({ on: e.detail.checked })}>{t('tj_on')}</IonToggle>
               </IonItem>
-              {tj.on && (
+              {tj.on && <>
                 <IonItem>
                   <IonLabel>{t('tj_offset')}</IonLabel>
                   <div slot="end" className="stepper ltr">
-                    <button onClick={() => tjSet({ offset: Math.max(0, tj.offset - 5) }, true)} aria-label="-5"><IonIcon icon={removeOutline} /></button>
-                    <span className={tj.offset ? 'nz' : ''}>{tj.offset ? '+' + tj.offset : 0}</span>
-                    <button onClick={() => tjSet({ offset: Math.min(60, tj.offset + 5) }, true)} aria-label="+5"><IonIcon icon={addOutline} /></button>
+                    <button onClick={() => tjSet({ offset: Math.max(0, Math.min(tj.offset, tjMax) - 5) }, true)} disabled={tj.offset <= 0} aria-label="-5"><IonIcon icon={removeOutline} /></button>
+                    <span className={tj.offset ? 'nz' : ''}>{tj.offset ? '+' + Math.min(tj.offset, tjMax) : 0}</span>
+                    <button onClick={() => tjSet({ offset: Math.min(tjMax, tj.offset + 5) }, true)} disabled={tjAtFajr} aria-label="+5"><IonIcon icon={addOutline} /></button>
                   </div>
                 </IonItem>
-              )}
+                {night && (
+                  <IonItem lines="none">
+                    <IonLabel className={'tj-at' + (tjAtFajr ? ' fajr' : '')}>
+                      {tjAtFajr ? `${t('tj_fajr_reached')} (${night.fajr})` : `${t('tj_rings_at')} ${tjAt}`}
+                    </IonLabel>
+                  </IonItem>
+                )}
+              </>}
             </IonList>
           </Section>
 
