@@ -111,7 +111,9 @@ export function nowSec(st) {
 }
 export const pname = (k, ST) => (k === 'dhuhr' && ST && ST.prayer && ST.prayer.friday ? t('jumuah') : t(k));
 export const signal = n => (n >= 3 ? 'strong' : n === 2 ? 'medium' : 'weak');
-export const isStandalone = () => matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true;
+// Als App unterwegs: installierte Web-App (standalone) oder die Android-App (Kennung im User-Agent)
+export const isNativeApp = () => /AzanWeckerApp/.test(navigator.userAgent);
+export const isStandalone = () => isNativeApp() || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true;
 export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
 export const appMode = () => new URLSearchParams(location.search).has('app');
 // Entfernung in km zwischen zwei Koordinaten

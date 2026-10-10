@@ -891,6 +891,18 @@ namespace web
             s_server.streamFile(f, "text/html; charset=utf-8");
             f.close();
         });
+        // Android-App zum Herunterladen: mit dem richtigen Typ, sonst bietet Android keine Installation an
+        s_server.on("/app/SmartAzanWecker.apk", HTTP_GET, [] {
+            File f = LittleFS.open("/www/app/SmartAzanWecker.apk", "r");
+            if (!f)
+            {
+                s_server.send(404, "text/plain", "APK fehlt");
+                return;
+            }
+            s_server.sendHeader("Content-Disposition", "attachment; filename=\"SmartAzanWecker.apk\"");
+            s_server.streamFile(f, "application/vnd.android.package-archive");
+            f.close();
+        });
         s_server.serveStatic("/", LittleFS, "/www/", "no-cache");
         s_server.onNotFound([] { s_server.send(404, "text/plain", "Not found"); });
         s_server.begin();

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Azan Wecker</string>
+    <string name="searching">Looking for the clock in your Wi-Fi …</string>
+    <string name="not_found_title">Clock not found</string>
+    <string name="not_found_text">Is your phone in the same Wi-Fi as the clock? You can also enter the address shown on the clock\'s settings page.</string>
+    <string name="address_hint">e.g. 192.168.178.72</string>
+    <string name="retry">Try again</string>
+    <string name="connect">Connect</string>
+</resources>

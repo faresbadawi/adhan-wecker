@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Azan Wecker</string>
+    <string name="searching">Uhr wird im WLAN gesucht …</string>
+    <string name="not_found_title">Uhr nicht gefunden</string>
+    <string name="not_found_text">Ist das Handy im selben WLAN wie die Uhr? Du kannst auch die Adresse eingeben, die auf der Einstellungsseite der Uhr steht.</string>
+    <string name="address_hint">z. B. 192.168.178.72</string>
+    <string name="retry">Erneut suchen</string>
+    <string name="connect">Verbinden</string>
+</resources>
