@@ -334,3 +334,8 @@ ion-item p.far { color: var(--ion-color-primary); }
 .rot-seg ion-label { font-size: 13px; padding: 2px 0; }
 .platforms p { display: flex; align-items: center; gap: 10px; margin: 6px 0; line-height: 1.45; }
 .platforms ion-icon { font-size: 20px; flex: none; }
+/* Download-Knopf als echter Link (Android-App) */
+.dl-btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; border-radius: 999px;
+  background: var(--ion-color-primary); color: var(--ion-color-primary-contrast); font-weight: 600; font-size: 17px; text-decoration: none; }
+.dl-btn ion-icon { font-size: 20px; }
+.dl-link { text-align: center; font-size: 13px; word-break: break-all; user-select: all; -webkit-user-select: all; }
