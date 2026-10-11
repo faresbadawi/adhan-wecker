@@ -12,7 +12,7 @@ namespace clock_screen
 
     static lv_obj_t *s_time, *s_sec, *s_weekday, *s_date, *s_holiday;
     static lv_obj_t *s_hijri, *s_hDay, *s_hMonth, *s_hYear;
-    static lv_obj_t *s_alarmRow, *s_alarmTime;
+    static lv_obj_t *s_alarmRow, *s_alarmTime, *s_city;
 
     void create(lv_obj_t *parent)
     {
@@ -26,6 +26,13 @@ namespace clock_screen
         image(s_alarmRow, &img_alarm, Role::ACCENT);
         s_alarmTime = label(s_alarmRow, &font_josefin_17, Role::MUTED, "");
         lv_obj_add_flag(s_alarmRow, LV_OBJ_FLAG_HIDDEN);
+
+        // Ort oben links (wie auf der Wetterseite), gegenüber der Weckzeit
+        s_city = label(parent, &font_josefin_17, Role::MUTED, "");
+        lv_obj_set_width(s_city, 220);
+        lv_label_set_long_mode(s_city, LV_LABEL_LONG_DOT);
+        lv_obj_set_style_base_dir(s_city, LV_BASE_DIR_AUTO, 0);
+        lv_obj_set_pos(s_city, MARGIN, 10);
 
         // Uhrzeit und Sekunden nebeneinander, unten bündig, gemeinsam zentriert
         lv_obj_t *row = box(parent);
@@ -117,4 +124,6 @@ namespace clock_screen
         lv_obj_clear_flag(s_holiday, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(s_date, LV_OBJ_FLAG_HIDDEN);
     }
+
+    void setCity(const char *city) { lv_label_set_text(s_city, city); }
 }

@@ -17,6 +17,7 @@ namespace moon_screen
 
     static lv_obj_t *s_canvas, *s_glow, *s_orn, *s_phase, *s_pct;
     static lv_obj_t *s_hDay, *s_hMonth, *s_hYear, *s_days[30];
+    static lv_obj_t *s_wdImg, *s_wdRange, *s_wdDates; // weiße Tage: Beschriftung, Daten (s_wdDates = s_wdRange)
     static lv_color_t *s_buf = nullptr;
     static int s_lastAge10 = -1;
 
@@ -140,9 +141,11 @@ namespace moon_screen
         lv_obj_set_flex_align(wd, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(wd, 6, 0);
         lv_obj_set_style_base_dir(wd, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
-        image(wd, lang::text(TXT_WHITE_DAYS), Role::MUTED);
-        lv_obj_t *range = label(wd, &font_josefin_17, Role::MUTED, "13–15");
-        lv_obj_set_style_base_dir(range, LV_BASE_DIR_LTR, 0); // Zahlenbereich nicht umdrehen
+        s_wdImg = image(wd, lang::text(TXT_WHITE_DAYS), Role::MUTED);
+        // die weißen Tage (13.–15.) als gregorianische Daten, z. B. "3.–5.11."
+        s_wdRange = label(wd, &font_josefin_17, Role::MUTED, "13–15");
+        lv_obj_set_style_base_dir(s_wdRange, LV_BASE_DIR_LTR, 0); // Zahlenbereich nicht umdrehen
+        s_wdDates = s_wdRange;
 
         // Mondphase in Worten und beleuchteter Anteil
         lv_obj_t *ph = box(col);
@@ -182,6 +185,23 @@ namespace moon_screen
                 lv_obj_set_style_bg_opa(s_days[i], today ? LV_OPA_COVER : past ? LV_OPA_40 : LV_OPA_80, 0);
                 lv_obj_set_size(s_days[i], today ? 10 : (i >= 12 && i <= 14 ? 6 : 4), today ? 10 : (i >= 12 && i <= 14 ? 6 : 4));
             }
+
+            // Weiße Tage (13.–15.) dieses Monats bzw. nach dem 15. des nächsten (Monat ca. 30 Tage)
+            const int toFirst = day.hijriDay <= 15 ? 13 - day.hijriDay : 30 - day.hijriDay + 13;
+            const time_t first = now + (time_t)toFirst * 86400, last = first + 2 * 86400;
+            struct tm a, b;
+            localtime_r(&first, &a);
+            localtime_r(&last, &b);
+            if (a.tm_mon == b.tm_mon)
+                lv_label_set_text_fmt(s_wdDates, "%s%d.–%d.%d", day.hijriDay > 15 ? "≈ " : "", a.tm_mday, b.tm_mday, b.tm_mon + 1);
+            else
+                lv_label_set_text_fmt(s_wdDates, "%s%d.%d.–%d.%d", day.hijriDay > 15 ? "≈ " : "", a.tm_mday, a.tm_mon + 1, b.tm_mday, b.tm_mon + 1);
+
+            // Heute ein weißer Tag: Zeile hell (Hauptfarbe) statt gedämpft
+            const bool whiteToday = day.hijriDay >= 13 && day.hijriDay <= 15;
+            const Role r = whiteToday ? Role::MAIN : Role::MUTED;
+            setRole(s_wdImg, r);
+            setRole(s_wdRange, whiteToday ? Role::ACCENT : Role::MUTED);
         }
     }
 }

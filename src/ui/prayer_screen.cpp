@@ -120,17 +120,24 @@ namespace prayer_screen
         lv_obj_t *title = image(scr, lang::text(TXT_TITLE), Role::ACCENT);
         lv_obj_align(title, LV_ALIGN_TOP_RIGHT, -MARGIN, 20);
 
-        // Oben rechts unter dem Titel: Wetter klein (Symbol + Temperatur + Stadt)
+        // Oben rechts unter dem Titel: Wetter klein (Temperatur + Symbol), darunter der Ort
         lv_obj_t *wx = box(scr);
         lv_obj_set_size(wx, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
         lv_obj_set_flex_flow(wx, LV_FLEX_FLOW_ROW);
         lv_obj_set_flex_align(wx, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         lv_obj_set_style_pad_column(wx, 8, 0);
-        lv_obj_align(wx, LV_ALIGN_TOP_RIGHT, -MARGIN, 58);
-        s_city = label(wx, &font_josefin_17, Role::MUTED, city);
-        lv_obj_set_style_pad_right(s_city, 6, 0);
+        lv_obj_align(wx, LV_ALIGN_TOP_RIGHT, -MARGIN, 52);
         s_wxTemp = label(wx, &font_temp_30, Role::MAIN, "");
         s_wxIcon = image(wx, nullptr, Role::ACCENT);
+
+        // Ort klein unter dem Wetter, auf Höhe des Datums links (verdeckt nicht mehr die Weckzeit).
+        // Festes Feld, rechtsbündig; Schreibrichtung aus dem Namen (lateinisch oder arabisch).
+        s_city = label(scr, &font_josefin_17, Role::MUTED, city);
+        lv_obj_set_width(s_city, 210);
+        lv_label_set_long_mode(s_city, LV_LABEL_LONG_DOT);
+        lv_obj_set_style_text_align(s_city, LV_TEXT_ALIGN_RIGHT, 0);
+        lv_obj_set_style_base_dir(s_city, LV_BASE_DIR_AUTO, 0);
+        lv_obj_align(s_city, LV_ALIGN_TOP_RIGHT, -MARGIN, 82);
 
         divider(scr, SCREEN_W / 2, 108, SCREEN_W / 2 - MARGIN);
 

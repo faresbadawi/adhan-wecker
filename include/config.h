@@ -1,8 +1,8 @@
-// Einstellungen des Adhan-Weckers
+// Einstellungen von Bilal (früher Adhan-Wecker)
 #pragma once
 
 // Gerät und Firmware (angezeigt in der Web-App)
-#define DEVICE_NAME "Smart Azan Wecker"
+#define DEVICE_NAME "Bilal"
 #define FW_VERSION "1.0.0"
 
 // Updates über WLAN (ArduinoOTA, Port 3232): pio run -e ota -t upload / -t uploadfs
@@ -35,7 +35,7 @@
 #define NTP_SERVER_2 "time.google.com"
 
 // Name des WLAN-Zugangspunkts für die Ersteinrichtung (http://192.168.4.1)
-#define SETUP_AP_NAME "Adhan-Wecker"
+#define SETUP_AP_NAME "Bilal-Setup"
 
 // Azan-Dateien: zuerst SD-Karte (AZAN_DIR_SD), dann interner Flash (LittleFS, AZAN_DIR_FLASH).
 // Dateinamen: azan.mp3 für alle Gebete; optional eigene Dateien azan_fajr.mp3, azan_dhuhr.mp3,

@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Smart Azan Wecker",
-  "short_name": "Azan Wecker",
-  "description": "Smart Azan Wecker – Gebetszeiten, Azan und Einstellungen der Uhr",
+  "name": "Bilal",
+  "short_name": "Bilal",
+  "description": "Bilal – Gebetszeiten, Azan und Wecker",
   "start_url": "/?app=1",
   "scope": "/",
   "display": "standalone",

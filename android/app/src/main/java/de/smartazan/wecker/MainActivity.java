@@ -37,7 +37,7 @@ import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Smart Azan Wecker für Android: zeigt die Web-App der Uhr ohne Browserleiste (Statusleiste bleibt sichtbar).
+ * Bilal für Android: zeigt die Web-App der Uhr ohne Browserleiste (Statusleiste bleibt sichtbar).
  * Die Oberfläche kommt immer von der Uhr selbst, App-Updates kommen also mit jedem Update der Uhr.
  *
  * Uhr finden, in dieser Reihenfolge: zuletzt benutzte Adresse, http://azan-clock.local, mDNS-Dienstsuche
@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        s.setUserAgentString(s.getUserAgentString() + " AzanWeckerApp/1.0"); // die Web-App blendet damit Installationshinweise aus
+        s.setUserAgentString(s.getUserAgentString() + " AzanWeckerApp/1.1"); // die Web-App blendet damit Installationshinweise aus
         web.setWebViewClient(new Client());
         web.setWebChromeClient(new Chrome());
         web.setVisibility(View.INVISIBLE);
@@ -90,6 +90,22 @@ public class MainActivity extends Activity {
         android.widget.LinearLayout col = new android.widget.LinearLayout(this);
         col.setOrientation(android.widget.LinearLayout.VERTICAL);
         col.setGravity(Gravity.CENTER);
+        // großer Name wie auf dem Startbildschirm der Uhr
+        TextView title = new TextView(this);
+        title.setText("بلال");
+        title.setTextColor(Color.rgb(233, 162, 124));
+        title.setTextSize(64);
+        title.setTypeface(android.graphics.Typeface.SERIF, android.graphics.Typeface.BOLD);
+        title.setGravity(Gravity.CENTER);
+        TextView latin = new TextView(this);
+        latin.setText("B I L A L");
+        latin.setTextColor(Color.rgb(246, 243, 238));
+        latin.setTextSize(18);
+        latin.setLetterSpacing(0.2f);
+        latin.setGravity(Gravity.CENTER);
+        latin.setPadding(0, 0, 0, 56);
+        col.addView(title);
+        col.addView(latin);
         ProgressBar bar = new ProgressBar(this);
         splashText = new TextView(this);
         splashText.setTextColor(Color.rgb(185, 179, 173));

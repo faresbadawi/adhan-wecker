@@ -76,7 +76,10 @@ export default function Alarm() {
       <IonContent fullscreen>
         <BigTitle title={t('nav_alarm')} />
         {!S || !alarms ? <div className="center pad"><IonSpinner /></div> : <>
-          <Section title={t('alarm_times')} hint={`${t('alarm_hint')} ${t('swipe_delete')}`}>
+          <Section title={t('alarm_times')} hint={t('alarm_hint')}
+            action={alarms.length < (S.alarmsMax || MAX_ALARMS) && (
+              <button className="sec-add" onClick={add} aria-label={t('alarm_add')}><IonIcon icon={addOutline} />{t('add')}</button>
+            )}>
             {!alarms.length && <div className="empty">{t('alarm_none')}</div>}
             <IonList inset className="alarms">
               {alarms.map((a, i) => (
@@ -85,6 +88,8 @@ export default function Alarm() {
                     <div className="alarm-in">
                       <div className="arow">
                         <button className="tbtn num ltr" onClick={() => openTime(i)}>{a.time}</button>
+                        <span className="grow" />
+                        <button className="adel" onClick={() => remove(i)} aria-label={t('delete')}><IonIcon icon={trashOutline} /></button>
                         <IonToggle checked={a.on} onIonChange={e => patch(i, { on: e.detail.checked })} aria-label={t('alarm_on')} />
                       </div>
                       <IonInput className="aname" value={a.name || ''} placeholder={t('alarm_name_ph')} maxlength={40}

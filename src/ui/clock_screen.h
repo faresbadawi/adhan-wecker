@@ -11,4 +11,6 @@ namespace clock_screen
     void setHijri(const model::PrayerDay &day);
     void setAlarm(int minutes); // nächster Wecker, -1 = keiner
     void setHoliday(model::Holiday h); // besonderer Tag statt des Datums
+    // Ort oben links (wie auf der Wetterseite)
+    void setCity(const char *city);
 }

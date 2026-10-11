@@ -16,7 +16,7 @@ namespace mawaqit
         HTTPClient http;
         http.useHTTP10(true);
         http.setTimeout(15000);
-        http.setUserAgent("Mozilla/5.0 (Adhan-Wecker)");
+        http.setUserAgent("Mozilla/5.0 (Bilal)");
         if (!http.begin(client, url))
             return false;
         const int code = http.GET();

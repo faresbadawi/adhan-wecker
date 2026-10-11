@@ -1,4 +1,4 @@
-// Adhan-Wecker: Gebetszeiten, große Uhr und Wetter auf Arabisch, Azan zur Gebetszeit.
+// Bilal (früher Adhan-Wecker): Gebetszeiten, große Uhr und Wetter, Azan zur Gebetszeit.
 #include <Arduino.h>
 #include <lvgl.h>
 #include <Preferences.h>
@@ -24,6 +24,7 @@
 #include "ui/night_screen.h"
 #include "ui/prayer_screen.h"
 #include "ui/settings_screen.h"
+#include "ui/splash.h"
 #include "ui/theme.h"
 #include "ui/ui.h"
 #include "ui/weather_screen.h"
@@ -44,6 +45,7 @@ static void applySettings()
     prayer_screen::setCity(st.city);
     timemgr::applyTimezone(); // Ortszeit des eingestellten Ortes (z. B. Türkei bei einer Moschee dort)
     weather_screen::setCity(st.city);
+    clock_screen::setCity(st.city);
     theme::setPalette(st.colorMain, st.colorAccent, st.colorMuted);
     lcd::setBrightness(st.brightness);
     azan::setVolumes(st.azanVolume); // Wecker und Vorhören setzen ihre Lautstärke selbst
@@ -349,7 +351,7 @@ void setup()
 {
     Serial.begin(115200);
     delay(300);
-    Serial.println("\n=== ADHAN-WECKER ===");
+    Serial.println("\n=== BILAL ===");
 
     if (!display::begin())
         Serial.println("Touch antwortet nicht");
@@ -379,6 +381,7 @@ void setup()
             alarm_screen::show(false, 0, 0);
         });
     applySettings(); // Farben, Hintergrund, Helligkeit, Lautstärke
+    splash::show(3500); // Startbildschirm "Bilal"
     prayer_screen::setAzanCallback(azan::skip);
     pinMode(PIN_BOOT_BUTTON, INPUT_PULLUP);
     rgbled::begin();

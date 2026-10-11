@@ -14,6 +14,7 @@
 #include "ui/lang.h"
 #include "ui/ui.h"
 #include "ui/theme.h"
+#include "ui/splash.h"
 #include "hal/rgb_led.h"
 #include "mawaqit.h"
 #include "prayer_times.h"
@@ -754,6 +755,16 @@ namespace web
     // ?page=1..5 zeigt vorher die Seite Uhr/Gebetszeiten/Wetter/Kalender/Einstellungen.
     static void sendScreenshot()
     {
+        // ?splash=1: Startbildschirm "Bilal" einblenden und mit aufnehmen (zur Kontrolle)
+        if (s_server.arg("splash") == "1")
+        {
+            splash::show(3500);
+            for (int i = 0; i < 90; i++) // Einblenden abwarten
+            {
+                lv_timer_handler();
+                delay(10);
+            }
+        }
         const int page = s_server.arg("page").toInt();
         if (page >= 1 && page <= ui::PAGE_COUNT)
         {
@@ -892,17 +903,20 @@ namespace web
             f.close();
         });
         // Android-App zum Herunterladen: mit dem richtigen Typ, sonst bietet Android keine Installation an
-        s_server.on("/app/SmartAzanWecker.apk", HTTP_GET, [] {
-            File f = LittleFS.open("/www/app/SmartAzanWecker.apk", "r");
+        // (der frühere Name SmartAzanWecker.apk führt zur selben Datei)
+        auto sendApk = [] {
+            File f = LittleFS.open("/www/app/Bilal.apk", "r");
             if (!f)
             {
                 s_server.send(404, "text/plain", "APK fehlt");
                 return;
             }
-            s_server.sendHeader("Content-Disposition", "attachment; filename=\"SmartAzanWecker.apk\"");
+            s_server.sendHeader("Content-Disposition", "attachment; filename=\"Bilal.apk\"");
             s_server.streamFile(f, "application/vnd.android.package-archive");
             f.close();
-        });
+        };
+        s_server.on("/app/Bilal.apk", HTTP_GET, sendApk);
+        s_server.on("/app/SmartAzanWecker.apk", HTTP_GET, sendApk);
         s_server.serveStatic("/", LittleFS, "/www/", "no-cache");
         s_server.onNotFound([] { s_server.send(404, "text/plain", "Not found"); });
         s_server.begin();

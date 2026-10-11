@@ -55,7 +55,7 @@ export default function Device() {
       <IonContent>
         <Section title={t('device')}>
           <IonList inset>
-            {kv(t('dev_name'), d ? d.name : 'Smart Azan Wecker')}
+            {kv(t('dev_name'), d ? d.name : 'Bilal')}
             <IonItem><IonLabel>{t('connection')}</IonLabel>
               <span slot="end" className="state"><span className={'dot' + (online ? ' ok' : '')} />{t(online ? 'device_online' : 'device_offline')}</span></IonItem>
             <IonItem><IonLabel>{t('nav_wifi')}</IonLabel>

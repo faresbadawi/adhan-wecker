@@ -2,11 +2,11 @@
 # Baut die Android-App (APK) ohne Gradle direkt mit den Android-Build-Tools.
 # Voraussetzungen: JDK 21 in ~/.local/jdk, Android SDK in ~/Android/Sdk (platforms;android-36, build-tools;36.1.0).
 # Signierschlüssel: ~/.config/azan-wecker/release.jks (wird beim ersten Lauf angelegt, NICHT ins Git).
-# Ergebnis: build/SmartAzanWecker.apk
+# Ergebnis: build/Bilal.apk
 set -euo pipefail
 cd "$(dirname "$0")"
-VERSION_CODE=${VERSION_CODE:-1}
-VERSION_NAME=${VERSION_NAME:-1.0}
+VERSION_CODE=${VERSION_CODE:-2}
+VERSION_NAME=${VERSION_NAME:-1.1}
 export JAVA_HOME=$(ls -d ~/.local/jdk/jdk-21* | head -1)
 export PATH=$JAVA_HOME/bin:$PATH
 SDK=~/Android/Sdk
@@ -53,8 +53,8 @@ if [ ! -f "$KS" ]; then
     -validity 20000 -dname "CN=Smart Azan Wecker" >/dev/null 2>&1
 fi
 "$BT/apksigner" sign --ks "$KS" --ks-pass file:"$KS_DIR/release.pass" --ks-key-alias azan \
-  --out build/SmartAzanWecker.apk build/aligned.apk
-"$BT/apksigner" verify build/SmartAzanWecker.apk
-ls -la build/SmartAzanWecker.apk
+  --out build/Bilal.apk build/aligned.apk
+"$BT/apksigner" verify build/Bilal.apk
+ls -la build/Bilal.apk
 # Auf der Uhr zum Herunterladen anbieten (die Web-App kopiert public/ nach data/www)
-mkdir -p ../webapp/public/app && cp build/SmartAzanWecker.apk ../webapp/public/app/
+mkdir -p ../webapp/public/app && cp build/Bilal.apk ../webapp/public/app/

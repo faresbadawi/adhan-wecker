@@ -27,7 +27,7 @@ namespace wifimgr
         WiFi.setAutoReconnect(true);
 
         s_wm.setConfigPortalBlocking(false);
-        s_wm.setTitle("Adhan-Wecker");
+        s_wm.setTitle("Bilal");
         // Einrichtungsseite schlicht halten: nur "Netz wählen" (Texte arabisch, siehe include/wm_strings_ar.h)
         static std::vector<const char *> menu = {"wifi"};
         s_wm.setMenu(menu);

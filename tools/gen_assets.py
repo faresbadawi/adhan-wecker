@@ -388,7 +388,7 @@ ARABIC_CHARS = "".join(chr(c) for c in (
 GERMAN = "äöüÄÖÜß·•–°\u2236\u200e"
 # Weitere lateinische Buchstaben für frei eingegebene Namen (Moscheen, Orte): Türkisch, Französisch,
 # Spanisch, Bosnisch u. a. – Moscheenamen von Mawaqit kommen aus aller Welt
-LATIN_EXT = "çÇğĞıİşŞéèêëÉÈÊàâÀÂîïÎÏôÔûùÛÙœŒñÑáíóúÁÍÓÚćčĆČđĐšŠžŽłŁńŃśŚźŹżŻąęĄĘåÅøØæÆ’"
+LATIN_EXT = "≈…çÇğĞıİşŞéèêëÉÈÊàâÀÂîïÎÏôÔûùÛÙœŒñÑáíóúÁÍÓÚćčĆČđĐšŠžŽłŁńŃśŚźŹżŻąęĄĘåÅøØæÆ’"
 DIGITS = "0123456789:-"
 TEMP = "0123456789-°C"
 
@@ -397,6 +397,7 @@ LANGS = ["ar", "de", "en"]  # Reihenfolge = ui::Lang
 # Feste Texte: Schlüssel -> (Größe der arabischen Fassung, fett, {Sprache: Text}).
 # Alle Texte werden weiß als Alphamaske erzeugt und auf dem Gerät in ihrer Farbgruppe gezeichnet.
 TEXTS = {
+    "splash_sub": (22, False, {"ar": "مواقيت الصلاة والأذان", "de": "Gebetszeiten & Azan", "en": "Prayer times & Azan"}),
     "moon_title": (30, True, {"ar": "القمر والتقويم الهجري", "de": "Mond & Hijri", "en": "Moon & Hijri"}),
     "white_days": (19, False, {"ar": "الأيام البيض", "de": "Weiße Tage", "en": "White days"}),
     "title": (30, True, {"ar": "مواقيت الصلاة", "de": "Gebetszeiten", "en": "Prayer Times"}),
@@ -430,8 +431,8 @@ TEXTS = {
     "sig_medium": (22, False, {"ar": "إشارة متوسطة", "de": "Signal mittel", "en": "Medium signal"}),
     "sig_weak": (22, False, {"ar": "إشارة ضعيفة", "de": "Signal schwach", "en": "Weak signal"}),
     "wifi_title": (28, True, {"ar": "إعداد الواي فاي", "de": "WLAN einrichten", "en": "Wi-Fi setup"}),
-    "wifi_1": (21, False, {"ar": "١. اتصل بالهاتف بشبكة Adhan-Wecker", "de": "1. Handy mit dem WLAN Adhan-Wecker verbinden",
-                           "en": "1. Connect your phone to the Wi-Fi Adhan-Wecker"}),
+    "wifi_1": (21, False, {"ar": "١. اتصل بالهاتف بشبكة Bilal-Setup", "de": "1. Handy mit dem WLAN Bilal-Setup verbinden",
+                           "en": "1. Connect your phone to the Wi-Fi Bilal-Setup"}),
     "wifi_2": (21, False, {"ar": "٢. افتح في المتصفح", "de": "2. Im Browser öffnen", "en": "2. Open in the browser"}),
     "wifi_3": (21, False, {"ar": "٣. اختر شبكتك وأدخل كلمة المرور", "de": "3. Eigenes WLAN wählen, Passwort eingeben",
                            "en": "3. Choose your Wi-Fi, enter the password"}),
@@ -653,6 +654,9 @@ def main():
     write_icon_image("img_alarm_lg", ICONS["ALARM"], 56, IMG_WHITE)
     masks["ornament"] = write_ornament("img_moon_orn", 196)
     write_icon_image("img_snooze", ICONS["ALARM_SNOOZE"], 22, IMG_WHITE)
+    # Startbildschirm: "بلال" groß (in allen Sprachen arabisch) und "BILAL" in Marcellus
+    write_text("img_splash_name", "ar", "بلال", arabic_font(104, "Amiri-Bold.ttf"))
+    write_text("img_splash_latin", "en", "B I L A L", ImageFont.truetype(str(FONTS / "Marcellus-Regular.ttf"), 26, layout_engine=ImageFont.Layout.RAQM))
     # Sonnenaufgang auf der Seite "Drittel der Nacht"
     write_icon_image("img_sunrise", ICONS["SUNRISE"], 34, IMG_WHITE)
     # Wetterdetails: gefühlte Temperatur, Luftfeuchte, Wind

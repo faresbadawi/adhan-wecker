@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ساعة الأذان</string>
+    <string name="app_name">بلال</string>
     <string name="searching">جارٍ البحث عن الساعة في شبكة الواي فاي …</string>
     <string name="not_found_title">لم يتم العثور على الساعة</string>
     <string name="not_found_text">هل الهاتف متصل بنفس شبكة الواي فاي مثل الساعة؟ يمكنك أيضًا إدخال العنوان الظاهر في صفحة إعدادات الساعة.</string>

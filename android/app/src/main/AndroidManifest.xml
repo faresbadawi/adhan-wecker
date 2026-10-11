@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Smart Azan Wecker für Android: native Hülle um die Web-App der Uhr (lädt http://azan-clock.local im Heimnetz).
+<!-- Bilal für Android: native Hülle um die Web-App der Uhr (lädt http://azan-clock.local im Heimnetz).
      Teilen aus der Mawaqit-App (Text/Link) übernimmt die Moschee. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.smartazan.wecker"
-    android:versionCode="1"
-    android:versionName="1.0">
+    android:versionCode="2"
+    android:versionName="1.1">
 
     <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
 

@@ -17,10 +17,10 @@ export default function Install() {
     body = (
       <div className="card-pad">
         {/* normaler Link statt IonButton: Ionic würde den Link abfangen und nichts herunterladen */}
-        <a className="dl-btn" href="/app/SmartAzanWecker.apk" download="SmartAzanWecker.apk">
+        <a className="dl-btn" href="/app/Bilal.apk" download="Bilal.apk">
           <IonIcon icon={downloadOutline} />{t('apk_download')}
         </a>
-        <p className="muted dl-link ltr-inline">{location.origin}/app/SmartAzanWecker.apk</p>
+        <p className="muted dl-link ltr-inline">{location.origin}/app/Bilal.apk</p>
         <ol className="steps big-steps mt">
           <li><b>{t('apk_s1')}</b></li>
           <li><b>{t('apk_s2')}</b><span className="muted">{t('apk_s2b')}</span></li>

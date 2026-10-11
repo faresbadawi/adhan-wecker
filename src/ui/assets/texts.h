@@ -8,6 +8,7 @@ extern "C" {
 
 enum TextId
 {
+    TXT_SPLASH_SUB,
     TXT_MOON_TITLE,
     TXT_WHITE_DAYS,
     TXT_TITLE,
