@@ -133,6 +133,12 @@ namespace settings
         setNewDefaults(s);
         setV3Defaults(s);
         setV4Defaults(s);
+        // Werkseinstellungen eines neuen Geräts: Wecker ganz laut, Azan Fajr 60 %, Isha 80 %, sonst 90 %,
+        // nachts 34 % Helligkeit (Nachtwecker aus, alle Seiten an, kein automatischer Seitenwechsel: siehe oben/unten)
+        s.volume = 21;
+        const uint8_t vol[5] = {60, 90, 90, 90, 80};
+        memcpy(s.azanVolume, vol, sizeof(vol));
+        s.nightBrightness = 34;
         return s;
     }
 
@@ -318,6 +324,16 @@ namespace settings
                 e.days = s_current.alarms[i].days;
                 const String n = p.getString(("n" + String(i)).c_str(), "");
                 strlcpy(e.name, n.c_str(), sizeof(e.name));
+            }
+            // Neues Gerät: ein Wecker (06:00, alle Tage, ausgeschaltet) als Vorlage
+            if (s_alarmCount == 0)
+            {
+                AlarmEntry &e = s_alarms[s_alarmCount++];
+                e = {};
+                e.enabled = false;
+                e.hour = 6;
+                e.minute = 0;
+                e.days = 0x7F;
             }
             p.putBytes("list", s_alarms, s_alarmCount * sizeof(AlarmEntry));
         }

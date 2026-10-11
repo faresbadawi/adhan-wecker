@@ -662,7 +662,8 @@ namespace web
     // Werkseinstellungen: Einstellungen, Gebetszeiten-Cache, Assistent und WLAN löschen
     static void deviceReset()
     {
-        for (const char *ns : {"adhan", "assistant", "web"})
+        // alle Einstellungen: Grundblock, Wecker-Liste, Seiten/Seitenwechsel, Ort/Zeitzone, Sprache
+        for (const char *ns : {"adhan", "assistant", "web", "alarms", "ui", "place"})
         {
             Preferences p;
             p.begin(ns, false);

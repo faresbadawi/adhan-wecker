@@ -21,8 +21,9 @@ const same = (a, b) => (a || '').toUpperCase() === (b || '').toUpperCase();
 
 // RGB-LED: jede Änderung geht sofort an die Uhr; Farbe und Helligkeit merkt sich das Handy
 function loadLed() {
-  try { return { color: '#FF0000', bri: 100, on: true, ...JSON.parse(localStorage.getItem('led') || '{}') }; }
-  catch (e) { return { color: '#FF0000', bri: 100, on: true }; }
+  // Die LED ist beim Start der Uhr aus; die App merkt sich Farbe und Helligkeit
+  try { return { color: '#FF0000', bri: 100, on: false, ...JSON.parse(localStorage.getItem('led') || '{}') }; }
+  catch (e) { return { color: '#FF0000', bri: 100, on: false }; }
 }
 let ledBusy = false, ledNext = null;
 async function ledSend(led) {

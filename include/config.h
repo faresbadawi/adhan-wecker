@@ -16,12 +16,12 @@
 // (http://azan-clock.local), gespeichert im NVS.
 
 // Ort für Gebetszeiten (Aladhan-API)
-#define PRAYER_CITY "Peine"
-#define PRAYER_COUNTRY "Germany"
+#define PRAYER_CITY "Braunschweig"
+#define PRAYER_COUNTRY "DE"
 
 // Koordinaten für das Wetter (Open-Meteo, ohne API-Schlüssel)
-#define WEATHER_LAT "52.32"
-#define WEATHER_LON "10.23"
+#define WEATHER_LAT "52.2674"
+#define WEATHER_LON "10.5210"
 // Wetter alle ... Minuten aktualisieren
 #define WEATHER_INTERVAL_MIN 15
 
