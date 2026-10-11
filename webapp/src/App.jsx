@@ -6,8 +6,9 @@ import { IonReactHashRouter } from '@ionic/react-router';
 import { Route, Navigate } from 'react-router-dom';
 import { homeOutline, alarmOutline, volumeHighOutline } from 'ionicons/icons';
 import { t, lang } from './lib/i18n.js';
-import { set, get, refreshStatus, loadSettings, applyTheme, save, confirmBox, toast, parseMawaqit, resolveMosque } from './lib/store.js';
+import { useApp, set, get, refreshStatus, loadSettings, applyTheme, save, confirmBox, toast, parseMawaqit, resolveMosque } from './lib/store.js';
 import Hosts from './components/Hosts.jsx';
+import Onboarding, { setupDone } from './components/Onboarding.jsx';
 import { takeMosque } from './lib/place.js';
 import Home from './pages/Home.jsx';
 import Prayer from './pages/Prayer.jsx';
@@ -30,6 +31,12 @@ function sharedMosque() {
   return parseMawaqit([q.get('url'), q.get('text'), q.get('title')].filter(Boolean).join('\n'));
 }
 
+// Einrichtungsassistent: eigene Komponente, damit nur sie auf den Zustand hört
+function SetupHost() {
+  const { setup } = useApp();
+  return <Onboarding open={setup} onClose={() => set({ setup: false })} />;
+}
+
 export default function App() {
   useEffect(() => {
     try {
@@ -48,6 +55,8 @@ export default function App() {
         return;
       }
       await loadSettings();
+      // erstes Öffnen auf diesem Gerät: Einrichtungsassistent
+      if (get().online && get().S && !setupDone() && !sharedMosque()) set({ setup: true });
       const shared = sharedMosque();
       if (shared) {
         history.replaceState(null, '', '/?app=1#/prayer');
@@ -98,6 +107,7 @@ export default function App() {
           </IonTabBar>
         </IonTabs>
       </IonReactHashRouter>
+      <SetupHost />
       <Hosts />
     </IonApp>
   );

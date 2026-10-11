@@ -11,6 +11,7 @@ let state = {
   installEvt: null, // Chrome-Installationsangebot
   toast: null,      // { text, err, id }
   ask: null,        // { title, text, danger, resolve }
+  setup: false,     // Einrichtungsassistent offen
 };
 const listeners = new Set();
 export function set(part) {

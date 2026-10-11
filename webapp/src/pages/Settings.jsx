@@ -1,10 +1,11 @@
 // Einstellungen: Anzeige der Uhr, Sprache, WLAN, Gerät – jeweils mit dem aktuellen Wert
 import { IonPage, IonContent, IonList, IonItem, IonLabel, IonNote, IonIcon } from '@ionic/react';
-import { colorPaletteOutline, languageOutline, wifiOutline, hardwareChipOutline, chevronForward, chevronBack } from 'ionicons/icons';
+import { colorPaletteOutline, languageOutline, wifiOutline, hardwareChipOutline, chevronForward, chevronBack, sparklesOutline } from 'ionicons/icons';
 import { Bar } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t, lang, LANGS } from '../lib/i18n.js';
-import { useApp, signal } from '../lib/store.js';
+import { useApp, set, signal } from '../lib/store.js';
+import { restartSetup } from '../components/Onboarding.jsx';
 
 export default function Settings() {
   const { ST, online } = useApp();
@@ -25,6 +26,14 @@ export default function Settings() {
           <IonList inset>
             {row('/settings/display', colorPaletteOutline, t('nav_display'))}
             {row('/settings/lang', languageOutline, t('nav_lang'), LANGS[lang()])}
+          </IonList>
+        </Section>
+        <Section hint={t('ob_restart_hint')}>
+          <IonList inset>
+            <IonItem button detail detailIcon={chev} onClick={() => { restartSetup(); set({ setup: true }); }}>
+              <span className="ico" slot="start"><IonIcon icon={sparklesOutline} /></span>
+              <IonLabel>{t('ob_restart')}</IonLabel>
+            </IonItem>
           </IonList>
         </Section>
         <Section title={t('grp_conn')}>
