@@ -79,8 +79,16 @@ const char HTTP_FORM_PARAM[]       PROGMEM = "<br/><input id='{i}' name='{n}' ma
 
 const char HTTP_SCAN_LINK[]        PROGMEM = "<br/><form action='/wifi?refresh=1' method='POST'><button name='refresh' value='1'>تحديث القائمة</button></form>";
 const char HTTP_SAVED[]            PROGMEM = "<div class='msg'>تم حفظ البيانات<br/>تحاول الساعة الآن الاتصال بالشبكة.<br/>إذا فشل الاتصال، اتصل مجددًا بشبكة Bilal-Setup وحاول مرة أخرى.</div>"
-"<h3>بعد نجاح الاتصال</h3><p class='lead'>اتصل هاتفك بشبكتك المنزلية ثم افتح بلال:</p><div id='after'></div>"
-"<script>fetch('/after').then(function(r){return r.text()}).then(function(h){document.getElementById('after').innerHTML=h}).catch(function(){})</script>";
+"<h3>بعد نجاح الاتصال</h3><p class='lead'>أعد هاتفك إلى شبكتك المنزلية، ثم افتح بلال بإحدى الطرق:</p>"
+"<a class='btn' href='http://azan-clock.local/'>فتح صفحة بلال</a><p class='lead ltr'>http://azan-clock.local</p>"
+"<div id='after'></div>"
+"<div class='os'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M6 9h12v8a1 1 0 0 1-1 1h-1v3.2a1.2 1.2 0 0 1-2.4 0V18h-3.2v3.2a1.2 1.2 0 0 1-2.4 0V18H7a1 1 0 0 1-1-1V9zM3.8 9.4v5.2a1.1 1.1 0 0 0 2.2 0V9.4a1.1 1.1 0 0 0-2.2 0zM18 9.4v5.2a1.1 1.1 0 0 0 2.2 0V9.4a1.1 1.1 0 0 0-2.2 0zM6.2 8a5.8 5.8 0 0 1 11.6 0z'/><path fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' d='M8.6 3.3 7.4 1.6M15.4 3.3l1.2-1.7'/></svg>"
+"<div><b>أندرويد</b><span>حمّل تطبيق بلال: امسح رمز QR الظاهر على شاشة الساعة (صفحة الإعدادات). يجد التطبيق الساعة تلقائيًا في الشبكة المنزلية.</span></div></div>"
+"<div class='os'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.800 2.300-1.600 2.800-.4 7 1.200 9.300.8 1.100 1.700 2.400 2.900 2.300 1.200 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200c.9-1.300 1.200-2.500 1.300-2.600-.1 0-2.500-1-2.500-3.900zM14.200 5.800c.600-.8 1.100-1.800 1-2.800-1 0-2.100.6-2.800 1.400-.6.700-1.100 1.700-1 2.700 1.100.1 2.100-.5 2.800-1.300z'/></svg>"
+"<div><b>آيفون وآيباد</b><span>افتح Safari واكتب azan-clock.local، ثم اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية».</span></div></div>"
+"<div class='os'><svg viewBox='0 0 24 24'><rect x='3' y='4' width='18' height='12' rx='1.6' fill='none' stroke='currentColor' stroke-width='1.6'/><path d='M8 20h8M12 16v4' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/></svg>"
+"<div><b>الحاسوب</b><span>افتح المتصفح واكتب azan-clock.local، ويُفضَّل حفظه في المفضلة.</span></div></div>"
+"<script>fetch('/after').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(h){if(h.indexOf('btn')>=0)document.getElementById('after').innerHTML=h}).catch(function(){})</script>";
 const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'>تم الحفظ<br/></div>";
 const char HTTP_END[]              PROGMEM = "</div></body></html>";
 const char HTTP_ERASEBTN[]         PROGMEM = "<br/><form action='/erase' method='get'><button class='D'>مسح إعدادات الواي فاي</button></form>";
@@ -129,6 +137,9 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 "td{vertical-align: top;}"
 ".btn{display:block;text-align:center;border-radius:12px;background:linear-gradient(180deg,#e0c07c,#bf9a52);color:#17140e;padding:14px;margin:12px 0;font-weight:600}.btn.ghost{background:none;color:#ecd8a6;border:1px solid rgba(212,175,106,.45)}"
 ".qr svg{width:210px;height:210px;display:block;margin:12px auto;border-radius:12px}"
+".os{display:flex;gap:14px;align-items:flex-start;background:#12110f;border:1px solid rgba(212,175,106,.18);border-radius:14px;padding:14px;margin:10px 0}"
+".os>svg{width:34px;height:34px;flex:none;color:#d4af6a}.os b{display:block;color:#ecd8a6;margin-bottom:4px}.os span{color:#c4baa6;font-size:.92em;line-height:1.6}"
+".ltr{direction:ltr}"
 ".h{display:none}"
 "button{transition: 0s opacity;transition-delay: 3s;transition-duration: 0s;cursor: pointer}"
 "button.D{background-color:#e0705f}"
