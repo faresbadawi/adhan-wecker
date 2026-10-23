@@ -107,6 +107,8 @@ public class Bridge {
                     p.prepare();
                     p.start();
                     preview = p;
+                    // Vorhören: nur die ersten 5 Sekunden
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> { if (preview == p) stopPreview(); }, 5000);
                     return;
                 } catch (Exception e) {
                     Log.w("Bilal", "Vorhören " + n + ": " + e);

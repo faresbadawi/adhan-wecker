@@ -15,7 +15,8 @@ import { takeSearchedPlace, takeMosque } from '../lib/place.js';
 import { loadLed, ledSend } from '../lib/led.js';
 import { reloadApp } from '../lib/errors.js';
 
-const STEPS = ['welcome', 'place', 'times', 'azan', 'alarm', 'display', 'light', 'done'];
+const CLOCK_STEPS = ['welcome', 'place', 'times', 'azan', 'alarm', 'display', 'light', 'done'];
+const PHONE_STEPS = ['welcome', 'place', 'times', 'azan', 'done']; // ohne Uhr: keine Schritte für Wecker, Anzeige und Licht der Uhr
 const KEY = 'bilalSetup'; // "done" oder Nummer des Schritts (nach dem Neuladen bei Sprachwechsel)
 
 export const setupDone = () => { try { return localStorage.getItem(KEY) === 'done'; } catch (e) { return true; } };
@@ -196,7 +197,8 @@ function LightStep() {
 }
 
 export default function Onboarding({ open, onClose }) {
-  const { S } = useApp();
+  const { S, local } = useApp();
+  const STEPS = local ? PHONE_STEPS : CLOCK_STEPS;
   // Schritt beim Öffnen aus dem Speicher (nach Sprachwechsel geht es dort weiter), sonst von vorn
   const savedStep = () => { try { const v = Number(localStorage.getItem(KEY)); return isNaN(v) ? 0 : Math.min(v, STEPS.length - 1); } catch (e) { return 0; } };
   const [step, setStepState] = useState(savedStep);
@@ -207,6 +209,7 @@ export default function Onboarding({ open, onClose }) {
   function finish() {
     try { localStorage.setItem(KEY, 'done'); } catch (e) { /* privat */ }
     onClose();
+    setTimeout(() => { window.location.hash = '#/home'; }, 350); // nach dem Einrichten direkt zur Startseite (erst nach dem Schließen des Fensters)
   }
   async function chooseLang(l) {
     if (l === lang()) return;
@@ -226,7 +229,7 @@ export default function Onboarding({ open, onClose }) {
         <div className="ob">
           <div className="ob-head">
             <div className="ob-dots">{STEPS.map((s, i) => <i key={s} className={i === step ? 'on' : i < step ? 'past' : ''} />)}</div>
-            {!last && <button className="ob-skip" onClick={finish}>{t('ob_skip')}</button>}
+            {!last && <button className="ob-skip" onClick={() => setStep(step + 1)} aria-label={t('ob_skip_step')}>{t('ob_skip')}</button>}
           </div>
 
           {id === 'welcome' && <div className="ob-hero"><div className="ob-name">بلال</div><div className="ob-latin">B I L A L</div></div>}

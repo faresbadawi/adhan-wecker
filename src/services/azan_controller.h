@@ -56,8 +56,14 @@ namespace azan
     // Hinweiston vor dem Gebet i (leiser Ton, nur wenn gerade nichts spielt); true, wenn er gestartet wurde
     bool playReminder(int i);
 
+    // Nach ms Millisekunden den Ton beenden (Vorhören: nur die ersten Sekunden des Azans)
+    void limitTo(uint32_t ms);
+
     // Azan sofort starten (Test/Demo).
     void start(model::Prayer p, uint16_t minutes);
+
+    // Wie start(), aber nur die ersten Sekunden (Test aus der App)
+    void startTest(model::Prayer p, uint16_t minutes, uint32_t ms = 5000);
 
     void mute(); // Ton aus, Hinweis bleibt kurz sichtbar
     void skip(); // Ton aus, sofort beenden

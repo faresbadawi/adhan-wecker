@@ -42,6 +42,8 @@ Danach mit `curl -F bin=@custom.bin -F preview=@custom.jpg http://<ip>/api/backg
 - **QR-Code auf der Uhr:** In der App unter *Einstellungen → App installieren → Download-Adresse der App* die https-Adresse
   der Release-Seite eintragen (z. B. `https://github.com/<name>/<repo>/releases/latest`). Die Uhr zeigt sie danach als QR-Code
   auf ihrer Einstellungsseite. Ohne Adresse zeigt der QR-Code die Adresse der Uhr.
+  Darunter gibt es ein zweites Feld für die Adresse der Web-Version (PWA). Beide erscheinen auch auf der Seite „WLAN“ der App und auf der
+  Seite „Daten gespeichert“ des Einrichtungsportals der Uhr (Link zu Bilal, QR-Code, Link zur Web-Version).
 - Die APK wird mit `~/.config/azan-wecker/release.jks` signiert. **Diesen Schlüssel sichern:** Ohne ihn lässt sich die App später
   nicht mehr über die alte Version drüberinstallieren.
 
@@ -65,3 +67,9 @@ Danach mit `curl -F bin=@custom.bin -F preview=@custom.jpg http://<ip>/api/backg
 Pro Gebet einstellbar (Azan-Seite): Der Azan ertönt bis zu 240 Minuten später (Fajr höchstens bis kurz vor Sonnenaufgang, die anderen
 bis kurz vor dem nächsten Gebet) und eine Erinnerung 5–60 Minuten vorher. Die angezeigten Gebetszeiten bleiben die echten Zeiten.
 Auf der Uhr gilt das ebenso (leiser Hinweiston `sounds/calm.mp3`); auf dem Handy als Benachrichtigung.
+
+## Einrichtungsassistent und Azan-Test
+
+- „Überspringen“ im Assistenten überspringt nur den aktuellen Schritt. Nach dem letzten Schritt geht es zur Startseite.
+- Ohne Uhr zeigt der Assistent nur die Schritte Sprache, Ort, Quelle der Zeiten und Azan.
+- Azan-Test und Vorhören (Uhr, Handy, Web-App) spielen nur die ersten 5 Sekunden.

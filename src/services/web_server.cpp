@@ -58,6 +58,27 @@ namespace web
         return s_appUrl;
     }
 
+    static char s_pwaUrl[128] = "";
+    static bool s_pwaUrlLoaded = false;
+    const char *pwaUrl()
+    {
+        if (!s_pwaUrlLoaded)
+        {
+            s_pwaUrlLoaded = true;
+            Preferences p;
+            p.begin("web", true);
+            p.getString("pwaurl", "").toCharArray(s_pwaUrl, sizeof(s_pwaUrl));
+            p.end();
+        }
+        return s_pwaUrl;
+    }
+
+    static bool validHttps(const String &url)
+    {
+        // nur https-Adressen (oder leer = zurücksetzen), kurz genug für einen gut lesbaren QR-Code
+        return url.isEmpty() || (url.startsWith("https://") && url.length() <= 100 && url.indexOf(' ') < 0);
+    }
+
     static void receiveAppUrl()
     {
         JsonDocument doc;
@@ -66,20 +87,38 @@ namespace web
             s_server.send(400, "application/json", "{\"error\":\"json\"}");
             return;
         }
-        String url = doc["url"] | "";
-        url.trim();
-        // nur https-Adressen (oder leer = zurücksetzen), kurz genug für einen gut lesbaren QR-Code
-        if (url.length() && (!url.startsWith("https://") || url.length() > 100 || url.indexOf(' ') >= 0))
-        {
-            s_server.send(400, "application/json", "{\"error\":\"url\"}");
-            return;
-        }
+        // {"url": "...", "pwa": "..."}: nur übergebene Felder ändern
         Preferences p;
-        p.begin("web", false);
-        p.putString("appurl", url);
-        p.end();
-        s_appUrlLoaded = false;
-        appUrl();
+        if (doc["url"].is<const char *>())
+        {
+            String url = doc["url"] | "";
+            url.trim();
+            if (!validHttps(url))
+            {
+                s_server.send(400, "application/json", "{\"error\":\"url\"}");
+                return;
+            }
+            p.begin("web", false);
+            p.putString("appurl", url);
+            p.end();
+            s_appUrlLoaded = false;
+            appUrl();
+        }
+        if (doc["pwa"].is<const char *>())
+        {
+            String url = doc["pwa"] | "";
+            url.trim();
+            if (!validHttps(url))
+            {
+                s_server.send(400, "application/json", "{\"error\":\"pwa\"}");
+                return;
+            }
+            p.begin("web", false);
+            p.putString("pwaurl", url);
+            p.end();
+            s_pwaUrlLoaded = false;
+            pwaUrl();
+        }
         s_server.send(200, "application/json", "{\"ok\":true}");
     }
 
@@ -618,6 +657,7 @@ namespace web
         dev["host"] = String(HOSTNAME) + ".local";
         dev["ip"] = WiFi.localIP().toString();
         dev["appUrl"] = appUrl();
+        dev["pwaUrl"] = pwaUrl();
         dev["uptime"] = millis() / 1000;
         dev["fsUsed"] = LittleFS.usedBytes();   // Dateien (Azan, Hintergründe, App)
         dev["fsTotal"] = LittleFS.totalBytes();
@@ -768,7 +808,7 @@ namespace web
         const bool fajr = strcmp(doc["prayer"] | "", "fajr") == 0;
         struct tm now;
         const uint16_t minutes = timemgr::now(now) ? now.tm_hour * 60 + now.tm_min : 0;
-        azan::start(fajr ? model::FAJR : model::DHUHR, minutes);
+        azan::startTest(fajr ? model::FAJR : model::DHUHR, minutes); // nur die ersten 5 Sekunden
         s_server.send(200, "application/json", "{}");
     }
 
@@ -794,6 +834,7 @@ namespace web
         }
         azan::applyVolume(prayer);
         audio::play(LittleFS, path);
+        azan::limitTo(5000); // Vorhören: nur die ersten 5 Sekunden
         s_server.send(200, "application/json", "{}");
     }
 

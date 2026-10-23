@@ -7,15 +7,17 @@ import { Bar } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t } from '../lib/i18n.js';
 import { isStandalone, isIOS, isNativeApp, useApp, api, refreshStatus, toast } from '../lib/store.js';
+import AccessCard from '../components/AccessCard.jsx';
 
 const isAndroid = () => /android/i.test(navigator.userAgent);
 
 // Download-Adresse der App einstellen (erscheint als QR-Code auf der Uhr)
-function AppLink({ current }) {
+function AppLink({ current, currentPwa }) {
   const [url, setUrl] = useState(current || '');
+  const [pwa, setPwa] = useState(currentPwa || '');
   async function saveUrl() {
     try {
-      const r = await api('/api/appurl', { url: url.trim() });
+      const r = await api('/api/appurl', { url: url.trim(), pwa: pwa.trim() });
       if (r.ok) { await refreshStatus(); toast(t('saved')); } else toast(t('error'), true);
     } catch (e) { toast(t('offline'), true); }
   }
@@ -24,6 +26,9 @@ function AppLink({ current }) {
       <p className="muted top">{t('app_link_hint')}</p>
       <IonInput className="urlin ltr-inline" value={url} placeholder="https://github.com/…/releases/latest" inputmode="url"
         onIonInput={e => setUrl(e.detail.value || '')} />
+      <p className="muted mt">{t('pwa_link_hint')}</p>
+      <IonInput className="urlin ltr-inline" value={pwa} placeholder="https://…github.io/…/" inputmode="url"
+        onIonInput={e => setPwa(e.detail.value || '')} />
       <div className="btnrow mt"><IonButton shape="round" onClick={saveUrl}>{t('app_link_set')}</IonButton></div>
     </div>
   );
@@ -67,7 +72,8 @@ export default function Install() {
           <div className="card-pad intro"><p>{t('inst_intro2')}</p><p className="muted mt">{t('app_scan')}</p></div>
         </Section>
         <Section title={t('inst_steps')}>{body}</Section>
-        {!isNativeApp() && <Section title={t('app_link')}><AppLink current={appUrl} /></Section>}
+        {!isNativeApp() && <Section title={t('app_link')}><AppLink current={appUrl} currentPwa={(ST && ST.device && ST.device.pwaUrl) || ''} /></Section>}
+        {!isNativeApp() && <AccessCard />}
         <Section title={t('inst_all')}>
           <div className="card-pad platforms">
             <p><IonIcon icon={logoAndroid} className="accent" /> {t('plat_android')}</p>

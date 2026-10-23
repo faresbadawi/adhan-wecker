@@ -12,6 +12,7 @@ namespace azan
     static uint32_t s_startedMs = 0; // Beginn (millis)
     static uint32_t s_mutedMs = 0;
     static int32_t s_lastKey = -1;   // zuletzt ausgelöstes Gebet (Datum + Index), verhindert Doppelstart
+    static uint32_t s_limitAt = 0;   // Zeitpunkt (millis), zu dem ein Test/Vorhören endet; 0 = kein Limit
     static uint8_t s_volume[5] = {100, 100, 100, 100, 100}; // Prozent je Gebet
 
     static const char *fileName(model::Prayer p)
@@ -156,8 +157,11 @@ namespace azan
         audio::setVolume((percent * 21 + 50) / 100); // Decoder 0..21
     }
 
+    void limitTo(uint32_t ms) { s_limitAt = millis() + ms; if (!s_limitAt) s_limitAt = 1; }
+
     void start(model::Prayer p, uint16_t minutes)
     {
+        s_limitAt = 0; // ein echter Azan läuft ganz
         s_status = {};
         s_status.state = State::PLAYING;
         s_status.prayer = p;
@@ -181,6 +185,12 @@ namespace azan
         Serial.printf("Azan %s: %s\n", model::prayerName(p), fs ? path : "keine Audiodatei gefunden");
     }
 
+    void startTest(model::Prayer p, uint16_t minutes, uint32_t ms)
+    {
+        start(p, minutes);
+        limitTo(ms);
+    }
+
     void mute()
     {
         if (s_status.state != State::PLAYING)
@@ -198,6 +208,16 @@ namespace azan
 
     void update(const struct tm &now, const model::PrayerDay &day, uint8_t enabledMask)
     {
+        // Test oder Vorhören: nach den ersten Sekunden beenden
+        if (s_limitAt && (int32_t)(millis() - s_limitAt) >= 0)
+        {
+            s_limitAt = 0;
+            if (s_status.state == State::PLAYING)
+                skip();
+            else
+                audio::stop();
+        }
+
         // Beginn einer Gebetszeit erkennen (einmal pro Gebet und Tag)
         if (day.valid && s_status.state == State::IDLE)
         {

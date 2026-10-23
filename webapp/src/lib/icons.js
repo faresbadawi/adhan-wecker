@@ -40,6 +40,8 @@ export const I = {
   sunrise: svg('<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 6v3M5.6 10.6l1.4 1.4M18.4 10.6 17 12M8 21h8"/>'),
   sunset: svg('<path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 3v6M9 6l3 3 3-3M8 21h8"/>'),
   alarm: svg('<circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.2 1.6M4.5 5.5 7 3.2M19.5 5.5 17 3.2"/>'),
+  // Letztes Drittel der Nacht: Mondsichel mit Stern
+  night: svg('<path d="M19.5 14.2A8 8 0 1 1 9.8 4.5a6.3 6.3 0 0 0 9.7 9.7Z"/><path d="M17 2.5v3.2M15.4 4.1h3.2M21 8.5v2M20 9.5h2"/>'),
   info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>'),
 };
 

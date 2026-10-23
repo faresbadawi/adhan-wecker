@@ -6,6 +6,7 @@ import { Bar } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t } from '../lib/i18n.js';
 import { useApp, api, toast, confirmBox, signal } from '../lib/store.js';
+import AccessCard from '../components/AccessCard.jsx';
 
 export default function Wifi() {
   const { ST, online } = useApp();
@@ -44,6 +45,8 @@ export default function Wifi() {
             {ok && <IonItem lines="none"><IonLabel>{t('signal')}</IonLabel><span slot="end"><Sig bars={w.bars} /></span></IonItem>}
           </IonList>
         </Section>
+
+        {ok && <AccessCard />}
 
         <Section title={t('networks')}>
           {nets === 'loading' && <div className="center pad"><IonSpinner /></div>}

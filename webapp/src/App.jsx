@@ -56,7 +56,7 @@ export default function App() {
       }
       await loadSettings();
       // erstes Öffnen auf diesem Gerät: Einrichtungsassistent
-      if (get().online && get().S && !setupDone() && !sharedMosque()) set({ setup: true });
+      if ((get().online || get().local) && get().S && !setupDone() && !sharedMosque()) set({ setup: true });
       const shared = sharedMosque();
       if (shared) {
         history.replaceState(null, '', '/?app=1#/prayer');

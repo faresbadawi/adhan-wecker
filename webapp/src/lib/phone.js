@@ -174,18 +174,21 @@ export async function localApi(url, body) {
   }
 }
 
-// ---------- Azan auf dem Handy abspielen (Vorhören)
-let audio = null;
+// ---------- Azan auf dem Handy abspielen (Vorhören: nur die ersten 5 Sekunden)
+const PREVIEW_MS = 5000;
+let audio = null, audioTimer = 0;
 export function playVoice(id, fajr) {
   const n = native();
-  if (n) { n.previewVoice(id, !!fajr); return; }
+  if (n) { n.previewVoice(id, !!fajr); return; } // die Android-App beendet nach 5 Sekunden selbst
   stopVoice();
   audio = new Audio('azans/' + voiceFile(id, fajr));
   audio.play().catch(() => {});
+  audioTimer = setTimeout(stopVoice, PREVIEW_MS);
 }
 export function stopVoice() {
   const n = native();
   if (n) { n.stopPreview(); return; }
+  clearTimeout(audioTimer);
   if (audio) { audio.pause(); audio = null; }
 }
 

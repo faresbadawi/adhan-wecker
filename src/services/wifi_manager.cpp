@@ -1,6 +1,8 @@
 #include "wifi_manager.h"
 #include <WiFi.h>
 #include <WiFiManager.h>
+#include "extra/libs/qrcode/qrcodegen.h"
+#include "web_server.h"
 
 namespace wifimgr
 {
@@ -12,6 +14,40 @@ namespace wifimgr
     static bool s_portal = false;
     static String s_pendingSsid, s_pendingPass; // Wechsel in ein anderes Netz, ausgeführt in update()
     static bool s_pending = false;
+
+    // QR-Code als SVG (dunkle Module auf weißem Grund mit Rand); leer, wenn der Text nicht passt
+    static String qrSvg(const String &text)
+    {
+        static uint8_t qr[qrcodegen_BUFFER_LEN_FOR_VERSION(12)], tmp[qrcodegen_BUFFER_LEN_FOR_VERSION(12)];
+        if (!qrcodegen_encodeText(text.c_str(), tmp, qr, qrcodegen_Ecc_MEDIUM, qrcodegen_VERSION_MIN, 12, qrcodegen_Mask_AUTO, true))
+            return "";
+        const int n = qrcodegen_getSize(qr);
+        String svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='-3 -3 " + String(n + 6) + " " + String(n + 6) +
+                     "' shape-rendering='crispEdges'><rect x='-3' y='-3' width='" + String(n + 6) + "' height='" + String(n + 6) +
+                     "' fill='#fff'/><path fill='#000' d='";
+        for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+                if (qrcodegen_getModule(qr, x, y))
+                    svg += "M" + String(x) + " " + String(y) + "h1v1h-1z";
+        svg += "'/></svg>";
+        return svg;
+    }
+
+    // Wird von der Seite "Daten gespeichert" nachgeladen: Link zu Bilal, QR-Code zur App und Link zur Web-Version
+    static void handleAfter()
+    {
+        const String home = "http://azan-clock.local/";
+        const String app = web::appUrl(), pwa = web::pwaUrl();
+        String html = "<a class='btn' href='" + home + "'>فتح صفحة بلال</a><p class='lead'>" + "azan-clock.local</p>";
+        const String code = app.length() ? app : home;
+        const String svg = qrSvg(code);
+        if (svg.length())
+            html += "<div class='qr'>" + svg + "</div><p class='lead'>" +
+                    String(app.length() ? "تطبيق أندرويد: امسح الرمز بالهاتف لتنزيل التطبيق" : "امسح الرمز بالهاتف لفتح صفحة بلال") + "</p>";
+        if (pwa.length())
+            html += "<a class='btn ghost' href='" + pwa + "'>فتح نسخة الويب (للتثبيت على الشاشة الرئيسية)</a>";
+        s_wm.server->send(200, "text/html; charset=utf-8", html);
+    }
 
     static void startPortal()
     {
@@ -27,6 +63,7 @@ namespace wifimgr
         WiFi.setAutoReconnect(true);
 
         s_wm.setConfigPortalBlocking(false);
+        s_wm.setWebServerCallback([] { s_wm.server->on("/after", handleAfter); });
         s_wm.setTitle("Bilal");
         // Einrichtungsseite schlicht halten: nur "Netz wählen" (Texte arabisch, siehe include/wm_strings_ar.h)
         static std::vector<const char *> menu = {"wifi"};

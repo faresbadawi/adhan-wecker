@@ -13,4 +13,6 @@ namespace web
     // Adresse, unter der man die App herunterladen kann (z. B. GitHub-Release); leer, wenn keine eingestellt ist.
     // Der QR-Code auf der Einstellungsseite der Uhr zeigt diese Adresse, sonst die Adresse der Uhr.
     const char *appUrl();
+    // Adresse der Web-Version (PWA zum Installieren auf dem Home-Bildschirm); leer, wenn keine eingestellt ist
+    const char *pwaUrl();
 }

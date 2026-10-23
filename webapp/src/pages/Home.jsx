@@ -72,48 +72,62 @@ export default function Home() {
           </div>
         )}
 
-        <section className="hero">
-          <div className="hero-top">
-            <span className="loc"><Svg html={I.location} />{ST ? ST.location.city : '—'}</span>
-            <span className="num ltr">{ST && ST.time ? clock : '--:--'}</span>
+        <div className="home-grid">
+          <div className="home-a">
+            <section className="hero">
+              <div className="hero-top">
+                <span className="loc"><Svg html={I.location} />{ST ? ST.location.city : '—'}</span>
+                <span className="num ltr hero-clock">{ST && ST.time ? clock : '--:--'}</span>
+              </div>
+              <div className="verse" lang="ar" dir="rtl">
+                ﴿إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا﴾
+                <small>{t('verse_ref')}</small>
+              </div>
+              {p && p.holiday && <div className="holiday"><Svg html={I.moon} />{t('holiday_' + p.holiday)}</div>}
+              <div className="ring">
+                <svg viewBox="0 0 240 240" aria-hidden="true">
+                  <defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f1dfa9" /><stop offset="1" stopColor="#b8913f" /></linearGradient></defs>
+                  <circle cx="120" cy="120" r="104" className="ring-bg" />
+                  <circle cx="120" cy="120" r="104" className="ring-fg" strokeDasharray={RING} strokeDashoffset={RING * (1 - progress)} />
+                </svg>
+                <div className="ring-in">
+                  {next ? <>
+                    <small>{t('next_prayer')}</small>
+                    <b className="pn">{pname(next, ST)}</b>
+                    <span className="time num ltr">{p.times[next]}</span>
+                    <span className="cd">{t('in')} {duration(left)}</span>
+                  </> : <small>{online ? '—' : t('offline')}</small>}
+                </div>
+              </div>
+              <div className="hero-date">{date}{p && <> · <span className="hj">{hijri(p.hijri)}</span></>}</div>
+            </section>
           </div>
-          <div className="bism" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-          {p && p.holiday && <div className="holiday"><Svg html={I.moon} />{t('holiday_' + p.holiday)}</div>}
-          <div className="ring">
-            <svg viewBox="0 0 240 240" aria-hidden="true">
-              <defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f1dfa9" /><stop offset="1" stopColor="#b8913f" /></linearGradient></defs>
-              <circle cx="120" cy="120" r="104" className="ring-bg" />
-              <circle cx="120" cy="120" r="104" className="ring-fg" strokeDasharray={RING} strokeDashoffset={RING * (1 - progress)} />
-            </svg>
-            <div className="ring-in">
-              {next ? <>
-                <small>{t('next_prayer')}</small>
-                <b className="pn">{pname(next, ST)}</b>
-                <span className="time num ltr">{p.times[next]}</span>
-                <span className="cd">{t('in')} {duration(left)}</span>
-              </> : <small>{online ? '—' : t('offline')}</small>}
-            </div>
-          </div>
-          <div className="hero-date">{date}{p && <> · <span className="hj">{hijri(p.hijri)}</span></>}</div>
-        </section>
 
-        <div className="tiles">
-          <div className="tile">
-            <Svg html={skyIcon} className="accent" />
-            <b className="num ltr">{wx ? wx.temp + '°' : '—'}</b>
-            <small>{wx ? t('sky_' + wx.sky) : t('weather_now')}</small>
-          </div>
-          <div className="tile">
-            <Svg html={I.moon} className="accent" />
-            <b className="num ltr">{ST && ST.night ? ST.night.lastThird : '—'}</b>
-            <small>{ST && ST.night ? (nightLeft > 0 ? `${t('in')} ${duration(nightLeft)}` : t('night_running')) : t('night_page')}</small>
-          </div>
-          <button className="tile" onClick={() => router.push('/settings/wifi')}>
-            <Svg html={I.wifi} className="accent" />
-            <b>{wifiOk ? t('sig_' + signal(ST.wifi.bars)) : '—'}</b>
-            <small>{t(wifiOk ? 'wifi_on' : 'wifi_off')}</small>
-          </button>
-        </div>
+          <div className="home-b">
+            <div className="tiles two">
+              <div className="tile">
+                <Svg html={skyIcon} className="accent" />
+                <b className="num ltr">{wx ? wx.temp + '°' : '—'}</b>
+                <small>{wx ? t('sky_' + wx.sky) : t('weather_now')}</small>
+              </div>
+              <button className="tile" onClick={() => router.push(local ? '/settings' : '/settings/wifi')}>
+                <Svg html={I.wifi} className={wifiOk ? 'accent' : 'dimmed'} />
+                <b>{wifiOk ? t('sig_' + signal(ST.wifi.bars)) : '—'}</b>
+                <small>{t(wifiOk ? 'wifi_on' : 'wifi_off')}</small>
+              </button>
+            </div>
+
+            {ST && ST.night && (
+              <section className="night-card">
+                <span className="night-ico"><Svg html={I.night} /></span>
+                <div className="night-txt">
+                  <small>{t('night_page')}</small>
+                  <b className="num ltr">{ST.night.lastThird}</b>
+                  <span>{nightLeft > 0 ? `${t('night_begins')} ${t('in')} ${duration(nightLeft)}` : t('night_running')}</span>
+                </div>
+                <span className="night-end">{t('night_until_fajr')}<b className="num ltr">{ST.night.fajr}</b></span>
+              </section>
+            )}
 
         <h2 className="section-title">{t('today_times')}</h2>
         <div className="timeline">
@@ -131,6 +145,8 @@ export default function Home() {
           )) : <div className="empty">—</div>}
         </div>
         <p className="section-hint">{t('bell_hint')}</p>
+          </div>
+        </div>
       </IonContent>
     </IonPage>
   );
