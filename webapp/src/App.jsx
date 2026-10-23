@@ -56,7 +56,10 @@ export default function App() {
       }
       await loadSettings();
       // erstes Öffnen auf diesem Gerät: Einrichtungsassistent
-      if ((get().online || get().local) && get().S && !setupDone() && !sharedMosque()) set({ setup: true });
+      // Der Stand liegt auf der Uhr (nach den Werkseinstellungen erscheint der Assistent wieder); ältere Firmware: Merker im Handy
+      const dev = get().ST && get().ST.device;
+      const needSetup = get().local ? !setupDone() : dev && typeof dev.setupDone === 'boolean' ? !dev.setupDone : !setupDone();
+      if ((get().online || get().local) && get().S && needSetup && !sharedMosque()) set({ setup: true });
       const shared = sharedMosque();
       if (shared) {
         history.replaceState(null, '', '/?app=1#/prayer');

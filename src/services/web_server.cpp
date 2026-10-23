@@ -52,8 +52,9 @@ namespace web
             s_appUrlLoaded = true;
             Preferences p;
             p.begin("web", true);
-            p.getString("appurl", "").toCharArray(s_appUrl, sizeof(s_appUrl));
+            String v = p.getString("appurl", "");
             p.end();
+            strlcpy(s_appUrl, v.length() ? v.c_str() : APP_URL_DEFAULT, sizeof(s_appUrl)); // ohne eigene Adresse: Standard
         }
         return s_appUrl;
     }
@@ -67,8 +68,9 @@ namespace web
             s_pwaUrlLoaded = true;
             Preferences p;
             p.begin("web", true);
-            p.getString("pwaurl", "").toCharArray(s_pwaUrl, sizeof(s_pwaUrl));
+            String v = p.getString("pwaurl", "");
             p.end();
+            strlcpy(s_pwaUrl, v.length() ? v.c_str() : PWA_URL_DEFAULT, sizeof(s_pwaUrl));
         }
         return s_pwaUrl;
     }
@@ -77,6 +79,31 @@ namespace web
     {
         // nur https-Adressen (oder leer = zurücksetzen), kurz genug für einen gut lesbaren QR-Code
         return url.isEmpty() || (url.startsWith("https://") && url.length() <= 100 && url.indexOf(' ') < 0);
+    }
+
+    // Einrichtungsassistent der App erledigt? Liegt auf der Uhr (NVS "ui"), damit er nach den Werkseinstellungen wieder erscheint
+    static bool setupDone()
+    {
+        Preferences p;
+        p.begin("ui", true);
+        const bool done = p.getBool("setup", false);
+        p.end();
+        return done;
+    }
+
+    static void receiveSetupDone()
+    {
+        JsonDocument doc;
+        if (deserializeJson(doc, s_server.arg("plain")))
+        {
+            s_server.send(400, "application/json", "{\"error\":\"json\"}");
+            return;
+        }
+        Preferences p;
+        p.begin("ui", false);
+        p.putBool("setup", doc["done"] | true);
+        p.end();
+        s_server.send(200, "application/json", "{\"ok\":true}");
     }
 
     static void receiveAppUrl()
@@ -658,6 +685,7 @@ namespace web
         dev["ip"] = WiFi.localIP().toString();
         dev["appUrl"] = appUrl();
         dev["pwaUrl"] = pwaUrl();
+        dev["setupDone"] = setupDone();
         dev["uptime"] = millis() / 1000;
         dev["fsUsed"] = LittleFS.usedBytes();   // Dateien (Azan, Hintergründe, App)
         dev["fsTotal"] = LittleFS.totalBytes();
@@ -1030,6 +1058,7 @@ namespace web
             f.close();
         });
         s_server.on("/api/appurl", HTTP_POST, receiveAppUrl);
+        s_server.on("/api/device/setup", HTTP_POST, receiveSetupDone);
         s_server.on("/api/backup/file", HTTP_GET, sendBackupFile);
         s_server.serveStatic("/", LittleFS, "/www/", "no-cache");
         s_server.onNotFound([] { s_server.send(404, "text/plain", "Not found"); });

@@ -33,20 +33,16 @@ namespace wifimgr
         return svg;
     }
 
-    // Wird von der Seite "Daten gespeichert" nachgeladen: Link zu Bilal, QR-Code zur App und Link zur Web-Version
-    static void handleAfter()
+    // QR-Code zur App-Download-Adresse als Bild für die Seiten des Einrichtungsportals
+    static void handleQr()
     {
-        const String home = "http://azan-clock.local/";
-        const String app = web::appUrl(), pwa = web::pwaUrl();
-        String html = "<a class='btn' href='" + home + "'>فتح صفحة بلال</a><p class='lead'>" + "azan-clock.local</p>";
-        const String code = app.length() ? app : home;
-        const String svg = qrSvg(code);
-        if (svg.length())
-            html += "<div class='qr'>" + svg + "</div><p class='lead'>" +
-                    String(app.length() ? "تطبيق أندرويد: امسح الرمز بالهاتف لتنزيل التطبيق" : "امسح الرمز بالهاتف لفتح صفحة بلال") + "</p>";
-        if (pwa.length())
-            html += "<a class='btn ghost' href='" + pwa + "'>فتح نسخة الويب (للتثبيت على الشاشة الرئيسية)</a>";
-        s_wm.server->send(200, "text/html; charset=utf-8", html);
+        const String svg = qrSvg(web::appUrl());
+        if (svg.isEmpty())
+        {
+            s_wm.server->send(404, "text/plain", "kein QR-Code");
+            return;
+        }
+        s_wm.server->send(200, "image/svg+xml", svg);
     }
 
     static void startPortal()
@@ -63,10 +59,10 @@ namespace wifimgr
         WiFi.setAutoReconnect(true);
 
         s_wm.setConfigPortalBlocking(false);
-        s_wm.setWebServerCallback([] { s_wm.server->on("/after", handleAfter); });
+        s_wm.setWebServerCallback([] { s_wm.server->on("/qr.svg", handleQr); });
         s_wm.setTitle("Bilal");
         // Einrichtungsseite schlicht halten: nur "Netz wählen" (Texte arabisch, siehe include/wm_strings_ar.h)
-        static std::vector<const char *> menu = {"wifi"};
+        static std::vector<const char *> menu = {}; // der Knopf "Netz wählen" steht in der Startseite selbst (HTTP_ROOT_MAIN)
         s_wm.setMenu(menu);
         s_wm.setScanDispPerc(false);
         s_wm.setDebugOutput(false);

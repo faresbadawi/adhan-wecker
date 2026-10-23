@@ -166,6 +166,7 @@ export async function localApi(url, body) {
     case '/api/azan/test': playVoice(phone().voice, !!(body && body.prayer === 'fajr')); return ok({ ok: true });
     case '/api/azan/stop': stopVoice(); return ok({ ok: true });
     case '/api/device/lang': return ok({ ok: true });
+    case '/api/device/setup': return ok({ ok: true });
     case '/api/mawaqit/resolve': {
       const m = await resolveMosque(body || {});
       return m ? ok(m) : { ok: false, status: 404, data: null };

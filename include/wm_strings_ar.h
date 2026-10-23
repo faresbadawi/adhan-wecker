@@ -45,8 +45,19 @@ const char HTTP_SCRIPT[]           PROGMEM = "<script>function c(l){"
 // Kopf mit Emblem und Titel auf jeder Seite des Portals
 const char HTTP_HEAD_END[]         PROGMEM = "</head><body class='{c}'><div class='wrap'><svg class='emb' viewBox='0 0 100 100'><g fill='none' stroke='#d4af6a' stroke-width='3'><rect x='22' y='22' width='56' height='56'/><rect x='22' y='22' width='56' height='56' transform='rotate(45 50 50)'/><circle cx='50' cy='50' r='19'/></g><path fill='#d4af6a' d='M57 41a13 13 0 1 0 0 18a10 10 0 1 1 0-18z'/></svg><h1>بلال</h1><h3>إعداد الواي فاي</h3>"; // {c} = _bodyclass
 // example of embedded logo, base64 encoded inline, No styling here
-// const char HTTP_ROOT_MAIN[]        PROGMEM = "<img title=' alt=' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADQElEQVRoQ+2YjW0VQQyE7Q6gAkgFkAogFUAqgFQAVACpAKiAUAFQAaECQgWECggVGH1PPrRvn3dv9/YkFOksoUhhfzwz9ngvKrc89JbnLxuA/63gpsCmwCADWwkNEji8fVNgotDM7osI/x777x5l9F6JyB8R4eeVql4P0y8yNsjM7KGIPBORp558T04A+CwiH1UVUItiUQmZ2XMReSEiAFgjAPBeVS96D+sCYGaUx4cFbLfmhSpnqnrZuqEJgJnd8cQplVLciAgX//Cf0ToIeOB9wpmloLQAwpnVmAXgdf6pwjpJIz+XNoeZQQZlODV9vhc1Tuf6owrAk/8qIhFbJH7eI3eEzsvydQEICqBEkZwiALfF70HyHPpqScPV5HFjeFu476SkRA0AzOfy4hYwstj2ZkDgaphE7m6XqnoS7Q0BOPs/sw0kDROzjdXcCMFCNwzIy0EcRcOvBACfh4k0wgOmBX4xjfmk4DKTS31hgNWIKBCI8gdzogTgjYjQWFMw+o9LzJoZ63GUmjWm2wGDc7EvDDOj/1IVMIyD9SUAL0WEhpriRlXv5je5S+U1i2N88zdPuoVkeB+ls4SyxCoP3kVm9jsjpEsBLoOBNC5U9SwpGdakFkviuFP1keblATkTENTYcxkzgxTKOI3jyDxqLkQT87pMA++H3XvJBYtsNbBN6vuXq5S737WqHkW1VgMQNXJ0RshMqbbT33sJ5kpHWymzcJjNTeJIymJZtSQd9NHQHS1vodoFoTMkfbJzpRnLzB2vi6BZAJxWaCr+62BC+jzAxVJb3dmmiLzLwZhZNPE5e880Suo2AZgB8e8idxherqUPnT3brBDTlPxO3Z66rVwIwySXugdNd+5ejhqp/+NmgIwGX3Py3QBmlEi54KlwmjkOytQ+iJrLJj23S4GkOeecg8G091no737qvRRdzE+HLALQoMTBbJgBsCj5RSWUlUVJiZ4SOljb05eLFWgoJ5oY6yTyJp62D39jDANoKKcSocPJD5dQYzlFAFZJflUArgTPZKZwLXAnHmerfJquUkKZEgyzqOb5TuDt1P3nwxobqwPocZA11m4A1mBx5IxNgRH21ti7KbAGiyNn3HoF/gJ0w05A8xclpwAAAABJRU5ErkJggg==' /><h1>{v}</h1><h3>WiFiManager</h3>";
-const char HTTP_ROOT_MAIN[]        PROGMEM = "<p class='lead'>اختر شبكتك المنزلية وأدخل كلمة المرور، ثم تتصل الساعة تلقائيًا.</p>";
+// Gemeinsamer Block der Startseite und der Seite nach dem Speichern: QR-Code zur App (Bild vom Portal) und je eine Karte pro System
+#define WM_APP_BLOCK \
+"<div class='qr'><img src='/qr.svg' alt='QR' onerror=\"this.parentNode.style.display='none'\"></div>" \
+"<div class='os'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M6 9h12v8a1 1 0 0 1-1 1h-1v3.2a1.2 1.2 0 0 1-2.4 0V18h-3.2v3.2a1.2 1.2 0 0 1-2.4 0V18H7a1 1 0 0 1-1-1V9zM3.8 9.4v5.2a1.1 1.1 0 0 0 2.2 0V9.4a1.1 1.1 0 0 0-2.2 0zM18 9.4v5.2a1.1 1.1 0 0 0 2.2 0V9.4a1.1 1.1 0 0 0-2.2 0zM6.2 8a5.8 5.8 0 0 1 11.6 0z'/><path fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' d='M8.6 3.3 7.4 1.6M15.4 3.3l1.2-1.7'/></svg>" \
+"<div><b>أندرويد</b><span>امسح رمز QR بكاميرا الهاتف لتنزيل تطبيق بلال. يجد التطبيق الساعة تلقائيًا في الشبكة المنزلية.</span></div></div>" \
+"<div class='os'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.800 2.300-1.600 2.800-.4 7 1.200 9.300.8 1.100 1.700 2.400 2.900 2.300 1.200 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200c.9-1.300 1.200-2.500 1.300-2.600-.1 0-2.500-1-2.500-3.900zM14.200 5.800c.600-.8 1.100-1.800 1-2.800-1 0-2.100.6-2.800 1.400-.6.700-1.100 1.700-1 2.700 1.100.1 2.100-.5 2.800-1.300z'/></svg>" \
+"<div><b>آيفون وآيباد</b><span>افتح Safari واكتب azan-clock.local، ثم اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية».</span></div></div>" \
+"<div class='os'><svg viewBox='0 0 24 24'><rect x='3' y='4' width='18' height='12' rx='1.6' fill='none' stroke='currentColor' stroke-width='1.6'/><path d='M8 20h8M12 16v4' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/></svg>" \
+"<div><b>الحاسوب</b><span>افتح المتصفح واكتب azan-clock.local، ويُفضَّل حفظه في المفضلة.</span></div></div>"
+
+const char HTTP_ROOT_MAIN[]        PROGMEM = "<p class='lead'>اختر شبكتك المنزلية وأدخل كلمة المرور، ثم تتصل الساعة تلقائيًا.</p>"
+"<form action='/wifi' method='get'><button>اختيار شبكة الواي فاي</button></form>"
+"<h3>تطبيق بلال</h3>" WM_APP_BLOCK;
 
 const char * const HTTP_PORTAL_MENU[] PROGMEM = {
 "<form action='/wifi'    method='get'><button>اختيار شبكة الواي فاي</button></form><br/>\n", // MENU_WIFI
@@ -79,16 +90,10 @@ const char HTTP_FORM_PARAM[]       PROGMEM = "<br/><input id='{i}' name='{n}' ma
 
 const char HTTP_SCAN_LINK[]        PROGMEM = "<br/><form action='/wifi?refresh=1' method='POST'><button name='refresh' value='1'>تحديث القائمة</button></form>";
 const char HTTP_SAVED[]            PROGMEM = "<div class='msg'>تم حفظ البيانات<br/>تحاول الساعة الآن الاتصال بالشبكة.<br/>إذا فشل الاتصال، اتصل مجددًا بشبكة Bilal-Setup وحاول مرة أخرى.</div>"
-"<h3>بعد نجاح الاتصال</h3><p class='lead'>أعد هاتفك إلى شبكتك المنزلية، ثم افتح بلال بإحدى الطرق:</p>"
+"<h3>بعد نجاح الاتصال</h3><p class='lead'>أعد هاتفك إلى شبكتك المنزلية. ستنتقل هذه الصفحة تلقائيًا إلى بلال، أو اضغط هنا:</p>"
 "<a class='btn' href='http://azan-clock.local/'>فتح صفحة بلال</a><p class='lead ltr'>http://azan-clock.local</p>"
-"<div id='after'></div>"
-"<div class='os'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M6 9h12v8a1 1 0 0 1-1 1h-1v3.2a1.2 1.2 0 0 1-2.4 0V18h-3.2v3.2a1.2 1.2 0 0 1-2.4 0V18H7a1 1 0 0 1-1-1V9zM3.8 9.4v5.2a1.1 1.1 0 0 0 2.2 0V9.4a1.1 1.1 0 0 0-2.2 0zM18 9.4v5.2a1.1 1.1 0 0 0 2.2 0V9.4a1.1 1.1 0 0 0-2.2 0zM6.2 8a5.8 5.8 0 0 1 11.6 0z'/><path fill='none' stroke='currentColor' stroke-width='1' stroke-linecap='round' d='M8.6 3.3 7.4 1.6M15.4 3.3l1.2-1.7'/></svg>"
-"<div><b>أندرويد</b><span>حمّل تطبيق بلال: امسح رمز QR الظاهر على شاشة الساعة (صفحة الإعدادات). يجد التطبيق الساعة تلقائيًا في الشبكة المنزلية.</span></div></div>"
-"<div class='os'><svg viewBox='0 0 24 24'><path fill='currentColor' d='M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.800 2.300-1.600 2.800-.4 7 1.200 9.300.8 1.100 1.700 2.400 2.900 2.300 1.200 0 1.600-.7 3-.7s1.800.7 3 .7 2-1.100 2.800-2.200c.9-1.300 1.200-2.500 1.300-2.600-.1 0-2.500-1-2.500-3.900zM14.200 5.800c.600-.8 1.100-1.800 1-2.800-1 0-2.100.6-2.800 1.400-.6.700-1.100 1.700-1 2.700 1.100.1 2.100-.5 2.800-1.300z'/></svg>"
-"<div><b>آيفون وآيباد</b><span>افتح Safari واكتب azan-clock.local، ثم اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية».</span></div></div>"
-"<div class='os'><svg viewBox='0 0 24 24'><rect x='3' y='4' width='18' height='12' rx='1.6' fill='none' stroke='currentColor' stroke-width='1.6'/><path d='M8 20h8M12 16v4' stroke='currentColor' stroke-width='1.6' stroke-linecap='round'/></svg>"
-"<div><b>الحاسوب</b><span>افتح المتصفح واكتب azan-clock.local، ويُفضَّل حفظه في المفضلة.</span></div></div>"
-"<script>fetch('/after').then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(h){if(h.indexOf('btn')>=0)document.getElementById('after').innerHTML=h}).catch(function(){})</script>";
+WM_APP_BLOCK
+"<script>var u='http://azan-clock.local/';function p(){fetch(u+'api/status',{mode:'no-cors'}).then(function(){location.href=u}).catch(function(){setTimeout(p,3000)})}setTimeout(p,8000)</script>";
 const char HTTP_PARAMSAVED[]       PROGMEM = "<div class='msg S'>تم الحفظ<br/></div>";
 const char HTTP_END[]              PROGMEM = "</div></body></html>";
 const char HTTP_ERASEBTN[]         PROGMEM = "<br/><form action='/erase' method='get'><button class='D'>مسح إعدادات الواي فاي</button></form>";
@@ -136,7 +141,7 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 "dt{font-weight:bold}dd{margin:0;padding:0 0 0.5em 0;min-height:12px}"
 "td{vertical-align: top;}"
 ".btn{display:block;text-align:center;border-radius:12px;background:linear-gradient(180deg,#e0c07c,#bf9a52);color:#17140e;padding:14px;margin:12px 0;font-weight:600}.btn.ghost{background:none;color:#ecd8a6;border:1px solid rgba(212,175,106,.45)}"
-".qr svg{width:210px;height:210px;display:block;margin:12px auto;border-radius:12px}"
+".qr svg,.qr img{width:210px;height:210px;display:block;margin:12px auto;border-radius:12px;background:#fff}"
 ".os{display:flex;gap:14px;align-items:flex-start;background:#12110f;border:1px solid rgba(212,175,106,.18);border-radius:14px;padding:14px;margin:10px 0}"
 ".os>svg{width:34px;height:34px;flex:none;color:#d4af6a}.os b{display:block;color:#ecd8a6;margin-bottom:4px}.os span{color:#c4baa6;font-size:.92em;line-height:1.6}"
 ".ltr{direction:ltr}"

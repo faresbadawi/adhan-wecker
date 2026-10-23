@@ -5,6 +5,11 @@
 #define DEVICE_NAME "Bilal"
 #define FW_VERSION "1.0.0"
 
+// Standard-Adressen der App, solange keine eigenen eingestellt sind (QR-Code, Downloadlink, Web-Version).
+// GitHub: Release mit der APK und GitHub Pages für die Web-Version; in der App unter Installieren änderbar.
+#define APP_URL_DEFAULT "https://github.com/faresbadawi/adhan-wecker/releases/latest"
+#define PWA_URL_DEFAULT "https://faresbadawi.github.io/adhan-wecker/"
+
 // Updates über WLAN (ArduinoOTA, Port 3232): pio run -e ota -t upload / -t uploadfs
 #define OTA_PASSWORD "azanclock"
 

@@ -59,7 +59,13 @@ export default function Install() {
       </div>
     );
   } else if (isIOS()) {
-    body = <div className="card-pad"><p>{t('install_hint_ios')}</p></div>;
+    const pwaUrl = (ST && ST.device && ST.device.pwaUrl) || '';
+    body = (
+      <div className="card-pad">
+        {pwaUrl && <a className="dl-btn" href={pwaUrl}><IonIcon icon={downloadOutline} />{t('open_web')}</a>}
+        <p className="mt">{t('install_hint_ios')}</p>
+      </div>
+    );
   } else {
     body = <div className="card-pad"><p>{t('pc_hint')}</p></div>;
   }

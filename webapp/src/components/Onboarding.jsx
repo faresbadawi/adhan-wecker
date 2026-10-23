@@ -208,6 +208,7 @@ export default function Onboarding({ open, onClose }) {
   const last = step === STEPS.length - 1;
   function finish() {
     try { localStorage.setItem(KEY, 'done'); } catch (e) { /* privat */ }
+    api('/api/device/setup', { done: true }).catch(() => {}); // die Uhr merkt es sich (Werkseinstellungen löschen den Merker)
     onClose();
     setTimeout(() => { window.location.hash = '#/home'; }, 350); // nach dem Einrichten direkt zur Startseite (erst nach dem Schließen des Fensters)
   }

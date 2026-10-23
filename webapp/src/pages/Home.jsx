@@ -44,7 +44,10 @@ export default function Home() {
   const [bannerOff, setBannerOff] = useState(() => { try { return localStorage.getItem('installBanner') === 'off'; } catch (e) { return false; } });
   const showBanner = !bannerOff && !isStandalone() && (installEvt || /android|iphone|ipad/i.test(navigator.userAgent));
   const closeBanner = () => { setBannerOff(true); try { localStorage.setItem('installBanner', 'off'); } catch (e) { /* privat */ } };
+  // Android: direkt zur Seite, auf der die App liegt; iPhone: zur Web-Version
+  const dl = ST && ST.device ? (/android/i.test(navigator.userAgent) ? ST.device.appUrl : /iphone|ipad|ipod/i.test(navigator.userAgent) ? ST.device.pwaUrl : '') : '';
   async function install() {
+    if (!installEvt && dl) { window.location.href = dl; return; }
     if (!installEvt) { router.push('/install'); return; }
     installEvt.prompt();
     await installEvt.userChoice;
