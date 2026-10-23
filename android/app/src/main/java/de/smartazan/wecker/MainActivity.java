@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
     private String base;                       // z. B. http://192.168.178.72 (null: Uhr nicht gefunden)
     private boolean bundled;                   // Oberfläche aus dem Bündel (ohne Uhr)
     private String pendingShare;               // geteilter Text, wird nach dem Finden der Uhr übergeben
+    private String pendingRoute;               // Seite, die ein Widget öffnen will (z. B. /calendar)
     private ValueCallback<Uri[]> fileCallback; // Dateiauswahl (Hintergrundbild, Update-Datei)
     private final Handler main = new Handler(Looper.getMainLooper());
     private NsdManager nsd;
@@ -126,6 +127,7 @@ public class MainActivity extends Activity {
         setContentView(root);
 
         takeShare(getIntent());
+        takeRoute(getIntent());
         Notif.ensureChannels(this);
         Schedule.armNext(this); // Alarme nach App-Start sicher angemeldet
         askNotificationPermission();
@@ -179,7 +181,19 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         takeShare(intent);
+        takeRoute(intent);
         if (pendingShare != null) { if (bundled || base == null) showBundled(); else show(null); }
+        else if (pendingRoute != null && web.getUrl() != null) { // App läuft schon: nur die Seite wechseln
+            web.evaluateJavascript("location.hash='#" + pendingRoute + "'", null);
+            pendingRoute = null;
+        }
+    }
+
+    // Widgets öffnen die passende Seite (z. B. /calendar) statt immer der Startseite
+    private void takeRoute(Intent intent) {
+        if (intent == null) return;
+        String r = intent.getStringExtra("route");
+        if (r != null && r.matches("/[a-z/]{1,24}")) pendingRoute = r;
     }
 
     private void takeShare(Intent intent) {
@@ -316,8 +330,9 @@ public class MainActivity extends Activity {
             getSharedPreferences("clock", MODE_PRIVATE).edit().putString("base", b).apply();
         }
         bundled = false;
-        String url = base + "/?app=1" + (pendingShare != null ? "&" + pendingShare : "");
+        String url = base + "/?app=1" + (pendingShare != null ? "&" + pendingShare : "") + (pendingRoute != null ? "#" + pendingRoute : "");
         pendingShare = null;
+        pendingRoute = null;
         web.loadUrl(url);
     }
 
@@ -325,8 +340,9 @@ public class MainActivity extends Activity {
     private void showBundled() {
         bundled = true;
         base = null;
-        String url = "https://" + VIRTUAL_HOST + "/?app=1" + (pendingShare != null ? "&" + pendingShare : "");
+        String url = "https://" + VIRTUAL_HOST + "/?app=1" + (pendingShare != null ? "&" + pendingShare : "") + (pendingRoute != null ? "#" + pendingRoute : "");
         pendingShare = null;
+        pendingRoute = null;
         web.loadUrl(url);
     }
 

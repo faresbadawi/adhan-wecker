@@ -11,7 +11,7 @@ import android.os.Build;
 /** Benachrichtigungen: Erinnerung vor dem Gebet und die laufende Azan-Anzeige. */
 final class Notif {
     static final String CH_REMIND = "remind";
-    static final String CH_AZAN = "azan";
+    static final String CH_AZAN = "azan2"; // v2: stille, ganz kleine Anzeige (früher "azan")
     static final int ID_AZAN = 100;
     private static int nextId = 200;
 
@@ -23,7 +23,8 @@ final class Notif {
         NotificationChannel r = new NotificationChannel(CH_REMIND, c.getString(R.string.ch_remind), NotificationManager.IMPORTANCE_HIGH);
         r.setDescription(c.getString(R.string.ch_remind_desc));
         nm.createNotificationChannel(r);
-        NotificationChannel a = new NotificationChannel(CH_AZAN, c.getString(R.string.ch_azan), NotificationManager.IMPORTANCE_LOW);
+        nm.deleteNotificationChannel("azan"); // alter Kanal
+        NotificationChannel a = new NotificationChannel(CH_AZAN, c.getString(R.string.ch_azan), NotificationManager.IMPORTANCE_MIN);
         a.setDescription(c.getString(R.string.ch_azan_desc));
         a.setSound(null, null);
         nm.createNotificationChannel(a);

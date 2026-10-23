@@ -161,6 +161,38 @@ public class Bridge {
         });
     }
 
+    // Widget auf den Startbildschirm legen lassen (Android fragt nach; nicht jeder Startbildschirm unterstützt das)
+    @JavascriptInterface
+    public boolean pinWidget(final String name) {
+        final Class<?> cls;
+        switch (name == null ? "" : name) {
+            case "prayers": cls = PrayerWidget.class; break;
+            case "next": cls = NextPrayerWidget.class; break;
+            case "third": cls = LastThirdWidget.class; break;
+            case "hijri": cls = HijriWidget.class; break;
+            case "azan": cls = AzanWidget.class; break;
+            case "dhikr": cls = DhikrWidget.class; break;
+            default: return false;
+        }
+        if (Build.VERSION.SDK_INT < 26) return false;
+        final android.appwidget.AppWidgetManager m = android.appwidget.AppWidgetManager.getInstance(act);
+        if (!m.isRequestPinAppWidgetSupported()) return false;
+        act.runOnUiThread(() -> m.requestPinAppWidget(new android.content.ComponentName(act, cls), null, null));
+        return true;
+    }
+
+    // Benachrichtigungs-Einstellungen von Android für diese App (Töne, Kanäle ein- und ausschalten)
+    @JavascriptInterface
+    public void openNotificationSettings() {
+        act.runOnUiThread(() -> {
+            try {
+                act.startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, act.getPackageName()));
+            } catch (Exception e) {
+                Log.w("Bilal", "Benachrichtigungs-Einstellungen: " + e);
+            }
+        });
+    }
+
     // ---------- Uhr
     @JavascriptInterface
     public void findClock() {

@@ -4,8 +4,8 @@
      Teilen aus der Mawaqit-App (Text/Link) übernimmt die Moschee. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.smartazan.wecker"
-    android:versionCode="3"
-    android:versionName="2.0">
+    android:versionCode="4"
+    android:versionName="2.1">
 
     <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
 
@@ -71,6 +71,36 @@
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_prayer_info" />
+        </receiver>
+        <receiver android:name=".NextPrayerWidget" android:exported="true" android:label="@string/widget_name_next">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_next_info" />
+        </receiver>
+        <receiver android:name=".LastThirdWidget" android:exported="true" android:label="@string/widget_name_third">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_third_info" />
+        </receiver>
+        <receiver android:name=".HijriWidget" android:exported="true" android:label="@string/widget_name_hijri">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_hijri_info" />
+        </receiver>
+        <receiver android:name=".AzanWidget" android:exported="true" android:label="@string/widget_name_azan">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_azan_info" />
+        </receiver>
+        <receiver android:name=".DhikrWidget" android:exported="true" android:label="@string/widget_name_dhikr">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_dhikr_info" />
         </receiver>
     </application>
 </manifest>

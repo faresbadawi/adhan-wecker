@@ -14,4 +14,15 @@
     <string name="stop">Beenden</string>
     <string name="widget_open">Bilal öffnen</string>
     <string name="widget_name">Gebetszeiten</string>
+    <string name="widget_desc_prayers">Gebetszeiten: alle fünf Gebete, das nächste mit Countdown</string>
+    <string name="widget_desc_next">Nächstes Gebet mit Countdown bis zum Azan</string>
+    <string name="widget_desc_third">Letztes Drittel der Nacht: Beginn, Ende und Countdown</string>
+    <string name="widget_desc_hijri">Hidschri-Datum mit gregorianischem Datum</string>
+    <string name="widget_desc_azan">Gebet und Azan: nächstes Gebet mit Symbol und Azan-Status</string>
+    <string name="widget_desc_dhikr">Dhikr des Tages mit Datum</string>
+    <string name="widget_name_next">Nächstes Gebet</string>
+    <string name="widget_name_third">Letztes Drittel der Nacht</string>
+    <string name="widget_name_hijri">Hidschri-Datum</string>
+    <string name="widget_name_azan">Gebet und Azan</string>
+    <string name="widget_name_dhikr">Dhikr des Tages</string>
 </resources>

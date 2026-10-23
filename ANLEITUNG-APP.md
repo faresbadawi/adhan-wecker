@@ -73,3 +73,35 @@ Auf der Uhr gilt das ebenso (leiser Hinweiston `sounds/calm.mp3`); auf dem Handy
 - „Überspringen“ im Assistenten überspringt nur den aktuellen Schritt. Nach dem letzten Schritt geht es zur Startseite.
 - Ohne Uhr zeigt der Assistent nur die Schritte Sprache, Ort, Quelle der Zeiten und Azan.
 - Azan-Test und Vorhören (Uhr, Handy, Web-App) spielen nur die ersten 5 Sekunden.
+
+## Widgets (Android)
+
+Unter Einstellungen → „Widgets für den Startbildschirm“ gibt es sechs Widgets mit Beschreibung; mit „+“ fragt Android, ob es auf den
+Startbildschirm soll (oder Startbildschirm lange drücken → Widgets → Bilal). Alle haben denselben Stil (Schwarz, Gold) und sind in der Größe änderbar.
+
+| Widget | Größe | Antippen öffnet |
+|--------|-------|-----------------|
+| Gebetszeiten | groß (4×3) | Gebetszeiten |
+| Nächstes Gebet | klein (2×1) | Gebetszeiten |
+| Letztes Drittel der Nacht | 3×1 | Seite „Nacht“ |
+| Hidschri-Datum | 2×2 | Hidschri-Kalender |
+| Azan und Gebet | 2×2 | Azan-Einstellungen |
+| Dhikr des Tages | 4×2 | Adhkar |
+
+Die Widgets lesen den Zeitplan (45 Tage), den die App der Android-App übergibt, und zeichnen sich bei jedem Gebet und um Mitternacht neu;
+die Countdowns laufen von selbst weiter. Sie brauchen weder Internet noch die Uhr.
+
+## Azan: wo, wie lange, wie laut
+
+Azan-Seite: „Wo soll der Azan ertönen?“ – **Handy**, **Uhr** oder **Beide** (nur in der Android-App; sonst ist die Uhr das einzige Gerät).
+Der Azan ertönt nie auf beiden Geräten, wenn nur eines gewählt ist. Dauer (ganz, 60, 30 oder 15 Sekunden), Stimme und Lautstärke sind für
+Handy und Uhr getrennt. Die Auswahl „nur Handy“ schaltet auf der Uhr Azan und Hinweiston ab; die Uhr bekommt sie, sobald sie erreichbar ist.
+
+## Weitere Neuerungen
+
+- Startseite kompakt und scrollbar mit Karten für Hidschri-Datum (→ Kalender), letztes Drittel der Nacht (→ Nacht) und Dhikr (→ Adhkar).
+- Neue Seiten: Hidschri-Kalender, Nacht (drei Drittel, Mitternacht der Nacht), Adhkar mit Zähler.
+- Sprachen: Arabisch, Deutsch, Englisch, **Türkisch** (Türkisch nur in der App; die Uhr zeigt dann Englisch).
+- Darstellung: hell, dunkel oder wie das Gerät; Akzentfarbe wählbar (Einstellungen).
+- Der Azan-Dienst zeigt nur noch eine ganz kleine, stille Benachrichtigung, solange der Azan läuft; Erinnerungen lassen sich abschalten.
+- Nicht enthalten: eine eigene Wear-OS-App (Smartwatch) und türkische Azan-Aufnahmen mit freier Lizenz (siehe `muezzins/LICENSES.md`).

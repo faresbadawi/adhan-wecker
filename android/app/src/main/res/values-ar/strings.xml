@@ -14,4 +14,15 @@
     <string name="stop">إيقاف</string>
     <string name="widget_open">فتح بلال</string>
     <string name="widget_name">مواقيت الصلاة</string>
+    <string name="widget_desc_prayers">مواقيت الصلاة: الصلوات الخمس والقادمة مع الوقت المتبقي</string>
+    <string name="widget_desc_next">الصلاة القادمة مع الوقت المتبقي حتى الأذان</string>
+    <string name="widget_desc_third">الثلث الأخير من الليل: البداية والنهاية والوقت المتبقي</string>
+    <string name="widget_desc_hijri">التاريخ الهجري مع التاريخ الميلادي</string>
+    <string name="widget_desc_azan">الصلاة والأذان: الصلاة القادمة مع رمز وحالة الأذان</string>
+    <string name="widget_desc_dhikr">ذكر اليوم مع التاريخ</string>
+    <string name="widget_name_next">الصلاة القادمة</string>
+    <string name="widget_name_third">الثلث الأخير من الليل</string>
+    <string name="widget_name_hijri">التاريخ الهجري</string>
+    <string name="widget_name_azan">الصلاة والأذان</string>
+    <string name="widget_name_dhikr">ذكر اليوم</string>
 </resources>

@@ -2,13 +2,14 @@
 // WLAN und die Zeiten des Tages. Die Glocke je Gebet schaltet den Azan. Zum Aktualisieren nach unten ziehen.
 import { useState } from 'react';
 import { IonPage, IonContent, IonRefresher, IonRefresherContent, IonButton, IonIcon, useIonRouter } from '@ionic/react';
-import { notifications, notificationsOffOutline, close, downloadOutline, phonePortraitOutline } from 'ionicons/icons';
+import { notifications, notificationsOffOutline, close, downloadOutline, phonePortraitOutline, chevronForward, chevronBack } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
 import Svg from '../components/Svg.jsx';
-import { t } from '../lib/i18n.js';
+import { t, lang } from '../lib/i18n.js';
+import { dhikrOfDay } from '../lib/adhkar.js';
 import { I, SKY_ICON, PRAYER_ICON } from '../lib/icons.js';
 import { ALL_TIMES } from '../lib/constants.js';
-import { useApp, set, save, refreshStatus, locale, duration, hijri, nowSec, elapsed, toMin, two, pname, signal, isStandalone, useNow } from '../lib/store.js';
+import { useApp, set, save, refreshStatus, locale, duration, hijri, hms, nowSec, elapsed, toMin, two, pname, signal, isStandalone, useNow } from '../lib/store.js';
 
 const RING = 2 * Math.PI * 104; // Umfang des Fortschrittsrings
 
@@ -87,19 +88,27 @@ export default function Home() {
                 <small>{t('verse_ref')}</small>
               </div>
               {p && p.holiday && <div className="holiday"><Svg html={I.moon} />{t('holiday_' + p.holiday)}</div>}
-              <div className="ring">
-                <svg viewBox="0 0 240 240" aria-hidden="true">
-                  <defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f1dfa9" /><stop offset="1" stopColor="#b8913f" /></linearGradient></defs>
-                  <circle cx="120" cy="120" r="104" className="ring-bg" />
-                  <circle cx="120" cy="120" r="104" className="ring-fg" strokeDasharray={RING} strokeDashoffset={RING * (1 - progress)} />
-                </svg>
-                <div className="ring-in">
+              <div className="hero-main">
+                <div className="ring sm">
+                  <svg viewBox="0 0 240 240" aria-hidden="true">
+                    <defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f1dfa9" /><stop offset="1" stopColor="#b8913f" /></linearGradient></defs>
+                    <circle cx="120" cy="120" r="104" className="ring-bg" />
+                    <circle cx="120" cy="120" r="104" className="ring-fg" strokeDasharray={RING} strokeDashoffset={RING * (1 - progress)} />
+                  </svg>
+                  <div className="ring-in">
+                    {next ? <>
+                      <span className="pico"><Svg html={PRAYER_ICON[next]} /></span>
+                      <span className="cdm num ltr">{hms(left)}</span>
+                    </> : <small>{online ? '—' : t('offline')}</small>}
+                  </div>
+                </div>
+                <div className="hero-next">
                   {next ? <>
                     <small>{t('next_prayer')}</small>
                     <b className="pn">{pname(next, ST)}</b>
                     <span className="time num ltr">{p.times[next]}</span>
                     <span className="cd">{t('in')} {duration(left)}</span>
-                  </> : <small>{online ? '—' : t('offline')}</small>}
+                  </> : <small>—</small>}
                 </div>
               </div>
               <div className="hero-date">{date}{p && <> · <span className="hj">{hijri(p.hijri)}</span></>}</div>
@@ -121,16 +130,29 @@ export default function Home() {
             </div>
 
             {ST && ST.night && (
-              <section className="night-card">
+              <button className="night-card" onClick={() => router.push('/night')}>
                 <span className="night-ico"><Svg html={I.night} /></span>
                 <div className="night-txt">
                   <small>{t('night_page')}</small>
                   <b className="num ltr">{ST.night.lastThird}</b>
-                  <span>{nightLeft > 0 ? `${t('night_begins')} ${t('in')} ${duration(nightLeft)}` : t('night_running')}</span>
+                  <span>{nightLeft > 0 ? `${t('night_starts_prefix')} ${duration(nightLeft)}` : t('night_running')}</span>
                 </div>
                 <span className="night-end">{t('night_until_fajr')}<b className="num ltr">{ST.night.fajr}</b></span>
-              </section>
+              </button>
             )}
+
+            <div className="info-cards">
+              {p && p.hijri && p.hijri.day > 0 && (
+                <button className="info-card" onClick={() => router.push('/calendar')}>
+                  <span className="big num">{p.hijri.day}</span>
+                  <span><b>{t('hijri_months')[p.hijri.month - 1]} {p.hijri.year}</b><small>{date}</small></span>
+                  <IonIcon className="chev" icon={lang() === 'ar' ? chevronBack : chevronForward} />
+                </button>
+              )}
+              <button className="info-card" onClick={() => router.push('/adhkar')}>
+                <span className="dhikr-wrap"><small>{t('adhkar_today')}</small><span className="dhikr" lang="ar" dir="rtl">{dhikrOfDay().ar}</span></span>
+              </button>
+            </div>
 
         <h2 className="section-title">{t('today_times')}</h2>
         <div className="timeline">

@@ -204,6 +204,8 @@ namespace web
                 ar[AZAN_KEYS[i]] = tmg.remind[i];
             }
         }
+        doc["azanOnClock"] = azan::onClock(); // false: Azan nur auf dem Handy
+        doc["azanMaxSec"] = azan::maxSeconds(); // 0 = ganzer Azan
         doc["brightness"] = st.brightness;
         doc["autoDim"] = st.autoDim;
         doc["showNight"] = st.showNight;
@@ -336,6 +338,10 @@ namespace web
             }
             azan::setTiming(tmg);
         }
+        if (doc["azanOnClock"].is<bool>())
+            azan::setOnClock(doc["azanOnClock"]);
+        if (doc["azanMaxSec"].is<int>())
+            azan::setMaxSeconds((uint16_t)doc["azanMaxSec"].as<int>());
         st.brightness = doc["brightness"] | st.brightness;
         st.autoDim = doc["autoDim"] | st.autoDim;
         st.showNight = doc["showNight"] | st.showNight;

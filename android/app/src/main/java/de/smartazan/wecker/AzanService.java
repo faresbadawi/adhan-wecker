@@ -15,6 +15,7 @@ import android.util.Log;
 public class AzanService extends Service {
     static final String ACTION_STOP = "de.smartazan.wecker.STOP";
     private MediaPlayer player;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
     private PowerManager.WakeLock wake;
 
     @Override
@@ -42,7 +43,10 @@ public class AzanService extends Service {
             wake = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "bilal:azan");
             wake.acquire(10 * 60_000L);
         }
+        handler.removeCallbacksAndMessages(null);
         play(voice, fajr, vol);
+        int maxSec = intent != null ? intent.getIntExtra("maxSec", 0) : 0;
+        if (maxSec >= 5) handler.postDelayed(this::finish, maxSec * 1000L); // kurzer Azan: nach der eingestellten Dauer beenden
         return START_NOT_STICKY;
     }
 
@@ -83,6 +87,7 @@ public class AzanService extends Service {
     }
 
     private void finish() {
+        handler.removeCallbacksAndMessages(null);
         release();
         if (wake != null && wake.isHeld()) wake.release();
         wake = null;

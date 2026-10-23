@@ -215,7 +215,7 @@ export default function Onboarding({ open, onClose }) {
   async function chooseLang(l) {
     if (l === lang()) return;
     try {
-      const r = await api('/api/device/lang', { lang: l });
+      const r = await api('/api/device/lang', { lang: l === 'tr' ? 'en' : l }); // Türkisch gibt es nur in der App, die Uhr zeigt dann Englisch
       if (!r.ok) throw new Error();
       try { localStorage.setItem('lang', l); localStorage.setItem(KEY, '0'); } catch (e) { /* privat */ }
       toast(t('lang_restart'));

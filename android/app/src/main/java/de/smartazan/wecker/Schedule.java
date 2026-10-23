@@ -46,7 +46,8 @@ final class Schedule {
         }
         prefs(c).edit().putString("schedule", json).apply();
         armNext(c);
-        PrayerWidget.updateAll(c);
+        Widgets.updateAll(c);
+        Widgets.armRefresh(c);
     }
 
     private static PendingIntent pending(Context c) {

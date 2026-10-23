@@ -2,7 +2,8 @@
 // Ist die Uhr erreichbar, gilt ihr Stand (die Handy-Daten werden von ihr übernommen); ohne Uhr antwortet localApi()
 // im Format der Uhr, damit die Seiten der App unverändert funktionieren.
 import TZDB from './tzdb.json';
-import { t } from './i18n.js';
+import { t, lang } from './i18n.js';
+import { dhikrOfDay } from './adhkar.js';
 import { kvGet, kvSet, native, hasNative, nativeFetchText } from './native.js';
 import { DAILY, KEYS, dayTimes, ensureData, epochOf, addDays, zoned, hm, maxDelay, deviceTz } from './times.js';
 
@@ -19,7 +20,8 @@ const DEFAULTS = {
   method: 3, madhhab: 0, offsets: five(0),
   azan: five(true), azanVolume: five(90), azanDelay: five(0), azanRemind: five(0),
   source: 'calculated', mawaqit: { slug: '', name: '' },
-  voice: 'alafasy', alerts: true,
+  voice: 'alafasy', alerts: true, remindNotify: true,
+  azanOnPhone: true, azanOnClock: true, azanMaxSec: 0, phoneVolume: 90, phoneAzanSec: 0, // wo der Azan ertönt, Dauer (0 = ganz), Lautstärke am Handy
   colors: { main: '#FFFFFF', accent: '#D4AF6A', muted: '#C4B6AE' },
 };
 const merge = (a, b) => {
@@ -36,7 +38,7 @@ export function phone() {
 function persist() { kvSet('P', P); }
 
 // Felder der Uhr, die das Handy übernimmt (Ort, Berechnung, Azan, Quelle) – das Handy-eigene (Stimme) bleibt
-const FROM_CLOCK = ['city', 'country', 'latitude', 'longitude', 'method', 'madhhab', 'offsets', 'azan', 'azanVolume', 'azanDelay', 'azanRemind', 'source', 'mawaqit', 'timezone', 'colors'];
+const FROM_CLOCK = ['azanOnClock', 'azanMaxSec', 'city', 'country', 'latitude', 'longitude', 'method', 'madhhab', 'offsets', 'azan', 'azanVolume', 'azanDelay', 'azanRemind', 'source', 'mawaqit', 'timezone', 'colors'];
 export function adoptClock(S) {
   if (!S) return;
   const p = phone();
@@ -49,7 +51,7 @@ export function adoptClock(S) {
 }
 
 // ---------- Status im Format der Uhr
-const HOLIDAYS = (m, d) => {
+export const HOLIDAYS = (m, d) => {
   if (m === 1) return d === 1 ? 'new_year' : d === 10 ? 'ashura' : '';
   if (m === 7) return d === 27 ? 'isra' : '';
   if (m === 9) return d === 1 ? 'ramadan' : d === 27 ? 'qadr' : '';
@@ -104,7 +106,7 @@ export function localSettings() {
     alarms: [], alarmsMax: 0, pages: [], rotate: { seconds: 0, pages: [] },
   };
 }
-const SETTABLE = ['city', 'country', 'latitude', 'longitude', 'method', 'madhhab', 'offsets', 'azan', 'azanVolume', 'azanDelay', 'azanRemind', 'source', 'mawaqit', 'timezone', 'colors', 'voice', 'alerts'];
+const SETTABLE = ['remindNotify', 'azanOnPhone', 'azanOnClock', 'azanMaxSec', 'phoneVolume', 'phoneAzanSec', 'city', 'country', 'latitude', 'longitude', 'method', 'madhhab', 'offsets', 'azan', 'azanVolume', 'azanDelay', 'azanRemind', 'source', 'mawaqit', 'timezone', 'colors', 'voice', 'alerts'];
 export async function saveLocal(part) {
   const p = phone();
   const before = JSON.stringify([p.latitude, p.longitude, p.method, p.madhhab, p.source, p.mawaqit]);
@@ -195,25 +197,39 @@ export function stopVoice() {
 
 // ---------- Alarme planen: die nächsten Wochen im Voraus, die Android-App löst sie auch ohne Netz aus
 const DAYS_AHEAD = 45;
+const loc = () => ({ ar: 'ar-u-nu-latn', de: 'de-DE', en: 'en-GB', tr: 'tr-TR' }[lang()] || 'en-GB');
 export function buildSchedule(now = Date.now()) {
   const p = phone(), tz = tzOf(p);
   const z = zoned(now, tz);
-  const events = [], prayers = [];
-  for (let n = 0; n < DAYS_AHEAD; n++) {
+  const events = [], prayers = [], days = [], nights = [];
+  const dayName = (d) => new Date(Date.UTC(d.y, d.m - 1, d.d, 12)).toLocaleDateString(loc(), { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+  const timeOf = ms => new Intl.DateTimeFormat('de-DE', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms));
+  for (let n = -1; n < DAYS_AHEAD; n++) {
     const d = addDays(z.y, z.m, z.d, n);
-    const { min } = dayTimes(p, d.y, d.m, d.d);
+    const { min, hijri } = dayTimes(p, d.y, d.m, d.d);
+    const nd = addDays(d.y, d.m, d.d, 1), next = dayTimes(p, nd.y, nd.m, nd.d);
+    // Tag: Mitternacht, Datum, Hidschri-Datum, Dhikr des Tages (für Widgets)
+    days.push({ t0: epochOf(d.y, d.m, d.d, 0, tz), greg: dayName(d), gs: new Date(Date.UTC(d.y, d.m - 1, d.d, 12)).toLocaleDateString(loc(), { day: 'numeric', month: 'short', timeZone: 'UTC' }), hijri: hijri.day > 0 ? `${hijri.day} ${t('hijri_months')[hijri.month - 1]} ${hijri.year}` : '', hd: hijri.day, hm: hijri.month > 0 ? t('hijri_months')[hijri.month - 1] : '', hy: hijri.year, dhikr: dhikrOfDay(new Date(Date.UTC(d.y, d.m - 1, d.d, 12))).ar });
+    // Nacht von Maghrib dieses Tages bis Fajr des nächsten, letztes Drittel
+    const ns = epochOf(d.y, d.m, d.d, min[4], tz), ne = epochOf(nd.y, nd.m, nd.d, next.min[0], tz), third = Math.round((ne - ns) / 3);
+    nights.push({ start: ns, mid: Math.round((ns + ne) / 2), last: ne - third, end: ne, lastT: timeOf(ne - third), endT: timeOf(ne), startT: timeOf(ns) });
+    if (n < 0) continue;
     DAILY.forEach((k, i) => {
       const base = min[KEYS.indexOf(k)];
-      prayers.push({ t: epochOf(d.y, d.m, d.d, base, tz), k, name: t(k === 'dhuhr' && new Date(Date.UTC(d.y, d.m - 1, d.d, 12)).getUTCDay() === 5 ? 'jumuah' : k), time: hm(base) });
       const prayerName = t(k === 'dhuhr' && new Date(Date.UTC(d.y, d.m - 1, d.d, 12)).getUTCDay() === 5 ? 'jumuah' : k);
+      prayers.push({ t: epochOf(d.y, d.m, d.d, base, tz), k, name: prayerName, time: hm(base), azan: !!p.azan[k] });
       const delay = Math.min((p.azanDelay && p.azanDelay[k]) || 0, maxDelay(min, i));
       const remind = (p.azanRemind && p.azanRemind[k]) || 0;
-      if (p.azan[k]) events.push({ t: epochOf(d.y, d.m, d.d, base + delay, tz), kind: 'azan', i, k, title: prayerName, text: `${t('prayer_at')} ${hm(base)} · ${p.city}`, vol: p.azanVolume[k] ?? 90 });
-      if (remind) events.push({ t: epochOf(d.y, d.m, d.d, base - remind, tz), kind: 'remind', i, k, title: prayerName, text: `${t('remind_before').replace('{m}', remind)} · ${hm(base)}` });
+      if (p.azan[k] && p.azanOnPhone !== false) events.push({ t: epochOf(d.y, d.m, d.d, base + delay, tz), kind: 'azan', i, k, title: prayerName, text: `${t('prayer_at')} ${hm(base)} · ${p.city}`, vol: p.phoneVolume ?? 90, maxSec: p.phoneAzanSec || 0 });
+      if (remind && p.remindNotify !== false) events.push({ t: epochOf(d.y, d.m, d.d, base - remind, tz), kind: 'remind', i, k, title: prayerName, text: `${t('remind_before').replace('{m}', remind)} · ${hm(base)}` });
     });
   }
   events.sort((a, b) => a.t - b.t);
-  return { version: 1, tz, voice: p.voice, alerts: p.alerts !== false, events: events.filter(e => e.t > now - 60000), prayers: prayers.filter(e => e.t > now - 3600000), labels: { next: t('next_prayer') } };
+  return {
+    version: 2, tz, voice: p.voice, alerts: p.alerts !== false, city: p.city,
+    events: events.filter(e => e.t > now - 60000), prayers: prayers.filter(e => e.t > now - 3600000), days, nights: nights.filter(x => x.end > now - 3600000),
+    labels: { next: t('next_prayer'), third: t('night_page'), until: t('night_until_fajr'), begins: t('night_starts_prefix'), running: t('night_running'), inn: '', open: 'Bilal', azanOn: t('w_azan_on'), azanOff: t('w_azan_off'), dhikr: t('adhkar_today'), now: t('w_now') },
+  };
 }
 
 // Kalender nachladen und den Zeitplan an die Android-App geben (nur dort sinnvoll); gebündelt, damit schnelle Änderungen
@@ -227,6 +243,6 @@ export function scheduleSoon() {
     } catch (e) { /* offline */ }
     const n = native();
     if (!n) return;
-    try { n.setSchedule(JSON.stringify(buildSchedule())); } catch (e) { /* ältere App */ }
+    try { n.setSchedule(JSON.stringify(buildSchedule())); } catch (e) { console.warn('Zeitplan nicht übergeben', e); }
   }, 1500);
 }

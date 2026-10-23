@@ -20,6 +20,9 @@ import Language from './pages/Language.jsx';
 import Wifi from './pages/Wifi.jsx';
 import Device from './pages/Device.jsx';
 import Install from './pages/Install.jsx';
+import Calendar from './pages/Calendar.jsx';
+import Night from './pages/Night.jsx';
+import Adhkar from './pages/Adhkar.jsx';
 import { reloadApp } from './lib/errors.js';
 
 // Moschee-Symbol für den Tab "Gebetszeiten"
@@ -49,7 +52,7 @@ export default function App() {
       await refreshStatus();
       // Sprache der Uhr übernehmen (gilt für App und Display); neue Leserichtung braucht einen Neustart der Seite
       const { ST, online } = get();
-      if (ST && ST.lang && online && ST.lang !== lang()) {
+      if (ST && ST.lang && online && ST.lang !== lang() && !(lang() === 'tr' && ST.lang === 'en')) { // Türkisch gibt es nur in der App, die Uhr zeigt dann Englisch
         try { localStorage.setItem('lang', ST.lang); } catch (e) { /* privat */ }
         reloadApp();
         return;
@@ -100,6 +103,9 @@ export default function App() {
             <Route path="/settings/wifi" element={<Wifi />} />
             <Route path="/settings/device" element={<Device />} />
             <Route path="/install" element={<Install />} />
+            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/night" element={<Night />} />
+            <Route path="/adhkar" element={<Adhkar />} />
             <Route path="/" element={<Navigate to="/home" replace />} />
           </IonRouterOutlet>
           <IonTabBar slot="bottom">

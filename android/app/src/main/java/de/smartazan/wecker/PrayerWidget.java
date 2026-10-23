@@ -1,78 +1,50 @@
 package de.smartazan.wecker;
 
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
-import android.os.SystemClock;
 import android.widget.RemoteViews;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-/** Widget für den Startbildschirm: nächstes Gebet mit Countdown und die vier danach. Daten kommen aus dem Zeitplan der App. */
-public class PrayerWidget extends AppWidgetProvider {
-    private static final int GOLD = Color.rgb(0xd4, 0xaf, 0x6a);
-    private static final int IVORY = Color.rgb(0xf8, 0xf4, 0xea);
-    private static final int DIM = Color.rgb(0x8f, 0x86, 0x72);
+/** Große Gebetszeiten: die fünf Gebete des Tages, das nächste hervorgehoben mit Countdown, darunter das Datum. Öffnet die Gebetszeiten. */
+public class PrayerWidget extends BaseWidget {
+    private static final int[] NAMES = {R.id.w_n1, R.id.w_n2, R.id.w_n3, R.id.w_n4, R.id.w_n5};
+    private static final int[] TIMES = {R.id.w_t1, R.id.w_t2, R.id.w_t3, R.id.w_t4, R.id.w_t5};
+    private static final int GOLD = 0xFFD4AF6A, IVORY = 0xFFF8F4EA, DIM = 0xFF8F8672;
 
     @Override
-    public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
-        for (int id : ids) m.updateAppWidget(id, build(c));
-    }
-
-    static void updateAll(Context c) {
-        AppWidgetManager m = AppWidgetManager.getInstance(c);
-        int[] ids = m.getAppWidgetIds(new ComponentName(c, PrayerWidget.class));
-        for (int id : ids) m.updateAppWidget(id, build(c));
-    }
-
-    private static RemoteViews build(Context c) {
+    RemoteViews build(Context c, WidgetData d) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_prayer);
-        Intent open = new Intent(c, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        v.setOnClickPendingIntent(R.id.w_root, PendingIntent.getActivity(c, 3, open,
-                PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0)));
-        int[] names = {R.id.w_n1, R.id.w_n2, R.id.w_n3, R.id.w_n4};
-        int[] times = {R.id.w_t1, R.id.w_t2, R.id.w_t3, R.id.w_t4};
-        JSONObject o = Schedule.load(c);
-        long now = System.currentTimeMillis();
-        try {
-            JSONArray pr = o == null ? null : o.optJSONArray("prayers");
-            int next = -1;
-            if (pr != null) for (int i = 0; i < pr.length(); i++) if (pr.getJSONObject(i).getLong("t") > now) { next = i; break; }
-            if (next < 0) {
-                v.setTextViewText(R.id.w_name, c.getString(R.string.app_name));
-                v.setTextViewText(R.id.w_time, "");
-                v.setTextViewText(R.id.w_label, c.getString(R.string.widget_open));
-                v.setViewVisibility(R.id.w_cd, android.view.View.GONE);
-                for (int i = 0; i < 4; i++) { v.setTextViewText(names[i], ""); v.setTextViewText(times[i], ""); }
-                return v;
-            }
-            JSONObject n = pr.getJSONObject(next);
-            v.setTextViewText(R.id.w_label, o.optJSONObject("labels") != null ? o.getJSONObject("labels").optString("next", "") : "");
-            v.setTextViewText(R.id.w_name, n.optString("name"));
-            v.setTextViewText(R.id.w_time, n.optString("time"));
-            v.setViewVisibility(R.id.w_cd, android.view.View.VISIBLE);
-            v.setChronometerCountDown(R.id.w_cd, true);
-            v.setChronometer(R.id.w_cd, SystemClock.elapsedRealtime() + (n.getLong("t") - now), null, true);
-            for (int i = 0; i < 4; i++) {
-                int idx = next + 1 + i;
-                if (idx < pr.length()) {
-                    JSONObject p = pr.getJSONObject(idx);
-                    v.setTextViewText(names[i], p.optString("name"));
-                    v.setTextViewText(times[i], p.optString("time"));
-                } else {
-                    v.setTextViewText(names[i], "");
-                    v.setTextViewText(times[i], "");
-                }
-            }
-        } catch (Exception e) {
+        v.setOnClickPendingIntent(R.id.w_root, d.open("/prayer", 11));
+        int next = d.nextIndex();
+        if (!d.ok() || next < 0) {
             v.setTextViewText(R.id.w_name, c.getString(R.string.app_name));
+            v.setTextViewText(R.id.w_label, c.getString(R.string.widget_open));
+            v.setTextViewText(R.id.w_time, "");
+            v.setViewVisibility(R.id.w_cd, android.view.View.GONE);
+            for (int i = 0; i < 5; i++) { v.setTextViewText(NAMES[i], ""); v.setTextViewText(TIMES[i], ""); }
+            v.setTextViewText(R.id.w_date, "");
+            return v;
         }
+        JSONObject n = d.prayer(next);
+        JSONObject today = d.today();
+        v.setTextViewText(R.id.w_label, d.label("next", "") + (today == null || today.optString("hijri").isEmpty() ? "" : " · " + today.optString("hijri")));
+        v.setTextViewText(R.id.w_name, n.optString("name"));
+        v.setTextViewText(R.id.w_time, n.optString("time"));
+        d.countdown(v, R.id.w_cd, n.optLong("t"));
+        JSONObject[] list = new JSONObject[5];
+        d.dayList(next, list);
+        for (int i = 0; i < 5; i++) {
+            JSONObject p = list[i];
+            boolean isNext = p != null && p.optLong("t") == n.optLong("t");
+            boolean past = p != null && p.optLong("t") <= d.now;
+            v.setTextViewText(NAMES[i], p == null ? "" : p.optString("name"));
+            v.setTextViewText(TIMES[i], p == null ? "" : p.optString("time"));
+            int col = isNext ? GOLD : past ? DIM : IVORY;
+            v.setTextColor(NAMES[i], col);
+            v.setTextColor(TIMES[i], col);
+        }
+        v.setTextViewText(R.id.w_date, "");
+        v.setViewVisibility(R.id.w_date, android.view.View.GONE);
         return v;
     }
 }

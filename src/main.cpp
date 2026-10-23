@@ -124,6 +124,8 @@ static uint8_t azanMask()
 {
     const settings::Settings st = settings::get();
     uint8_t mask = 0;
+    if (!azan::onClock())
+        return 0; // nur das Handy soll rufen
     for (int i = 0; i < 5; i++)
         if (st.azanEnabled[i])
             mask |= 1 << i;

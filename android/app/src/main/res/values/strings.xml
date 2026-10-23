@@ -14,4 +14,15 @@
     <string name="stop">Stop</string>
     <string name="widget_open">Open Bilal</string>
     <string name="widget_name">Prayer times</string>
+    <string name="widget_desc_prayers">Prayer times: all five prayers, the next one with countdown</string>
+    <string name="widget_desc_next">Next prayer with countdown to the azan</string>
+    <string name="widget_desc_third">Last third of the night: start, end and countdown</string>
+    <string name="widget_desc_hijri">Hijri date with the Gregorian date</string>
+    <string name="widget_desc_azan">Prayer and azan: next prayer with symbol and azan status</string>
+    <string name="widget_desc_dhikr">Dhikr of the day with the date</string>
+    <string name="widget_name_next">Next prayer</string>
+    <string name="widget_name_third">Last third of the night</string>
+    <string name="widget_name_hijri">Hijri date</string>
+    <string name="widget_name_azan">Prayer and azan</string>
+    <string name="widget_name_dhikr">Dhikr of the day</string>
 </resources>

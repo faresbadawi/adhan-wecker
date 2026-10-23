@@ -1,6 +1,6 @@
 // Azan-Benachrichtigung: Muezzin, Azan je Gebet mit Lautstärke und Probehören, Test mit Anzeige auf der Uhr
 import { useEffect, useState } from 'react';
-import { IonPage, IonContent, IonList, IonItem, IonLabel, IonToggle, IonIcon, IonButton, IonRange, IonSpinner, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonPage, IonContent, IonList, IonItem, IonLabel, IonToggle, IonIcon, IonButton, IonRange, IonSpinner, IonSelect, IonSelectOption, IonSegment, IonSegmentButton } from '@ionic/react';
 import { play, stop, checkmark, volumeLowOutline, volumeHighOutline, removeOutline, addOutline } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
@@ -13,6 +13,8 @@ import { hasNative } from '../lib/native.js';
 import { phone, saveLocal, scheduleSoon, playVoice, VOICES } from '../lib/phone.js';
 
 const REMINDS = [0, 5, 10, 15, 20, 30, 45, 60];
+const DURATIONS = [0, 60, 30, 15];
+const durLabel = v => (v ? t('dur_secs').replace('{s}', v) : t('dur_full'));
 const STEP = 5;
 const hm = m => `${two(Math.floor(m / 60) % 24)}:${two(m % 60)}`;
 
@@ -59,9 +61,51 @@ function Timing({ S, ST }) {
   );
 }
 
+// Wo ertönt der Azan: Handy, Uhr oder beide (Handy nur in der Android-App); Dauer und Lautstärke je Gerät
+function Output({ S, local }) {
+  const native = hasNative();
+  const [phoneOn, setPhoneOn] = useState(phone().azanOnPhone !== false);
+  const clockOn = S.azanOnClock !== false;
+  const mode = !native ? 'clock' : phoneOn && clockOn ? 'both' : phoneOn ? 'phone' : 'clock';
+  async function pick(m) {
+    const p = m !== 'clock', c = m !== 'phone';
+    setPhoneOn(p);
+    await saveLocal({ azanOnPhone: p });
+    await save({ azanOnClock: c }, true);
+    scheduleSoon();
+  }
+  if (!native) return null;
+  return (
+    <Section title={t('out_title')} hint={t('out_hint')}>
+      <div className="pad-x">
+        <IonSegment value={mode} onIonChange={e => e.detail.value !== mode && pick(e.detail.value)}>
+          <IonSegmentButton value="phone"><IonLabel>{t('out_phone')}</IonLabel></IonSegmentButton>
+          <IonSegmentButton value="clock"><IonLabel>{t('out_clock')}</IonLabel></IonSegmentButton>
+          <IonSegmentButton value="both"><IonLabel>{t('out_both')}</IonLabel></IonSegmentButton>
+        </IonSegment>
+      </div>
+    </Section>
+  );
+}
+
+// Dauer des Azans auf der Uhr (kurzer Ausschnitt statt ganzem Azan)
+function ClockDuration({ S }) {
+  return (
+    <Section title={t('dur_title')} hint={t('dur_clock_hint')}>
+      <div className="pad-x">
+        <IonSegment value={String(S.azanMaxSec || 0)} onIonChange={e => save({ azanMaxSec: Number(e.detail.value) }, true)}>
+          {DURATIONS.map(v => <IonSegmentButton key={v} value={String(v)}><IonLabel>{durLabel(v)}</IonLabel></IonSegmentButton>)}
+        </IonSegment>
+      </div>
+    </Section>
+  );
+}
+
 // Azan-Stimme für die Alarme auf dem Handy (nur in der Android-App neben der Uhr; ohne Uhr ist es die Hauptliste)
 function PhoneVoices() {
   const [sel, setSel] = useState(phone().voice);
+  const [vol, setVol] = useState(phone().phoneVolume ?? 90);
+  const [dur, setDur] = useState(phone().phoneAzanSec || 0);
   if (!hasNative()) return null;
   const choose = async id => { setSel(id); await saveLocal({ voice: id }); scheduleSoon(); toast(t('saved')); };
   return (
@@ -76,6 +120,18 @@ function PhoneVoices() {
           </IonItem>
         ))}
       </IonList>
+      <div className="pad-x mt">
+        <p className="muted top">{t('phone_volume')}</p>
+        <IonRange min={0} max={100} value={vol} pin pinFormatter={v => v + '%'}
+          onIonKnobMoveEnd={e => { setVol(e.detail.value); saveLocal({ phoneVolume: e.detail.value }).then(scheduleSoon); }} aria-label={t('phone_volume')}>
+          <IonIcon slot="start" icon={volumeLowOutline} />
+          <IonIcon slot="end" icon={volumeHighOutline} />
+        </IonRange>
+        <p className="muted">{t('dur_phone_hint')}</p>
+        <IonSegment value={String(dur)} onIonChange={e => { const v = Number(e.detail.value); setDur(v); saveLocal({ phoneAzanSec: v }).then(scheduleSoon); }}>
+          {DURATIONS.map(v => <IonSegmentButton key={v} value={String(v)}><IonLabel>{durLabel(v)}</IonLabel></IonSegmentButton>)}
+        </IonSegment>
+      </div>
     </Section>
   );
 }
@@ -107,7 +163,9 @@ export default function Azan() {
       <IonContent fullscreen>
         <BigTitle title={t('title_audio')} />
         {!S ? <div className="center pad"><IonSpinner /></div> : <>
-          <Section title={t('azan_voice')} hint={t('azan_voice_hint')}>
+          {!local && <ClockDuration S={S} />}
+
+          {!local && <Section title={t('azan_voice')} hint={t('azan_voice_hint')}>
             <IonList inset>
               {!voices && <div className="center pad"><IonSpinner /></div>}
               {voices && voices.list.map(id => (
@@ -123,9 +181,10 @@ export default function Azan() {
                 </IonItem>
               ))}
             </IonList>
-          </Section>
+          </Section>}
 
-          {!local && <PhoneVoices />}
+          <Output S={S} local={local} />
+          <PhoneVoices />
 
           <Section title={t('azan')} hint={t('azan_volume_hint')}>
             <IonList inset className="azan-list">
@@ -136,7 +195,7 @@ export default function Azan() {
                       <span className="ico"><Svg html={PRAYER_ICON[k]} /></span>
                       <IonToggle checked={S.azan[k]} onIonChange={e => save({ azan: { [k]: e.detail.checked } }, true)}>{t(k)}</IonToggle>
                     </div>
-                    <div className="vrow">
+                    {!local && <div className="vrow">
                       <IonRange className="vol" min={0} max={100} value={S.azanVolume[k]} pin pinFormatter={v => v + '%'}
                         onIonKnobMoveEnd={e => save({ azanVolume: { [k]: e.detail.value } }, true)} aria-label={t('volume')}>
                         <IonIcon slot="start" icon={volumeLowOutline} />
@@ -145,7 +204,7 @@ export default function Azan() {
                       <IonButton fill="clear" className="play" onClick={() => playOn('/api/azan/preview', { prayer: k })} aria-label={t('listen')}>
                         <IonIcon slot="icon-only" icon={play} />
                       </IonButton>
-                    </div>
+                    </div>}
                   </div>
                 </IonItem>
               ))}

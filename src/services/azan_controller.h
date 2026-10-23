@@ -44,6 +44,13 @@ namespace azan
     // Minute (seit Mitternacht), in der der Azan des Gebets i an diesem Tag ertönt
     int azanMinute(const model::PrayerDay &day, int i);
 
+    // Wo und wie lange der Azan auf der Uhr läuft: onClock = false schaltet Azan und Hinweiston auf der Uhr ab
+    // (z. B. wenn nur das Handy rufen soll); maxSeconds = 0: ganzer Azan, sonst Dauer in Sekunden (5..600).
+    bool onClock();
+    bool setOnClock(bool on);
+    uint16_t maxSeconds();
+    bool setMaxSeconds(uint16_t seconds);
+
     // Regelmäßig aufrufen (jede Sekunde genügt). enabledMask: Bit i = model::DAILY_PRAYERS[i]
     // (Fajr, Dhuhr, Asr, Maghrib, Isha) darf den Azan automatisch starten.
     void update(const struct tm &now, const model::PrayerDay &day, uint8_t enabledMask);

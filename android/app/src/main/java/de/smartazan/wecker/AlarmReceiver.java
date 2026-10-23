@@ -13,6 +13,11 @@ import org.json.JSONObject;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context c, Intent intent) {
+        if (intent != null && Widgets.ACTION_REFRESH.equals(intent.getAction())) { // nur Widgets neu zeichnen
+            Widgets.updateAll(c);
+            Widgets.armRefresh(c);
+            return;
+        }
         JSONObject o = Schedule.load(c);
         if (o == null) return;
         long now = System.currentTimeMillis();
@@ -32,6 +37,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                             .putExtra("title", e.optString("title"))
                             .putExtra("text", e.optString("text"))
                             .putExtra("vol", e.optInt("vol", 90))
+                            .putExtra("maxSec", e.optInt("maxSec", 0))
                             .putExtra("fajr", "fajr".equals(e.optString("k")))
                             .putExtra("voice", o.optString("voice", "alafasy"));
                     if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(s); else c.startService(s);
@@ -44,6 +50,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
         Schedule.prefs(c).edit().putLong("lastFired", newest).apply();
         Schedule.armNext(c);
-        PrayerWidget.updateAll(c);
+        Widgets.updateAll(c);
+        Widgets.armRefresh(c);
     }
 }

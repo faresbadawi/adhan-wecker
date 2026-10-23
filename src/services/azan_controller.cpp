@@ -111,6 +111,58 @@ namespace azan
         return true;
     }
 
+    static bool s_onClock = true;
+    static uint16_t s_maxSec = 0;
+    static bool s_outLoaded = false;
+
+    static void loadOut()
+    {
+        if (s_outLoaded)
+            return;
+        s_outLoaded = true;
+        Preferences pr;
+        pr.begin("azanx", true);
+        s_onClock = pr.getBool("onclock", true);
+        s_maxSec = pr.getUShort("maxsec", 0);
+        pr.end();
+    }
+
+    bool onClock()
+    {
+        loadOut();
+        return s_onClock;
+    }
+
+    bool setOnClock(bool on)
+    {
+        loadOut();
+        s_onClock = on;
+        Preferences pr;
+        pr.begin("azanx", false);
+        pr.putBool("onclock", on);
+        pr.end();
+        return true;
+    }
+
+    uint16_t maxSeconds()
+    {
+        loadOut();
+        return s_maxSec;
+    }
+
+    bool setMaxSeconds(uint16_t seconds)
+    {
+        if (seconds != 0 && (seconds < 5 || seconds > 600))
+            return false;
+        loadOut();
+        s_maxSec = seconds;
+        Preferences pr;
+        pr.begin("azanx", false);
+        pr.putUShort("maxsec", seconds);
+        pr.end();
+        return true;
+    }
+
     int maxDelay(const model::PrayerDay &day, int i)
     {
         const int own = day.minutes[model::DAILY_PRAYERS[i]];
@@ -135,7 +187,7 @@ namespace azan
 
     bool playReminder(int i)
     {
-        if (audio::isPlaying() || s_status.state != State::IDLE)
+        if (!onClock() || audio::isPlaying() || s_status.state != State::IDLE)
             return false;
         char path[96];
         fs::FS *fs = storage::find(AZAN_DIR_SD, "/sounds", "calm.mp3", path, sizeof(path));
@@ -181,6 +233,8 @@ namespace azan
         {
             applyVolume(p);
             audio::play(*fs, path);
+            if (maxSeconds())
+                limitTo(maxSeconds() * 1000UL); // kurzer Azan: nach der eingestellten Dauer beenden
         }
         Serial.printf("Azan %s: %s\n", model::prayerName(p), fs ? path : "keine Audiodatei gefunden");
     }

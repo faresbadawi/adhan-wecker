@@ -9,6 +9,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context c, Intent intent) {
         Schedule.armNext(c);
-        PrayerWidget.updateAll(c);
+        Widgets.updateAll(c);
+        Widgets.armRefresh(c);
     }
 }

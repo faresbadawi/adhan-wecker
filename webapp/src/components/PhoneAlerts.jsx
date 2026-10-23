@@ -12,6 +12,7 @@ import { LOCAL_ONLY } from '../lib/store.js';
 export default function PhoneAlerts() {
   const n = native();
   const [on, setOn] = useState(phone().alerts !== false);
+  const [rem, setRem] = useState(phone().remindNotify !== false);
   const [perm, setPerm] = useState(null);
   const refresh = () => { try { setPerm(JSON.parse(n.permissions())); } catch (e) { /* ältere App */ } };
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function PhoneAlerts() {
   if (!n) return LOCAL_ONLY ? <Section title={t('alerts_title')} hint={t('alerts_web_only')} /> : null;
 
   const toggle = async v => { setOn(v); await saveLocal({ alerts: v }); scheduleSoon(); };
+  const toggleRem = async v => { setRem(v); await saveLocal({ remindNotify: v }); scheduleSoon(); };
   const row = (kind, label) => {
     const ok = perm && perm[kind];
     return (
@@ -40,9 +42,11 @@ export default function PhoneAlerts() {
     <Section title={t('alerts_title')} hint={t('alerts_hint')}>
       <IonList inset>
         <IonItem lines="full"><IonToggle checked={on} onIonChange={e => toggle(e.detail.checked)}>{t('alerts_on')}</IonToggle></IonItem>
+        <IonItem lines="full"><IonToggle checked={rem} disabled={!on} onIonChange={e => toggleRem(e.detail.checked)}>{t('notif_remind')}</IonToggle></IonItem>
         {perm && row('notifications', t('perm_notif'))}
         {perm && row('exactAlarms', t('perm_exact'))}
         {perm && row('battery', t('perm_battery'))}
+        <IonItem button detail lines="none" onClick={() => n.openNotificationSettings && n.openNotificationSettings()}><IonLabel>{t('notif_settings')}</IonLabel></IonItem>
       </IonList>
     </Section>
   );

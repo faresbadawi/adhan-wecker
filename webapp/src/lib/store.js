@@ -2,7 +2,7 @@
 // React-Komponenten lesen ihn mit useApp(); jede Änderung zeichnet sie neu.
 import { useSyncExternalStore } from 'react';
 import { t, lang } from './i18n.js';
-import { kvGet, kvSet, kvDel } from './native.js';
+import { kvGet, kvSet, kvDel, hasNative } from './native.js';
 import { localApi, adoptClock, scheduleSoon } from './phone.js';
 
 let state = {
@@ -61,7 +61,7 @@ export async function api(url, body) {
   }
   const r = await localApi(url, body);
   if (!r) throw new Error('offline');
-  if (!LOCAL_ONLY && url === '/api/settings' && body !== undefined && r.ok) kvSet('pending', mergePart(kvGet('pending', {}), body));
+  if ((!LOCAL_ONLY || hasNative()) && url === '/api/settings' && body !== undefined && r.ok) kvSet('pending', mergePart(kvGet('pending', {}), body));
   if (url === '/api/settings' && body !== undefined) scheduleSoon();
   return r;
 }
@@ -124,7 +124,7 @@ export function applyTheme(c) {
 }
 
 // ---------- kleine Helfer für die Seiten
-export const locale = () => ({ ar: 'ar-u-nu-latn', de: 'de-DE', en: 'en-GB' }[lang()]);
+export const locale = () => ({ ar: 'ar-u-nu-latn', de: 'de-DE', en: 'en-GB', tr: 'tr-TR' }[lang()]);
 export const mb = b => (b / 1048576).toFixed(1).replace('.', lang() === 'de' ? ',' : '.') + ' MB';
 export const toMin = hm => { const [h, m] = (hm || '0:0').split(':').map(Number); return h * 60 + m; };
 export const two = n => String(n).padStart(2, '0');

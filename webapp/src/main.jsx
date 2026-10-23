@@ -1,4 +1,5 @@
 // Einstieg: Sprache, Ionic (überall die ruhige iOS-Darstellung), Start der App
+import { applyAppTheme } from './lib/appTheme.js';
 import { createRoot } from 'react-dom/client';
 import { setupIonicReact } from '@ionic/react';
 import { setLang } from './lib/i18n.js';
@@ -39,11 +40,12 @@ if (typeof Node === 'function' && Node.prototype) {
 
 let l = 'ar';
 try { l = localStorage.getItem('lang') || ''; } catch (e) { /* privat */ }
-if (!l) { // erstes Öffnen: Sprache des Handys (Deutsch, Englisch, sonst Arabisch wie auf der Uhr)
+if (!l) { // erstes Öffnen: Sprache des Handys (Deutsch, Englisch, Türkisch, sonst Arabisch wie auf der Uhr)
   const nav = (navigator.language || '').slice(0, 2);
-  l = nav === 'de' || nav === 'en' ? nav : 'ar';
+  l = nav === 'de' || nav === 'en' || nav === 'tr' ? nav : 'ar';
 }
 setLang(l);
+applyAppTheme();
 
 setupIonicReact({ mode: 'ios', swipeBackEnabled: true, hardwareBackButton: true });
 
