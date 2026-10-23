@@ -2,7 +2,7 @@
 // WLAN und die Zeiten des Tages. Die Glocke je Gebet schaltet den Azan. Zum Aktualisieren nach unten ziehen.
 import { useState } from 'react';
 import { IonPage, IonContent, IonRefresher, IonRefresherContent, IonButton, IonIcon, useIonRouter } from '@ionic/react';
-import { notifications, notificationsOffOutline, close, downloadOutline } from 'ionicons/icons';
+import { notifications, notificationsOffOutline, close, downloadOutline, phonePortraitOutline } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
 import Svg from '../components/Svg.jsx';
 import { t } from '../lib/i18n.js';
@@ -15,7 +15,7 @@ const RING = 2 * Math.PI * 104; // Umfang des Fortschrittsrings
 export default function Home() {
   const st = useApp();
   useNow(); // Uhr und Countdowns jede Sekunde
-  const { ST, S, online, installEvt } = st;
+  const { ST, S, online, installEvt, local } = st;
   const router = useIonRouter();
   const p = ST && ST.prayer;
   const wx = ST && ST.weather;
@@ -61,7 +61,9 @@ export default function Home() {
         </IonRefresher>
         <BigTitle title={t('tab_home')} />
 
-        {showBanner && (
+        {local && <div className="banner"><IonIcon icon={phonePortraitOutline} className="accent" /><div className="grow"><b>{t('phone_mode')}</b><div className="muted">{t('phone_mode_hint')}</div></div></div>}
+
+        {showBanner && !local && (
           <div className="banner">
             <IonIcon icon={downloadOutline} className="accent" />
             <div className="grow">{t('inst_banner')}</div>
@@ -79,6 +81,7 @@ export default function Home() {
           {p && p.holiday && <div className="holiday"><Svg html={I.moon} />{t('holiday_' + p.holiday)}</div>}
           <div className="ring">
             <svg viewBox="0 0 240 240" aria-hidden="true">
+              <defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f1dfa9" /><stop offset="1" stopColor="#b8913f" /></linearGradient></defs>
               <circle cx="120" cy="120" r="104" className="ring-bg" />
               <circle cx="120" cy="120" r="104" className="ring-fg" strokeDasharray={RING} strokeDashoffset={RING * (1 - progress)} />
             </svg>

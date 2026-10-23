@@ -138,9 +138,30 @@ static bool azanDueNow(const struct tm &now)
     const uint8_t mask = azanMask();
     const int nowMin = now.tm_hour * 60 + now.tm_min;
     for (int i = 0; i < 5; i++)
-        if ((mask & (1 << i)) && s_today.minutes[model::DAILY_PRAYERS[i]] == nowMin)
+        if ((mask & (1 << i)) && azan::azanMinute(s_today, i) == nowMin)
             return true;
     return false;
+}
+
+// Hinweiston einige Minuten vor dem Gebet (einmal pro Gebet und Tag); die Azan-Verschiebung ändert daran nichts
+static void refreshReminder(const struct tm &now)
+{
+    static int32_t lastKey = -1;
+    if (!s_today.valid || alarmclock::ringing())
+        return;
+    const azan::Timing tmg = azan::timing();
+    const int nowMin = now.tm_hour * 60 + now.tm_min;
+    const int32_t date = (now.tm_year + 1900) * 10000 + (now.tm_mon + 1) * 100 + now.tm_mday;
+    for (int i = 0; i < 5; i++)
+    {
+        const int32_t key = date * 10 + i;
+        if (tmg.remind[i] && key != lastKey && s_today.minutes[model::DAILY_PRAYERS[i]] - tmg.remind[i] == nowMin)
+        {
+            lastKey = key;
+            azan::playReminder(i);
+            break;
+        }
+    }
 }
 
 // Kalender mit den Hijri-Tagen aus dem Gebetszeiten-Cache füllen
@@ -232,7 +253,7 @@ static void refreshEverySecond(const struct tm &now)
 
     const model::WifiInfo wifi = wifimgr::info();
     prayer_screen::setWifi(wifi);
-    settings_screen::setWifi(wifi, web::url());
+    settings_screen::setWifi(wifi, web::url(), web::appUrl());
 
     if (weather::version() != weatherVersion)
     {
@@ -285,6 +306,7 @@ static void refreshAzan(const struct tm &now)
     }
 
     azan::update(now, s_today, azanMask());
+    refreshReminder(now);
     const azan::Status st = azan::status();
     const bool active = st.state == azan::State::PLAYING;
     if (active != shown)

@@ -1,15 +1,37 @@
-// App auf dem Gerät: Android bekommt die eigene App (APK, liegt auf der Uhr), iPhone/iPad die Web-App über Safari,
-// am PC genügt der Browser. Die Oberfläche kommt in allen Fällen von der Uhr, Updates kommen mit der Uhr.
-import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/react';
+// App auf dem Gerät: Android bekommt die eigene App (APK aus dem Netz, Adresse einstellbar, QR-Code auf der Uhr),
+// iPhone/iPad die Web-App über Safari, am PC genügt der Browser.
+import { useState } from 'react';
+import { IonPage, IonContent, IonButton, IonIcon, IonInput } from '@ionic/react';
 import { downloadOutline, checkmarkCircle, logoAndroid, logoApple, desktopOutline } from 'ionicons/icons';
 import { Bar } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t } from '../lib/i18n.js';
-import { isStandalone, isIOS, isNativeApp } from '../lib/store.js';
+import { isStandalone, isIOS, isNativeApp, useApp, api, refreshStatus, toast } from '../lib/store.js';
 
 const isAndroid = () => /android/i.test(navigator.userAgent);
 
+// Download-Adresse der App einstellen (erscheint als QR-Code auf der Uhr)
+function AppLink({ current }) {
+  const [url, setUrl] = useState(current || '');
+  async function saveUrl() {
+    try {
+      const r = await api('/api/appurl', { url: url.trim() });
+      if (r.ok) { await refreshStatus(); toast(t('saved')); } else toast(t('error'), true);
+    } catch (e) { toast(t('offline'), true); }
+  }
+  return (
+    <div className="card-pad">
+      <p className="muted top">{t('app_link_hint')}</p>
+      <IonInput className="urlin ltr-inline" value={url} placeholder="https://github.com/…/releases/latest" inputmode="url"
+        onIonInput={e => setUrl(e.detail.value || '')} />
+      <div className="btnrow mt"><IonButton shape="round" onClick={saveUrl}>{t('app_link_set')}</IonButton></div>
+    </div>
+  );
+}
+
 export default function Install() {
+  const { ST } = useApp();
+  const appUrl = (ST && ST.device && ST.device.appUrl) || '';
   let body;
   if (isNativeApp() || isStandalone()) {
     body = <div className="card-pad done"><IonIcon icon={checkmarkCircle} className="accent" /><p>{t('installed')}</p></div>;
@@ -17,10 +39,12 @@ export default function Install() {
     body = (
       <div className="card-pad">
         {/* normaler Link statt IonButton: Ionic würde den Link abfangen und nichts herunterladen */}
-        <a className="dl-btn" href="/app/Bilal.apk" download="Bilal.apk">
-          <IonIcon icon={downloadOutline} />{t('apk_download')}
-        </a>
-        <p className="muted dl-link ltr-inline">{location.origin}/app/Bilal.apk</p>
+        {appUrl ? <>
+          <a className="dl-btn" href={appUrl} target="_blank" rel="noreferrer">
+            <IonIcon icon={downloadOutline} />{t('apk_download')}
+          </a>
+          <p className="muted dl-link ltr-inline">{appUrl}</p>
+        </> : <p className="muted">{t('app_link_none')}</p>}
         <ol className="steps big-steps mt">
           <li><b>{t('apk_s1')}</b></li>
           <li><b>{t('apk_s2')}</b><span className="muted">{t('apk_s2b')}</span></li>
@@ -40,9 +64,10 @@ export default function Install() {
       <Bar title={t('inst_title')} back="/home" />
       <IonContent>
         <Section>
-          <div className="card-pad intro"><p>{t('inst_intro2')}</p></div>
+          <div className="card-pad intro"><p>{t('inst_intro2')}</p><p className="muted mt">{t('app_scan')}</p></div>
         </Section>
         <Section title={t('inst_steps')}>{body}</Section>
+        {!isNativeApp() && <Section title={t('app_link')}><AppLink current={appUrl} /></Section>}
         <Section title={t('inst_all')}>
           <div className="card-pad platforms">
             <p><IonIcon icon={logoAndroid} className="accent" /> {t('plat_android')}</p>

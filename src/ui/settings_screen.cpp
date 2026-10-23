@@ -17,6 +17,7 @@ namespace settings_screen
     static int s_shownSignal = -1;
     static lv_obj_t *s_qr, *s_url, *s_scan;
     static char s_shownUrl[40] = "-";
+    static char s_shownQr[128] = "-";
 
     // Kleine Karte mit Rahmen in der Akzentfarbe
     static lv_obj_t *card(lv_obj_t *parent, lv_coord_t x, lv_coord_t w)
@@ -68,7 +69,7 @@ namespace settings_screen
         lv_obj_align(s_scan, LV_ALIGN_BOTTOM_MID, 0, -14);
     }
 
-    void setWifi(const model::WifiInfo &w, const char *url)
+    void setWifi(const model::WifiInfo &w, const char *url, const char *qrUrl)
     {
         const bool online = w.connected;
         lv_img_set_src(s_wifiIcon, img_wifi_list[online ? 1 : 0]);
@@ -96,13 +97,18 @@ namespace settings_screen
         }
 
         // QR-Code nur bei geänderter Adresse neu erzeugen
+        const char *code = (qrUrl && qrUrl[0]) ? qrUrl : url;
         if (strcmp(s_shownUrl, url) != 0)
         {
             strlcpy(s_shownUrl, url, sizeof(s_shownUrl));
-            const bool haveUrl = url[0] != 0;
+            lv_label_set_text(s_url, url[0] ? url : "-");
+        }
+        if (strcmp(s_shownQr, code) != 0)
+        {
+            strlcpy(s_shownQr, code, sizeof(s_shownQr));
+            const bool haveUrl = code[0] != 0;
             if (haveUrl)
-                lv_qrcode_update(s_qr, url, strlen(url));
-            lv_label_set_text(s_url, haveUrl ? url : "-");
+                lv_qrcode_update(s_qr, code, strlen(code));
             if (haveUrl)
             {
                 lv_obj_clear_flag(s_qr, LV_OBJ_FLAG_HIDDEN);

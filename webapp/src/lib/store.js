@@ -2,11 +2,14 @@
 // React-Komponenten lesen ihn mit useApp(); jede Änderung zeichnet sie neu.
 import { useSyncExternalStore } from 'react';
 import { t, lang } from './i18n.js';
+import { kvGet, kvSet, kvDel } from './native.js';
+import { localApi, adoptClock, scheduleSoon } from './phone.js';
 
 let state = {
   S: null,          // /api/settings
   ST: null,         // /api/status
   online: false,
+  local: false,     // Handy-Betrieb ohne Uhr
   stBase: 0,        // performance.now() beim letzten Status
   installEvt: null, // Chrome-Installationsangebot
   toast: null,      // { text, err, id }
@@ -28,13 +31,43 @@ const tickers = new Set();
 setInterval(() => { now = Date.now(); tickers.forEach(l => l()); }, 1000);
 export const useNow = () => useSyncExternalStore(l => { tickers.add(l); return () => tickers.delete(l); }, () => now);
 
-export async function api(url, body) {
+// Web-App nur für das Handy (Android-App aus dem Bündel, Web-App aus dem Netz): es gibt keine Uhr im Hintergrund
+export const LOCAL_ONLY = import.meta.env.MODE === 'app' || import.meta.env.MODE === 'pwa' || /[?&]local\b/.test(location.search); // ?local zum Ausprobieren
+
+async function clockFetch(url, body) {
   const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
-  const r = await fetch(url, opt);
-  let data = null;
-  try { data = await r.json(); } catch (e) { /* leere Antwort */ }
-  return { ok: r.ok, status: r.status, data };
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetch(url, { ...opt, signal: ctl.signal });
+    let data = null;
+    try { data = await r.json(); } catch (e) { /* leere Antwort */ }
+    return { ok: r.ok, status: r.status, data };
+  } finally { clearTimeout(timer); }
 }
+
+// Teil-Einstellungen zusammenführen (eine Ebene tief, damit z. B. offsets.fajr und offsets.isha beide erhalten bleiben)
+const mergePart = (a, b) => { const o = { ...a }; for (const [k, v] of Object.entries(b)) o[k] = v && typeof v === 'object' && !Array.isArray(v) && o[k] && typeof o[k] === 'object' ? { ...o[k], ...v } : v; return o; };
+
+// Anfrage an die Uhr; ist sie nicht erreichbar (anderes WLAN, unterwegs), antwortet das Handy für Gebetszeiten,
+// Ort, Azan-Einstellungen und Vorhören. Änderungen ohne Uhr werden gemerkt und der Uhr später nachgereicht.
+export async function api(url, body) {
+  if (!LOCAL_ONLY) {
+    try {
+      const r = await clockFetch(url, body);
+      if (r.ok && url === '/api/settings' && r.data && r.data.city !== undefined) { adoptClock(r.data); scheduleSoon(); }
+      return r;
+    } catch (e) { /* Uhr nicht erreichbar: Handy */ }
+  }
+  const r = await localApi(url, body);
+  if (!r) throw new Error('offline');
+  if (!LOCAL_ONLY && url === '/api/settings' && body !== undefined && r.ok) kvSet('pending', mergePart(kvGet('pending', {}), body));
+  if (url === '/api/settings' && body !== undefined) scheduleSoon();
+  return r;
+}
+
+// Neue Gebetszeiten vom Netz geladen (Handy-Betrieb): Anzeige auffrischen
+if (typeof window !== 'undefined') window.addEventListener('bilal-data', () => { refreshStatus(); loadSettings(); });
 
 let toastId = 0;
 export function toast(text, err) { set({ toast: { text, err: !!err, id: ++toastId } }); }
@@ -60,14 +93,21 @@ export async function refreshStatus() {
   try {
     const r = await api('/api/status');
     if (!r.ok) throw new Error();
-    set({ ST: r.data, stBase: performance.now(), online: true });
-    try { localStorage.setItem('status', JSON.stringify(r.data)); } catch (e) { /* privat */ }
+    const local = !!r.data.local;
+    set({ ST: r.data, stBase: performance.now(), online: !local, local });
+    if (!local) try { localStorage.setItem('status', JSON.stringify(r.data)); } catch (e) { /* privat */ }
   } catch (e) { set({ online: false }); }
 }
 export async function loadSettings() {
   try {
-    const r = await api('/api/settings');
-    if (r.ok) { set({ S: r.data }); applyTheme(r.data.colors); }
+    let r = await api('/api/settings');
+    // Änderungen, die ohne Uhr gemacht wurden, jetzt an die Uhr geben
+    const pending = !LOCAL_ONLY && r.ok && r.data && !r.data.local ? kvGet('pending') : null;
+    if (pending && Object.keys(pending).length) {
+      const w = await api('/api/settings', pending);
+      if (w.ok) { r = w; kvDel('pending'); }
+    }
+    if (r.ok) { set({ S: r.data }); applyTheme(r.data.colors); scheduleSoon(); }
   } catch (e) { /* offline */ }
 }
 
@@ -75,16 +115,11 @@ export async function loadSettings() {
 const rgb = hex => { const n = parseInt(hex.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
 const mix = (a, b, f) => '#' + a.map((v, i) => Math.round(v + (b[i] - v) * f).toString(16).padStart(2, '0')).join('');
 export function applyTheme(c) {
+  // Die App behält ihr Schwarz-Gold; die Farben der Uhr (Anzeige) werden nur für Vorschauen übernommen
   if (!c || !/^#[0-9a-f]{6}$/i.test(c.accent || '')) return;
-  const r = document.documentElement.style, a = rgb(c.accent);
-  r.setProperty('--ion-color-primary', c.accent);
-  r.setProperty('--ion-color-primary-rgb', a.join(','));
-  r.setProperty('--ion-color-primary-contrast', '#17120e');
-  r.setProperty('--ion-color-primary-contrast-rgb', '23,18,14');
-  r.setProperty('--ion-color-primary-shade', mix(a, [0, 0, 0], 0.12));
-  r.setProperty('--ion-color-primary-tint', mix(a, [255, 255, 255], 0.1));
-  r.setProperty('--accent-light', mix(a, [255, 255, 255], 0.3));
+  const r = document.documentElement.style;
   if (/^#[0-9a-f]{6}$/i.test(c.main || '')) r.setProperty('--clock-main', c.main);
+  r.setProperty('--clock-accent', c.accent);
   try { localStorage.setItem('colors', JSON.stringify(c)); } catch (e) { /* privat */ }
 }
 

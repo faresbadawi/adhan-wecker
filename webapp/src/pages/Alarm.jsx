@@ -15,7 +15,7 @@ import { useApp, api, save, saveLater, toast, confirmBox, toMin, two } from '../
 const volPct = v => Math.round(v * 100 / 21); // Decoder 0..21 <-> Prozent
 
 export default function Alarm() {
-  const { S, ST } = useApp();
+  const { S, ST, local } = useApp();
   const [alarms, setAlarms] = useState(null);
   const [tj, setTj] = useState(null);
   const [edit, setEdit] = useState(-1); // Index des Weckers, dessen Zeit gerade gewählt wird
@@ -30,6 +30,14 @@ export default function Alarm() {
     api('/api/sounds').then(r => { if (r.data) setSounds({ list: r.data.list, selected: (r.data.selected || '').trim() }); }).catch(() => setSounds({ list: [], selected: '' }));
   }, []);
   const days = t('days');
+  if (local) {
+    return (
+      <IonPage>
+        <Bar title={t('nav_alarm')} />
+        <IonContent fullscreen><BigTitle title={t('nav_alarm')} /><div className="card-pad intro"><p>{t('alarm_phone_note')}</p></div></IonContent>
+      </IonPage>
+    );
+  }
 
   const store = (list, later) => { setAlarms(list); (later ? saveLater : save)({ alarms: list.map(a => ({ ...a })) }, later); };
   const patch = (i, part, later) => store(alarms.map((a, j) => (j === i ? { ...a, ...part } : a)), later);

@@ -6,11 +6,14 @@
   "description": "Web-App (PWA) der Smart Azan Wecker – React + Ionic, gebaut mit Vite nach ../data/www",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/clean.js && vite build && node scripts/gzip.js"
+    "build": "node scripts/clean.js && vite build && node scripts/gzip.js",
+    "build:pwa": "vite build --mode pwa && node scripts/pwa.js",
+    "build:app": "vite build --mode app"
   },
   "dependencies": {
     "@ionic/react": "^9.0.7",
     "@ionic/react-router": "^9.0.7",
+    "adhan": "^4.4.3",
     "ionicons": "^8.1.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

@@ -43,6 +43,46 @@ namespace web
         return l;
     }
 
+    static char s_appUrl[128] = "";
+    static bool s_appUrlLoaded = false;
+    const char *appUrl()
+    {
+        if (!s_appUrlLoaded)
+        {
+            s_appUrlLoaded = true;
+            Preferences p;
+            p.begin("web", true);
+            p.getString("appurl", "").toCharArray(s_appUrl, sizeof(s_appUrl));
+            p.end();
+        }
+        return s_appUrl;
+    }
+
+    static void receiveAppUrl()
+    {
+        JsonDocument doc;
+        if (deserializeJson(doc, s_server.arg("plain")))
+        {
+            s_server.send(400, "application/json", "{\"error\":\"json\"}");
+            return;
+        }
+        String url = doc["url"] | "";
+        url.trim();
+        // nur https-Adressen (oder leer = zurücksetzen), kurz genug für einen gut lesbaren QR-Code
+        if (url.length() && (!url.startsWith("https://") || url.length() > 100 || url.indexOf(' ') >= 0))
+        {
+            s_server.send(400, "application/json", "{\"error\":\"url\"}");
+            return;
+        }
+        Preferences p;
+        p.begin("web", false);
+        p.putString("appurl", url);
+        p.end();
+        s_appUrlLoaded = false;
+        appUrl();
+        s_server.send(200, "application/json", "{\"ok\":true}");
+    }
+
     static const char *AZAN_KEYS[5] = {"fajr", "dhuhr", "asr", "maghrib", "isha"};
     static String toHex(uint32_t c)
     {
@@ -82,6 +122,22 @@ namespace web
         JsonObject av = doc["azanVolume"].to<JsonObject>(); // Azan je Gebet, Prozent
         for (int i = 0; i < 5; i++)
             av[AZAN_KEYS[i]] = st.azanVolume[i];
+        // Azan verschieben und Erinnerung vor dem Gebet (Minuten); azanDelayMax = heute längste sinnvolle Verschiebung
+        {
+            const azan::Timing tmg = azan::timing();
+            struct tm now;
+            model::PrayerDay day;
+            const bool have = timemgr::now(now) && prayers::forDay(now, day);
+            JsonObject ad = doc["azanDelay"].to<JsonObject>();
+            JsonObject am = doc["azanDelayMax"].to<JsonObject>();
+            JsonObject ar = doc["azanRemind"].to<JsonObject>();
+            for (int i = 0; i < 5; i++)
+            {
+                ad[AZAN_KEYS[i]] = tmg.delay[i];
+                am[AZAN_KEYS[i]] = have ? azan::maxDelay(day, i) : 60;
+                ar[AZAN_KEYS[i]] = tmg.remind[i];
+            }
+        }
         doc["brightness"] = st.brightness;
         doc["autoDim"] = st.autoDim;
         doc["showNight"] = st.showNight;
@@ -204,6 +260,16 @@ namespace web
         JsonObject av = doc["azanVolume"];
         for (int i = 0; i < 5; i++)
             st.azanVolume[i] = av[AZAN_KEYS[i]] | st.azanVolume[i];
+        {
+            azan::Timing tmg = azan::timing();
+            JsonObject ad = doc["azanDelay"], ar = doc["azanRemind"];
+            for (int i = 0; i < 5; i++)
+            {
+                tmg.delay[i] = (uint8_t)constrain(ad[AZAN_KEYS[i]] | (int)tmg.delay[i], 0, (int)azan::MAX_DELAY);
+                tmg.remind[i] = (uint8_t)constrain(ar[AZAN_KEYS[i]] | (int)tmg.remind[i], 0, (int)azan::MAX_REMIND);
+            }
+            azan::setTiming(tmg);
+        }
         st.brightness = doc["brightness"] | st.brightness;
         st.autoDim = doc["autoDim"] | st.autoDim;
         st.showNight = doc["showNight"] | st.showNight;
@@ -367,6 +433,24 @@ namespace web
             settings::set(st);
         }
         sendBackgrounds();
+    }
+
+    // Sicherung eigener Dateien (vor einem Dateisystem-Update): nur diese vier Pfade, nur lesen
+    static void sendBackupFile()
+    {
+        static const char *const OK[] = {"/bg/custom.bin", "/www/bg/custom.jpg", "/alarm.mp3", "/alarm.txt"};
+        const String path = s_server.arg("path");
+        bool allowed = false;
+        for (const char *p : OK)
+            allowed = allowed || path == p;
+        File f = allowed ? LittleFS.open(path, "r") : File();
+        if (!f)
+        {
+            s_server.send(404, "text/plain", "keine Datei");
+            return;
+        }
+        s_server.streamFile(f, "application/octet-stream");
+        f.close();
     }
 
     // Update aus der App: firmware.bin (beginnt mit 0xE9) oder littlefs.bin (App-Dateien, Töne, Bilder).
@@ -533,6 +617,7 @@ namespace web
         dev["firmware"] = FW_VERSION;
         dev["host"] = String(HOSTNAME) + ".local";
         dev["ip"] = WiFi.localIP().toString();
+        dev["appUrl"] = appUrl();
         dev["uptime"] = millis() / 1000;
         dev["fsUsed"] = LittleFS.usedBytes();   // Dateien (Azan, Hintergründe, App)
         dev["fsTotal"] = LittleFS.totalBytes();
@@ -903,21 +988,8 @@ namespace web
             s_server.streamFile(f, "text/html; charset=utf-8");
             f.close();
         });
-        // Android-App zum Herunterladen: mit dem richtigen Typ, sonst bietet Android keine Installation an
-        // (der frühere Name SmartAzanWecker.apk führt zur selben Datei)
-        auto sendApk = [] {
-            File f = LittleFS.open("/www/app/Bilal.apk", "r");
-            if (!f)
-            {
-                s_server.send(404, "text/plain", "APK fehlt");
-                return;
-            }
-            s_server.sendHeader("Content-Disposition", "attachment; filename=\"Bilal.apk\"");
-            s_server.streamFile(f, "application/vnd.android.package-archive");
-            f.close();
-        };
-        s_server.on("/app/Bilal.apk", HTTP_GET, sendApk);
-        s_server.on("/app/SmartAzanWecker.apk", HTTP_GET, sendApk);
+        s_server.on("/api/appurl", HTTP_POST, receiveAppUrl);
+        s_server.on("/api/backup/file", HTTP_GET, sendBackupFile);
         s_server.serveStatic("/", LittleFS, "/www/", "no-cache");
         s_server.onNotFound([] { s_server.send(404, "text/plain", "Not found"); });
         s_server.begin();

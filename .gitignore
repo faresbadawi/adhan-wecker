@@ -10,3 +10,8 @@ __pycache__/
 # Web-App (Framework7 + Svelte): Abhängigkeiten und kopierte Framework7-CSS
 webapp/node_modules/
 webapp/public/css/
+
+# lokale Werkzeug-Einstellungen und Build-Ergebnisse
+.claude/
+android/build/
+pwa/

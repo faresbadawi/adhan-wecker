@@ -68,6 +68,83 @@ namespace azan
         return LittleFS.exists(path);
     }
 
+    static Timing s_timing = {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}};
+    static bool s_timingLoaded = false;
+
+    static void loadTiming()
+    {
+        if (s_timingLoaded)
+            return;
+        s_timingLoaded = true;
+        Preferences pr;
+        pr.begin("azanx", true);
+        uint8_t blob[11] = {};
+        if (pr.getBytesLength("timing") == sizeof(blob) && pr.getBytes("timing", blob, sizeof(blob)) == sizeof(blob) && blob[0] == 1)
+        {
+            memcpy(s_timing.delay, blob + 1, 5);
+            memcpy(s_timing.remind, blob + 6, 5);
+        }
+        pr.end();
+    }
+
+    Timing timing()
+    {
+        loadTiming();
+        return s_timing;
+    }
+
+    bool setTiming(const Timing &t)
+    {
+        for (int i = 0; i < 5; i++)
+            if (t.delay[i] > MAX_DELAY || t.remind[i] > MAX_REMIND)
+                return false;
+        loadTiming();
+        s_timing = t;
+        uint8_t blob[11] = {1};
+        memcpy(blob + 1, t.delay, 5);
+        memcpy(blob + 6, t.remind, 5);
+        Preferences pr;
+        pr.begin("azanx", false);
+        pr.putBytes("timing", blob, sizeof(blob));
+        pr.end();
+        return true;
+    }
+
+    int maxDelay(const model::PrayerDay &day, int i)
+    {
+        const int own = day.minutes[model::DAILY_PRAYERS[i]];
+        int limit;
+        switch (i)
+        {
+        case 0: limit = day.minutes[model::SUNRISE]; break;
+        case 1: limit = day.minutes[model::ASR]; break;
+        case 2: limit = day.minutes[model::MAGHRIB]; break;
+        case 3: limit = day.minutes[model::ISHA]; break;
+        default: limit = 1440; break;
+        }
+        return constrain(limit - own - 1, 0, (int)MAX_DELAY);
+    }
+
+    int azanMinute(const model::PrayerDay &day, int i)
+    {
+        loadTiming();
+        const int d = min<int>(s_timing.delay[i], maxDelay(day, i));
+        return day.minutes[model::DAILY_PRAYERS[i]] + d;
+    }
+
+    bool playReminder(int i)
+    {
+        if (audio::isPlaying() || s_status.state != State::IDLE)
+            return false;
+        char path[96];
+        fs::FS *fs = storage::find(AZAN_DIR_SD, "/sounds", "calm.mp3", path, sizeof(path));
+        if (!fs)
+            return false;
+        audio::setVolume(max(1, (int)((s_volume[i] * 21 + 50) / 100 * 6 / 10))); // leiser als der Azan
+        audio::play(*fs, path);
+        return true;
+    }
+
     void setVolumes(const uint8_t percent[5]) { memcpy(s_volume, percent, sizeof(s_volume)); }
 
     void applyVolume(model::Prayer p)
@@ -130,10 +207,10 @@ namespace azan
             {
                 const model::Prayer p = model::DAILY_PRAYERS[i];
                 const int32_t key = date * 10 + p;
-                if (day.minutes[p] == nowMin && key != s_lastKey && (enabledMask & (1 << i)))
+                if (azanMinute(day, i) == nowMin && key != s_lastKey && (enabledMask & (1 << i)))
                 {
                     s_lastKey = key;
-                    start(p, day.minutes[p]);
+                    start(p, day.minutes[p]); // angezeigt wird die echte Gebetszeit, nicht die verschobene
                     break;
                 }
             }

@@ -7,6 +7,7 @@ namespace settings_screen
 {
     void create(lv_obj_t *parent);
 
-    // WLAN-Status und Adresse der Weboberfläche (leer = nicht verbunden); jede Sekunde aufrufen
-    void setWifi(const model::WifiInfo &w, const char *url);
+    // WLAN-Status und Adresse der Weboberfläche (leer = nicht verbunden); jede Sekunde aufrufen.
+    // qrUrl: Inhalt des QR-Codes (Download-Adresse der App; leer: Adresse der Weboberfläche)
+    void setWifi(const model::WifiInfo &w, const char *url, const char *qrUrl);
 }

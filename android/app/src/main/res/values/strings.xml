@@ -7,4 +7,11 @@
     <string name="address_hint">e.g. 192.168.178.72</string>
     <string name="retry">Try again</string>
     <string name="connect">Connect</string>
+    <string name="ch_remind">Prayer reminder</string>
+    <string name="ch_remind_desc">Reminder shortly before the prayer</string>
+    <string name="ch_azan">Azan</string>
+    <string name="ch_azan_desc">Shown while the azan is playing</string>
+    <string name="stop">Stop</string>
+    <string name="widget_open">Open Bilal</string>
+    <string name="widget_name">Prayer times</string>
 </resources>

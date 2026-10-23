@@ -2,45 +2,48 @@
    Dunkle, ruhige Flächen wie das Display; Akzent = Akzentfarbe der Uhr (--ion-color-primary, gesetzt in store.js);
    IBM Plex Sans Arabic bzw. Inter als Schrift, Amiri für Gebetsnamen. */
 :root {
-  --bg: #0b0c0c;
-  --surface: #17191a;
-  --surface2: #232627;
-  --sep: rgba(255, 255, 255, .09);
-  --text: #f6f3ee;
-  --muted: #b9b3ad;
-  --dim: #8a8580;
+  --bg: #070707;
+  --surface: #12110f;
+  --surface2: #1d1b17;
+  --sep: rgba(212, 175, 106, .13);
+  --text: #f8f4ea;
+  --muted: #c4baa6;
+  --dim: #8f8672;
   --ok: #5fc08b;
   --err: #e2735f;
-  --accent-light: #f4c7ae;
+  --accent-light: #ecd8a6;
+  --gold: #d4af6a;
+  --gold-deep: #a8843f;
+  --gold-line: linear-gradient(90deg, transparent, rgba(212, 175, 106, .7), transparent);
   --clock-main: #ffffff;
   --arabic: "Amiri", "Noto Naskh Arabic", "Geeza Pro", serif;
   --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='.8'%3E%3Crect x='18' y='18' width='28' height='28'/%3E%3Crect x='18' y='18' width='28' height='28' transform='rotate(45 32 32)'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M0 32h12M52 32h12M32 0v12M32 52v12'/%3E%3C/g%3E%3C/svg%3E");
 
-  --ion-color-primary: #e9a27c;
-  --ion-color-primary-rgb: 233, 162, 124;
-  --ion-color-primary-contrast: #17120e;
-  --ion-color-primary-contrast-rgb: 23, 18, 14;
-  --ion-color-primary-shade: #cd8f6d;
-  --ion-color-primary-tint: #ebab89;
+  --ion-color-primary: #d4af6a;
+  --ion-color-primary-rgb: 212, 175, 106;
+  --ion-color-primary-contrast: #16110a;
+  --ion-color-primary-contrast-rgb: 22, 17, 10;
+  --ion-color-primary-shade: #bb9a5d;
+  --ion-color-primary-tint: #d9b878;
   --ion-color-danger: #e2735f;
   --ion-color-danger-rgb: 226, 115, 95;
   --ion-color-success: #5fc08b;
 
   --ion-font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --ion-background-color: var(--bg);
-  --ion-background-color-rgb: 11, 12, 12;
+  --ion-background-color-rgb: 7, 7, 7;
   --ion-text-color: var(--text);
   --ion-text-color-rgb: 246, 243, 238;
   --ion-item-background: var(--surface);
   --ion-item-border-color: var(--sep);
-  --ion-toolbar-background: rgba(11, 12, 12, .86);
+  --ion-toolbar-background: rgba(7, 7, 7, .86);
   --ion-toolbar-border-color: var(--sep);
-  --ion-tab-bar-background: rgba(16, 17, 17, .9);
+  --ion-tab-bar-background: rgba(10, 9, 8, .92);
   --ion-tab-bar-border-color: var(--sep);
-  --ion-tab-bar-color: #8f8a85;
+  --ion-tab-bar-color: #8f8672;
   --ion-tab-bar-color-selected: var(--ion-color-primary);
   --ion-card-background: var(--surface);
-  --ion-modal-background: #121414;
+  --ion-modal-background: #0f0e0c;
   --ion-color-step-50: #151717;
   --ion-color-step-100: #1d1f20;
   --ion-color-step-150: #242627;
@@ -65,7 +68,8 @@ html[lang=ar] { --ion-font-family: "IBM Plex Sans Arabic", "Inter", system-ui, s
 html, body { background: var(--bg); }
 ion-content { --background: var(--bg); }
 ion-toolbar { --color: var(--text); }
-ion-title.title-large { font-size: 32px; letter-spacing: -.4px; }
+ion-title.title-large { font-size: 30px; letter-spacing: -.4px; }
+ion-title.title-large::part(native), ion-title.title-large .toolbar-title { white-space: normal; line-height: 1.15; }
 html[lang=ar] ion-title.title-large { font-family: var(--arabic); font-size: 36px; letter-spacing: 0; }
 ion-tab-bar { --border: 0; padding-top: 4px; }
 ion-tab-button { --color-selected: var(--ion-color-primary); font-weight: 500; }
@@ -145,9 +149,9 @@ ion-button.play { --color: var(--ion-color-primary); --padding-start: 8px; --pad
   position: relative; overflow: hidden; margin: 10px 16px 0; padding: 16px 18px 18px; border-radius: 28px;
   background:
     radial-gradient(120% 80% at 50% 0%, rgba(var(--ion-color-primary-rgb), .30) 0%, rgba(var(--ion-color-primary-rgb), .06) 55%, transparent 80%),
-    linear-gradient(180deg, #181a1b, #101111);
-  border: 1px solid rgba(var(--ion-color-primary-rgb), .22);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
+    linear-gradient(180deg, #17150f, #0c0b09);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), .38);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .03);
 }
 .hero::before { content: ""; position: absolute; inset: 0; background: var(--pattern); background-size: 64px; opacity: .06; pointer-events: none; }
 .hero > * { position: relative; }
@@ -220,6 +224,24 @@ html[lang=ar] .prow ion-toggle { font-family: var(--arabic); font-size: 20px; }
 .vrow { display: flex; align-items: center; gap: 4px; }
 .vrow ion-range { flex: 1; }
 .azan-list .off .vrow { opacity: .4; }
+
+/* ---------- Azan später / Erinnerung */
+.tm-list { display: grid; gap: 12px; margin: 0 16px; }
+.tm-card { background: var(--surface); border-radius: 18px; padding: 14px 16px 10px; border: 1px solid var(--sep); }
+.tm-card.off { opacity: .55; }
+.tm-head { display: flex; align-items: center; gap: 10px; padding-bottom: 8px; }
+.tm-name { font-size: 17px; font-weight: 600; flex: 1; }
+html[lang=ar] .tm-name { font-family: var(--arabic); font-size: 21px; }
+.tm-show { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.tm-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--sep); }
+.tm-label { font-size: 15px; display: flex; flex-direction: column; }
+.tm-label small { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.tm-stepper { display: inline-flex; align-items: center; gap: 4px; background: var(--surface2); border-radius: 999px; padding: 3px; }
+.tm-stepper button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: transparent; color: var(--ion-color-primary); font-size: 20px; display: inline-flex; align-items: center; justify-content: center; }
+.tm-stepper button:disabled { opacity: .3; }
+.tm-val { min-width: 86px; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+.tm-result { color: var(--accent-light); font-size: 13px; text-align: end; padding-bottom: 6px; }
+.tm-sel { max-width: 170px; --padding-start: 12px; --padding-end: 8px; font-size: 14px; color: var(--accent-light); }
 
 /* ---------- Anzeige */
 .bgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
@@ -385,3 +407,26 @@ html[lang=ar] .ob-title { font-family: var(--arabic); font-size: 30px; }
 .ob-nav { margin-top: auto; padding: 18px 0 8px; display: flex; justify-content: space-between; align-items: center; }
 .ob-nav ion-button[shape=round] { min-width: 130px; }
 .ob-time ion-datetime { width: 100%; max-width: 300px; min-height: 200px; }
+
+.urlin { --background: var(--surface2); --padding-start: 12px; --padding-end: 12px; border-radius: 12px; margin-top: 8px; font-size: 14px; }
+
+/* ---------- Feinschliff: Gold-Linien, Schmuck, ruhige Karten */
+ion-title.title-large { color: var(--accent-light); }
+ion-toolbar { --border-width: 0 0 1px 0; }
+.section-title { color: var(--gold); display: flex; align-items: center; gap: 10px; }
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--gold-line); opacity: .45; }
+.card-pad, .timeline, .tiles .tile, .tm-card, ion-list.list-inset { border: 1px solid var(--sep); }
+ion-list.list-inset { background: var(--surface); }
+.hero::after { content: ""; position: absolute; left: 12%; right: 12%; top: 0; height: 1px; background: var(--gold-line); pointer-events: none; }
+.hero .bism { color: var(--gold); letter-spacing: .5px; }
+.ring .ring-fg { stroke: url(#goldGrad); filter: drop-shadow(0 0 6px rgba(212, 175, 106, .45)); }
+.trow.next { background: linear-gradient(90deg, rgba(var(--ion-color-primary-rgb), .20), rgba(var(--ion-color-primary-rgb), .06)); border: 1px solid rgba(var(--ion-color-primary-rgb), .35); }
+ion-content ion-button:not([fill=clear]):not([fill=outline]), ion-modal ion-content ion-button:not([fill=clear]):not([fill=outline]) { --background: linear-gradient(180deg, #e0c07c, #bf9a52); --color: #16110a; }
+ion-toolbar ion-button { --background: transparent; }
+ion-segment-button { --indicator-color: var(--gold); }
+ion-tab-bar { border-top: 1px solid var(--sep); backdrop-filter: blur(14px); }
+.dl-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 18px; border-radius: 16px; font-weight: 600; text-decoration: none;
+  background: linear-gradient(180deg, #e0c07c, #bf9a52); color: #16110a; }
+.warn { color: var(--err); }
+.fajr-lbl { font-size: 12px; font-weight: 600; margin-inline-end: 2px; }
+ion-button.fajr-btn { --padding-start: 6px; --padding-end: 4px; }

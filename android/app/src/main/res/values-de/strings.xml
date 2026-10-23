@@ -7,4 +7,11 @@
     <string name="address_hint">z. B. 192.168.178.72</string>
     <string name="retry">Erneut suchen</string>
     <string name="connect">Verbinden</string>
+    <string name="ch_remind">Gebetserinnerung</string>
+    <string name="ch_remind_desc">Erinnerung kurz vor dem Gebet</string>
+    <string name="ch_azan">Azan</string>
+    <string name="ch_azan_desc">Wird angezeigt, solange der Azan läuft</string>
+    <string name="stop">Beenden</string>
+    <string name="widget_open">Bilal öffnen</string>
+    <string name="widget_name">Gebetszeiten</string>
 </resources>

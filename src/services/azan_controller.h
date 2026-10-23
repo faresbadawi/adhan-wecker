@@ -24,6 +24,26 @@ namespace azan
         uint32_t duration = 0;     // Sekunden, 0 = unbekannt
     };
 
+    // Verschieben und Erinnerung je Gebet (Fajr, Dhuhr, Asr, Maghrib, Isha), in Minuten.
+    // delay: der Azan ertönt so viel später als die Gebetszeit (angezeigt wird weiter die echte Gebetszeit);
+    // remind: so viele Minuten vor der Gebetszeit ertönt ein leiser Hinweiston, 0 = aus.
+    struct Timing
+    {
+        uint8_t delay[5];
+        uint8_t remind[5];
+    };
+    constexpr uint8_t MAX_REMIND = 60;
+    constexpr uint8_t MAX_DELAY = 240;
+
+    Timing timing();
+    bool setTiming(const Timing &t); // prüft, speichert dauerhaft; false bei ungültigen Werten
+
+    // Längste sinnvolle Verschiebung am Tag `day`: Fajr bis kurz vor Sonnenaufgang, die anderen bis kurz vor
+    // dem nächsten Gebet, Isha bis Mitternacht (höchstens MAX_DELAY).
+    int maxDelay(const model::PrayerDay &day, int i);
+    // Minute (seit Mitternacht), in der der Azan des Gebets i an diesem Tag ertönt
+    int azanMinute(const model::PrayerDay &day, int i);
+
     // Regelmäßig aufrufen (jede Sekunde genügt). enabledMask: Bit i = model::DAILY_PRAYERS[i]
     // (Fajr, Dhuhr, Asr, Maghrib, Isha) darf den Azan automatisch starten.
     void update(const struct tm &now, const model::PrayerDay &day, uint8_t enabledMask);
@@ -32,6 +52,9 @@ namespace azan
     void setVolumes(const uint8_t percent[5]);
     // Lautstärke des Gebets am Ausgang einstellen (vor dem Abspielen oder zum Probehören)
     void applyVolume(model::Prayer p);
+
+    // Hinweiston vor dem Gebet i (leiser Ton, nur wenn gerade nichts spielt); true, wenn er gestartet wurde
+    bool playReminder(int i);
 
     // Azan sofort starten (Test/Demo).
     void start(model::Prayer p, uint16_t minutes);

@@ -5,8 +5,8 @@
 # Ergebnis: build/Bilal.apk
 set -euo pipefail
 cd "$(dirname "$0")"
-VERSION_CODE=${VERSION_CODE:-2}
-VERSION_NAME=${VERSION_NAME:-1.1}
+VERSION_CODE=${VERSION_CODE:-3}
+VERSION_NAME=${VERSION_NAME:-2.0}
 export JAVA_HOME=$(ls -d ~/.local/jdk/jdk-21* | head -1)
 export PATH=$JAVA_HOME/bin:$PATH
 SDK=~/Android/Sdk
@@ -15,7 +15,7 @@ JAR=$SDK/platforms/android-36/android.jar
 KS_DIR=~/.config/azan-wecker
 KS=$KS_DIR/release.jks
 
-rm -rf build && mkdir -p build/gen build/classes build/dex build/res/mipmap-xxxhdpi build/res/mipmap-xxhdpi build/res/mipmap-xhdpi build/res/mipmap-hdpi build/res/mipmap-mdpi
+rm -rf build && mkdir -p build/assets/www build/gen build/classes build/dex build/res/mipmap-xxxhdpi build/res/mipmap-xxhdpi build/res/mipmap-xhdpi build/res/mipmap-hdpi build/res/mipmap-mdpi
 
 # Symbol in den üblichen Größen (aus dem App-Symbol der Web-App); Pillow aus der Projekt-venv
 PY_PIL=${PY_PIL:-$HOME/.cache/azan-clock-venv/bin/python}
@@ -25,11 +25,17 @@ src = Image.open('app/src/main/res/drawable/ic_launcher.png').convert('RGBA')
 for d, s in {'mdpi': 48, 'hdpi': 72, 'xhdpi': 96, 'xxhdpi': 144, 'xxxhdpi': 192}.items():
     src.resize((s, s), Image.LANCZOS).save(f'build/res/mipmap-{d}/ic_launcher.png')
 PY
-cp -r app/src/main/res/values* build/res/
+cp -r app/src/main/res/values* app/src/main/res/layout app/src/main/res/xml build/res/
+mkdir -p build/res/drawable && cp app/src/main/res/drawable/*.xml build/res/drawable/
+
+# Oberfläche für den Betrieb ohne Uhr ins Bündel (assets/www) und die Azan-Stimmen (assets/azans)
+( cd ../webapp && npx vite build --mode app --outDir "$OLDPWD/build/assets/www" --emptyOutDir >/dev/null )
+rm -rf build/assets/www/bg build/assets/www/app
+cp -r ../muezzins build/assets/azans && rm -f build/assets/azans/*.md
 sed 's#@drawable/ic_launcher#@mipmap/ic_launcher#g' app/src/main/AndroidManifest.xml > build/AndroidManifest.xml
 
 "$BT/aapt2" compile --dir build/res -o build/res.zip
-"$BT/aapt2" link -o build/base.apk -I "$JAR" --manifest build/AndroidManifest.xml build/res.zip \
+"$BT/aapt2" link -o build/base.apk -I "$JAR" --manifest build/AndroidManifest.xml -A build/assets build/res.zip \
   --java build/gen --min-sdk-version 24 --target-sdk-version 34 \
   --version-code "$VERSION_CODE" --version-name "$VERSION_NAME"
 
@@ -56,5 +62,3 @@ fi
   --out build/Bilal.apk build/aligned.apk
 "$BT/apksigner" verify build/Bilal.apk
 ls -la build/Bilal.apk
-# Auf der Uhr zum Herunterladen anbieten (die Web-App kopiert public/ nach data/www)
-mkdir -p ../webapp/public/app && cp build/Bilal.apk ../webapp/public/app/

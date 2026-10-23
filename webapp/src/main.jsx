@@ -38,12 +38,17 @@ if (typeof Node === 'function' && Node.prototype) {
 }
 
 let l = 'ar';
-try { l = localStorage.getItem('lang') || 'ar'; } catch (e) { /* privat */ }
+try { l = localStorage.getItem('lang') || ''; } catch (e) { /* privat */ }
+if (!l) { // erstes Öffnen: Sprache des Handys (Deutsch, Englisch, sonst Arabisch wie auf der Uhr)
+  const nav = (navigator.language || '').slice(0, 2);
+  l = nav === 'de' || nav === 'en' ? nav : 'ar';
+}
 setLang(l);
 
 setupIonicReact({ mode: 'ios', swipeBackEnabled: true, hardwareBackButton: true });
 
 // Service Worker gibt es nur in sicheren Kontexten (HTTPS oder als sicher markierter Ursprung)
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+// (nicht in der Android-App: dort liefert die App die Dateien selbst aus)
+if ('serviceWorker' in navigator && !window.BilalNative) navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js').catch(() => {});
 
 createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);

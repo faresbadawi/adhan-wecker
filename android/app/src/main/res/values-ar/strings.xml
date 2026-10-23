@@ -7,4 +7,11 @@
     <string name="address_hint">مثال: 192.168.178.72</string>
     <string name="retry">إعادة البحث</string>
     <string name="connect">اتصال</string>
+    <string name="ch_remind">تذكير بالصلاة</string>
+    <string name="ch_remind_desc">تذكير قبل وقت الصلاة بقليل</string>
+    <string name="ch_azan">الأذان</string>
+    <string name="ch_azan_desc">يظهر أثناء رفع الأذان</string>
+    <string name="stop">إيقاف</string>
+    <string name="widget_open">فتح بلال</string>
+    <string name="widget_name">مواقيت الصلاة</string>
 </resources>

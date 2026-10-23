@@ -22,6 +22,7 @@ import android.view.Window;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -37,21 +38,24 @@ import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Bilal für Android: zeigt die Web-App der Uhr ohne Browserleiste (Statusleiste bleibt sichtbar).
- * Die Oberfläche kommt immer von der Uhr selbst, App-Updates kommen also mit jedem Update der Uhr.
+ * Bilal für Android: zeigt die Web-App ohne Browserleiste (Statusleiste bleibt sichtbar).
+ * Ist die Uhr im WLAN erreichbar, kommt die Oberfläche von ihr (immer passend zur Firmware). Sonst läuft die
+ * Oberfläche aus dem Bündel in der App (assets/www) – mit eigenen Gebetszeiten, Alarmen und Widget, ganz ohne Uhr.
  *
  * Uhr finden, in dieser Reihenfolge: zuletzt benutzte Adresse, http://azan-clock.local, mDNS-Dienstsuche
- * (NsdManager, Dienst "azan-clock" vom Typ _http._tcp), sonst Adresse von Hand eingeben.
+ * (NsdManager, Dienst "azan-clock" vom Typ _http._tcp); sonst Bündel. Adresse von Hand: Einstellungen → Uhr verbinden.
  */
 public class MainActivity extends Activity {
     private static final String HOST = "azan-clock.local";
-    private static final int BG = Color.rgb(11, 12, 12);
+    private static final int BG = Color.rgb(7, 7, 7);
+    private static final String VIRTUAL_HOST = "bilal.app";
     private static final int FILE_REQUEST = 1;
 
     private WebView web;
     private View splash;
     private TextView splashText;
-    private String base;                       // z. B. http://192.168.178.72
+    private String base;                       // z. B. http://192.168.178.72 (null: Uhr nicht gefunden)
+    private boolean bundled;                   // Oberfläche aus dem Bündel (ohne Uhr)
     private String pendingShare;               // geteilter Text, wird nach dem Finden der Uhr übergeben
     private ValueCallback<Uri[]> fileCallback; // Dateiauswahl (Hintergrundbild, Update-Datei)
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -78,7 +82,8 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        s.setUserAgentString(s.getUserAgentString() + " AzanWeckerApp/1.1"); // die Web-App blendet damit Installationshinweise aus
+        s.setUserAgentString(s.getUserAgentString() + " AzanWeckerApp/2.0"); // die Web-App blendet damit Installationshinweise aus
+        web.addJavascriptInterface(new Bridge(this, web), "BilalNative");
         web.setWebViewClient(new Client());
         web.setWebChromeClient(new Chrome());
         web.setVisibility(View.INVISIBLE);
@@ -93,13 +98,13 @@ public class MainActivity extends Activity {
         // großer Name wie auf dem Startbildschirm der Uhr
         TextView title = new TextView(this);
         title.setText("بلال");
-        title.setTextColor(Color.rgb(233, 162, 124));
+        title.setTextColor(Color.rgb(212, 175, 106));
         title.setTextSize(64);
         title.setTypeface(android.graphics.Typeface.SERIF, android.graphics.Typeface.BOLD);
         title.setGravity(Gravity.CENTER);
         TextView latin = new TextView(this);
         latin.setText("B I L A L");
-        latin.setTextColor(Color.rgb(246, 243, 238));
+        latin.setTextColor(Color.rgb(248, 244, 234));
         latin.setTextSize(18);
         latin.setLetterSpacing(0.2f);
         latin.setGravity(Gravity.CENTER);
@@ -121,26 +126,60 @@ public class MainActivity extends Activity {
         setContentView(root);
 
         takeShare(getIntent());
+        Notif.ensureChannels(this);
+        Schedule.armNext(this); // Alarme nach App-Start sicher angemeldet
+        askNotificationPermission();
         if (state != null && state.getString("base") != null) {
             base = state.getString("base");
             show(null);
+        } else if (state != null && state.getBoolean("bundled", false)) {
+            showBundled();
         } else {
-            findClock();
+            findClock(false);
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle out) {
         super.onSaveInstanceState(out);
-        if (base != null) out.putString("base", base);
+        if (base != null && !bundled) out.putString("base", base);
+        if (bundled) out.putBoolean("bundled", true);
     }
+
+    // Benachrichtigungen erlauben lassen (Android 13+), einmal beim ersten Start
+    private void askNotificationPermission() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) return;
+        android.content.SharedPreferences p = getSharedPreferences("bilal", MODE_PRIVATE);
+        if (p.getBoolean("askedNotif", false)) return;
+        p.edit().putBoolean("askedNotif", true).apply();
+        requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 7);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int code, String[] perms, int[] results) {
+        super.onRequestPermissionsResult(code, perms, results);
+        tellPage();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tellPage(); // Rechte können in den Android-Einstellungen geändert worden sein
+    }
+
+    private void tellPage() {
+        if (web != null) web.evaluateJavascript("document.dispatchEvent(new Event('visibilitychange'))", null);
+    }
+
+    boolean onClock() { return !bundled && base != null; }
 
     // ---------- Teilen aus der Mawaqit-App: Text an die Web-App übergeben (sie fragt "Diese Moschee übernehmen?")
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         takeShare(intent);
-        if (pendingShare != null && base != null) show(null);
+        if (pendingShare != null) { if (bundled || base == null) showBundled(); else show(null); }
     }
 
     private void takeShare(Intent intent) {
@@ -157,9 +196,23 @@ public class MainActivity extends Activity {
     }
 
     // ---------- Uhr finden
-    private void findClock() {
+    private boolean onWifi() {
+        try {
+            android.net.ConnectivityManager cm = (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            android.net.Network n = cm.getActiveNetwork();
+            android.net.NetworkCapabilities c = n == null ? null : cm.getNetworkCapabilities(n);
+            return c != null && c.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    // manual = vom Nutzer gewünscht: bei Misserfolg Adresse abfragen; sonst still auf die Oberfläche im Bündel wechseln
+    void findClock(boolean manual) {
+        searchingManually = manual;
         splashText.setText(R.string.searching);
         splash.setVisibility(View.VISIBLE);
+        if (!manual && !onWifi()) { showBundled(); return; } // unterwegs: gar nicht erst suchen
         final String saved = getSharedPreferences("clock", MODE_PRIVATE).getString("base", null);
         new Thread(() -> {
             if (saved != null && reachable(saved)) { main.post(() -> show(saved)); return; }
@@ -167,13 +220,14 @@ public class MainActivity extends Activity {
             main.post(this::discover);
         }).start();
     }
+    private boolean searchingManually;
 
     // Die Uhr antwortet bei Last (Gebetszeiten laden, Azan) manchmal erst nach einigen Sekunden
     private static boolean reachable(String b) {
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(b + "/api/status").openConnection();
-            c.setConnectTimeout(6000);
-            c.setReadTimeout(10000);
+            c.setConnectTimeout(3000);
+            c.setReadTimeout(8000);
             int code = c.getResponseCode();
             c.disconnect();
             Log.i("AzanWecker", b + " -> HTTP " + code);
@@ -217,7 +271,7 @@ public class MainActivity extends Activity {
             giveUp(done);
             return;
         }
-        main.postDelayed(() -> giveUp(done), 8000);
+        main.postDelayed(() -> giveUp(done), 5000);
     }
 
     private void stopDiscovery() {
@@ -230,6 +284,7 @@ public class MainActivity extends Activity {
     private void giveUp(AtomicBoolean done) {
         if (!done.compareAndSet(false, true)) return;
         stopDiscovery();
+        if (!searchingManually) { showBundled(); return; }
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         input.setHint(R.string.address_hint);
@@ -246,10 +301,11 @@ public class MainActivity extends Activity {
                     final String b = a;
                     new Thread(() -> {
                         boolean ok = reachable(b);
-                        main.post(() -> { if (ok) show(b); else findClock(); });
+                        main.post(() -> { if (ok) show(b); else showBundled(); });
                     }).start();
                 })
-                .setNegativeButton(R.string.retry, (d, x) -> findClock())
+                .setNegativeButton(R.string.retry, (d, x) -> findClock(true))
+                .setNeutralButton(android.R.string.cancel, (d, x) -> showBundled())
                 .show();
     }
 
@@ -259,19 +315,67 @@ public class MainActivity extends Activity {
             base = b;
             getSharedPreferences("clock", MODE_PRIVATE).edit().putString("base", b).apply();
         }
+        bundled = false;
         String url = base + "/?app=1" + (pendingShare != null ? "&" + pendingShare : "");
         pendingShare = null;
         web.loadUrl(url);
+    }
+
+    // Oberfläche aus dem Bündel (assets/www), wenn keine Uhr erreichbar ist
+    private void showBundled() {
+        bundled = true;
+        base = null;
+        String url = "https://" + VIRTUAL_HOST + "/?app=1" + (pendingShare != null ? "&" + pendingShare : "");
+        pendingShare = null;
+        web.loadUrl(url);
+    }
+
+    private static String mime(String path) {
+        String p = path.toLowerCase();
+        if (p.endsWith(".html")) return "text/html";
+        if (p.endsWith(".js")) return "text/javascript";
+        if (p.endsWith(".css")) return "text/css";
+        if (p.endsWith(".json") || p.endsWith(".webmanifest")) return "application/json";
+        if (p.endsWith(".png")) return "image/png";
+        if (p.endsWith(".svg")) return "image/svg+xml";
+        if (p.endsWith(".woff2")) return "font/woff2";
+        if (p.endsWith(".woff")) return "font/woff";
+        if (p.endsWith(".mp3")) return "audio/mpeg";
+        if (p.endsWith(".ico")) return "image/x-icon";
+        return "application/octet-stream";
+    }
+
+    // Dateien der Oberfläche aus dem Bündel ausliefern (https://bilal.app/…)
+    private WebResourceResponse bundledFile(Uri u) {
+        String path = u.getPath() == null || u.getPath().equals("/") ? "/index.html" : u.getPath();
+        if (path.contains("..")) return null;
+        try {
+            String asset = path.startsWith("/azans/") ? path.substring(1) : "www" + path;
+            java.io.InputStream in = getAssets().open(asset);
+            WebResourceResponse r = new WebResourceResponse(mime(path), "UTF-8", in);
+            java.util.Map<String, String> h = new java.util.HashMap<>();
+            h.put("Access-Control-Allow-Origin", "*");
+            h.put("Cache-Control", "no-cache");
+            r.setResponseHeaders(h);
+            return r;
+        } catch (Exception e) {
+            return new WebResourceResponse("text/plain", "UTF-8", 404, "Not found", new java.util.HashMap<>(), new java.io.ByteArrayInputStream(new byte[0]));
+        }
     }
 
     private class Client extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
             Uri u = r.getUrl();
-            Uri b = Uri.parse(base);
-            if (u.getHost() != null && u.getHost().equals(b.getHost())) return false; // Seiten der Uhr bleiben in der App
+            if (u.getHost() != null && (VIRTUAL_HOST.equals(u.getHost()) || (base != null && u.getHost().equals(Uri.parse(base).getHost())))) return false; // eigene Seiten bleiben in der App
             try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { } // Mawaqit, Karten …
             return true;
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
+            if (VIRTUAL_HOST.equals(r.getUrl().getHost()) && "GET".equals(r.getMethod())) return bundledFile(r.getUrl());
+            return null;
         }
 
         @Override
@@ -282,10 +386,10 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
-            if (r.isForMainFrame()) { // Uhr nicht erreichbar (anderes WLAN, neue Adresse): erneut suchen
+            if (r.isForMainFrame() && !bundled) { // Uhr nicht erreichbar (anderes WLAN, neue Adresse): erneut suchen
                 web.setVisibility(View.INVISIBLE);
                 getSharedPreferences("clock", MODE_PRIVATE).edit().remove("base").apply();
-                findClock();
+                findClock(false);
             }
         }
     }
