@@ -1,0 +1,13 @@
+{
+  "name": "bilal-anleitung",
+  "private": true,
+  "description": "Anleitung als PDF: npm install, Dev-Server der Web-App starten (CLOCK=http://<Uhr>), dann npm run shots && npm run pdf",
+  "scripts": {
+    "shots": "node shot.js && node shot2.js",
+    "pdf": "node build.js"
+  },
+  "dependencies": {
+    "playwright-core": "1.48.2",
+    "qrcode": "1.5.4"
+  }
+}
