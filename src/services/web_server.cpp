@@ -595,6 +595,80 @@ namespace web
         s_server.send(200, "application/json", out);
     }
 
+    // Mawaqit-Anmeldung: {"user","pass"} -> {"token"}; 401 bei falscher Anmeldung, 502 ohne Verbindung.
+    // Die Uhr reicht die Anmeldung nur weiter und speichert nichts.
+    static void mawaqitLogin()
+    {
+        JsonDocument in;
+        deserializeJson(in, s_server.arg("plain"));
+        String token;
+        int code = 0;
+        if (!mawaqit::login(in["user"] | "", in["pass"] | "", token, code))
+        {
+            s_server.send(code == 401 || code == 403 ? 401 : 502, "application/json", "{\"error\":\"login\"}");
+            return;
+        }
+        JsonDocument doc;
+        doc["token"] = token;
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+
+    // Moscheesuche: {"token", "q"} oder {"token", "lat", "lon"} -> Liste
+    // [{"slug","name","place","dist","lat","lon"}]; 401, wenn der Schlüssel nicht mehr gilt.
+    static void mawaqitSearch()
+    {
+        JsonDocument in;
+        deserializeJson(in, s_server.arg("plain"));
+        const bool byPlace = !in["lat"].isNull() && !in["lon"].isNull();
+        String body;
+        int code = 0;
+        if (!mawaqit::search(in["token"] | "", in["q"] | "", in["lat"] | 0.0f, in["lon"] | 0.0f, byPlace, body, code))
+        {
+            s_server.send(code == 401 || code == 403 ? 401 : 502, "application/json", "{\"error\":\"search\"}");
+            return;
+        }
+        JsonDocument filter;
+        for (const char *k : {"slug", "name", "label", "localisation", "proximity", "latitude", "longitude", "url"})
+            filter[0][k] = true;
+        JsonDocument res;
+        if (deserializeJson(res, body, DeserializationOption::Filter(filter)))
+        {
+            s_server.send(502, "application/json", "{\"error\":\"format\"}");
+            return;
+        }
+        body = String();
+        JsonDocument doc;
+        JsonArray out = doc.to<JsonArray>();
+        for (JsonObject m : res.as<JsonArray>())
+        {
+            String slug = m["slug"] | "";
+            if (!slug.length())
+            {
+                const String url = m["url"] | "";
+                const int i = url.lastIndexOf('/');
+                if (i >= 0)
+                    slug = url.substring(i + 1);
+            }
+            if (!slug.length())
+                continue;
+            JsonObject o = out.add<JsonObject>();
+            o["slug"] = slug;
+            o["name"] = m["name"] | (m["label"] | "");
+            o["place"] = m["localisation"] | "";
+            if (!m["proximity"].isNull())
+                o["dist"] = m["proximity"];
+            o["lat"] = m["latitude"];
+            o["lon"] = m["longitude"];
+            if (out.size() >= 40)
+                break;
+        }
+        String outStr;
+        serializeJson(doc, outStr);
+        s_server.send(200, "application/json", outStr);
+    }
+
     // Wecktöne: /sounds/<name>.mp3; der gewählte liegt als /alarm.mp3, sein Name in /alarm.txt
     static bool validSound(const String &name)
     {
@@ -1157,6 +1231,8 @@ namespace web
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);
         s_server.on("/api/mawaqit/resolve", HTTP_POST, resolveMosque);
+        s_server.on("/api/mawaqit/login", HTTP_POST, mawaqitLogin);
+        s_server.on("/api/mawaqit/search", HTTP_POST, mawaqitSearch);
         s_server.on("/api/backgrounds", HTTP_GET, sendBackgrounds);
         s_server.on("/api/update", HTTP_POST, updateDone, updateData);
         s_server.on("/api/background/upload", HTTP_POST, backgroundUploadDone, backgroundUploadData);

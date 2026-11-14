@@ -5,12 +5,13 @@ import {
   IonPage, IonContent, IonList, IonItem, IonLabel, IonNote, IonIcon, IonSegment, IonSegmentButton, IonSelect, IonSelectOption,
   IonButton, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonSearchbar, IonSpinner, IonInput,
 } from '@ionic/react';
-import { locationOutline, searchOutline, openOutline, clipboardOutline, linkOutline, checkmarkCircle, chevronForward, chevronBack, removeOutline, addOutline } from 'ionicons/icons';
+import { locationOutline, navigateOutline, logOutOutline, logInOutline, searchOutline, openOutline, clipboardOutline, linkOutline, checkmarkCircle, chevronForward, chevronBack, removeOutline, addOutline } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
 import { t, lang } from '../lib/i18n.js';
 import { METHODS, PRAYERS } from '../lib/constants.js';
-import { useApp, save, saveLater, toast, parseMawaqit, resolveMosque, cachedMosque } from '../lib/store.js';
+import { useApp, save, saveLater, toast, parseMawaqit, resolveMosque, cachedMosque, api, km, LOCAL_ONLY } from '../lib/store.js';
+import { kvGet, kvSet, kvDel, hasNative } from '../lib/native.js';
 import { takeSearchedPlace, takeMosque } from '../lib/place.js';
 
 // Ort suchen (Open-Meteo-Geocoding, direkt vom Handy) und antippen
@@ -62,6 +63,96 @@ function PlaceSheet({ open, onClose }) {
         {res === null && <p className="section-hint">{t('place_hint')}</p>}
       </IonContent>
     </IonModal>
+  );
+}
+
+// Moschee direkt bei Mawaqit suchen. Mawaqit gibt die Suche nur mit Anmeldung frei: jeder Nutzer meldet sich
+// einmal mit seinem eigenen Mawaqit-Konto an; die App behält nur den Zugangsschlüssel (nicht das Passwort).
+// Die Anfragen laufen über die Uhr oder die Android-App (der Browser allein darf mawaqit.net nicht abfragen).
+function MosqueSearch({ S, onPick }) {
+  const [token, setToken] = useState(() => kvGet('mawaqitToken', ''));
+  const [user, setUser] = useState('');
+  const [pass, setPass] = useState('');
+  const [q, setQ] = useState('');
+  const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const usable = !LOCAL_ONLY || hasNative();
+  if (!usable) return <Section title={t('mq_title')} hint={t('mq_unavailable')} />;
+
+  async function login() {
+    if (!user.trim() || !pass) return;
+    setBusy(true);
+    try {
+      const r = await api('/api/mawaqit/login', { user: user.trim(), pass });
+      if (r.ok && r.data && r.data.token) { kvSet('mawaqitToken', r.data.token); setToken(r.data.token); setPass(''); toast(t('mq_logged_in')); }
+      else toast(t(r.status === 401 ? 'mq_login_bad' : 'mq_error'), true);
+    } catch (e) { toast(t('mq_error'), true); }
+    setBusy(false);
+  }
+  function logout() { kvDel('mawaqitToken'); setToken(''); setRes(null); }
+  async function search(near) {
+    const word = q.trim();
+    if (!near && word.length < 2) return;
+    setBusy(true); setRes('loading');
+    try {
+      const r = await api('/api/mawaqit/search', near ? { token, lat: S.latitude, lon: S.longitude } : { token, q: word });
+      if (r.status === 401) { logout(); toast(t('mq_expired'), true); setBusy(false); return; }
+      if (!r.ok || !Array.isArray(r.data)) throw new Error('search');
+      const list = r.data.map(m => ({ ...m, km: m.lat != null && m.lon != null && (S.latitude || S.longitude) ? km(S.latitude, S.longitude, m.lat, m.lon) : null }));
+      if (near) list.sort((a, b) => (a.km ?? 1e9) - (b.km ?? 1e9));
+      setRes(list);
+    } catch (e) { setRes(null); toast(t('mq_error'), true); }
+    setBusy(false);
+  }
+  async function pick(m) {
+    setBusy(true);
+    await onPick(m.slug);
+    setBusy(false);
+  }
+
+  if (!token) return (
+    <Section title={t('mq_title')} hint={t('mq_login_hint')}>
+      <IonList inset>
+        <IonItem><IonInput label={t('mq_email')} labelPlacement="stacked" type="email" autocomplete="username" value={user} onIonInput={e => setUser(e.detail.value || '')} /></IonItem>
+        <IonItem><IonInput label={t('mq_pass')} labelPlacement="stacked" type="password" autocomplete="current-password" value={pass} onIonInput={e => setPass(e.detail.value || '')}
+          onKeyDown={e => e.key === 'Enter' && login()} /></IonItem>
+      </IonList>
+      <div className="pad-x">
+        <IonButton expand="block" shape="round" onClick={login} disabled={busy || !user.trim() || !pass}>
+          {busy ? <IonSpinner name="crescent" /> : <><IonIcon slot="start" icon={logInOutline} />{t('mq_login')}</>}
+        </IonButton>
+        <IonButton expand="block" fill="clear" size="small" href="https://mawaqit.net/de/backoffice/register/" target="_blank">{t('mq_register')}</IonButton>
+      </div>
+    </Section>
+  );
+
+  return (
+    <Section title={t('mq_title')}>
+      <div className="pad-x">
+        <IonSearchbar value={q} onIonInput={e => setQ(e.detail.value || '')} onKeyDown={e => e.key === 'Enter' && search(false)}
+          placeholder={t('mq_ph')} debounce={0} enterkeyhint="search" />
+        <IonButton expand="block" shape="round" fill="outline" onClick={() => (q.trim().length >= 2 ? search(false) : search(true))} disabled={busy}>
+          <IonIcon slot="start" icon={q.trim().length >= 2 ? searchOutline : navigateOutline} />
+          {q.trim().length >= 2 ? t('mq_search') : t('mq_near').replace('{place}', S.city || '')}
+        </IonButton>
+      </div>
+      {res === 'loading' && <div className="center pad"><IonSpinner /></div>}
+      {Array.isArray(res) && !res.length && <div className="empty">{t('no_results')}</div>}
+      {Array.isArray(res) && res.length > 0 && (
+        <IonList inset>
+          {res.map(m => (
+            <IonItem key={m.slug} button detail={false} disabled={busy} onClick={() => pick(m)}>
+              <IonIcon icon={S.mawaqit.slug === m.slug ? checkmarkCircle : locationOutline} slot="start" className="accent" />
+              <IonLabel><h3>{m.name}</h3>{m.place && <p>{m.place}</p>}</IonLabel>
+              {m.km != null && <IonNote slot="end">{m.km < 10 ? m.km.toFixed(1) : Math.round(m.km)} km</IonNote>}
+            </IonItem>
+          ))}
+        </IonList>
+      )}
+      <div className="pad-x">
+        <IonButton fill="clear" size="small" onClick={logout}><IonIcon slot="start" icon={logOutOutline} />{t('mq_logout')}</IonButton>
+      </div>
+    </Section>
   );
 }
 
@@ -156,6 +247,8 @@ export default function Prayer() {
                 </IonItem>
               </IonList>
             </Section>
+
+            <MosqueSearch S={S} onPick={slug => takeText('https://mawaqit.net/de/' + slug)} />
 
             <Section title={t('mosque_how')}>
               <div className="card-pad howto">

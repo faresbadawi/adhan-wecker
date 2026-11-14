@@ -24,4 +24,13 @@ namespace mawaqit
     // minutes[Tag-1][0..5] = Fajr, Sonnenaufgang, Dhuhr, Asr, Maghrib, Isha (Minuten seit Mitternacht).
     // days = Anzahl der Tage im Kalender. Darf nicht aus dem LVGL-Task aufgerufen werden (dauert Sekunden).
     bool fetchMonth(const char *slug, int month, uint16_t minutes[31][6], int &days);
+
+    // Anmeldung mit dem Mawaqit-Konto des Nutzers (E-Mail und Passwort): liefert seinen Zugangsschlüssel.
+    // Die Uhr speichert weder Passwort noch Schlüssel; die App behält den Schlüssel.
+    // code: HTTP-Status von Mawaqit (401 = falsche Anmeldung, 0 = keine Verbindung).
+    bool login(const char *user, const char *pass, String &token, int &code);
+
+    // Moscheesuche mit dem Zugangsschlüssel: Suchwort (Name, Ort, Postleitzahl) oder Standort.
+    // body: Antwort von Mawaqit (JSON-Liste); code wie bei login.
+    bool search(const char *token, const char *word, float lat, float lon, bool byPlace, String &body, int &code);
 }

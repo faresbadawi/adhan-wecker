@@ -148,6 +148,32 @@ async function resolveMosque(ref) {
   return { slug, name, country: pick('countryCode') || '', timezone: pick('timezone') || '', lat: pick('latitude') || 0, lon: pick('longitude') || 0 };
 }
 
+// ---------- Mawaqit-Konto: Anmeldung und Moscheesuche (wie bei der Uhr, nur über die Android-App)
+const authErr = e => ({ ok: false, status: /HTTP 40[13]/.test(String(e && e.message)) ? 401 : 502, data: null });
+async function mawaqitLogin(b) {
+  if (!hasNative()) return null;
+  try {
+    const basic = 'Basic ' + btoa(unescape(encodeURIComponent((b.user || '') + ':' + (b.pass || ''))));
+    const r = JSON.parse(await nativeFetchText('https://mawaqit.net/api/2.0/me', 'Authorization', basic));
+    return r && r.apiAccessToken ? { ok: true, status: 200, data: { token: r.apiAccessToken } } : { ok: false, status: 502, data: null };
+  } catch (e) { return authErr(e); }
+}
+async function mawaqitSearch(b) {
+  if (!hasNative()) return null;
+  const q = b.lat != null && b.lon != null ? `lat=${(+b.lat).toFixed(5)}&lon=${(+b.lon).toFixed(5)}` : 'word=' + encodeURIComponent(b.q || '');
+  try {
+    const list = JSON.parse(await nativeFetchText('https://mawaqit.net/api/2.0/mosque/search?' + q, 'Api-Access-Token', b.token || ''));
+    const out = [];
+    for (const m of Array.isArray(list) ? list : []) {
+      const slug = m.slug || String(m.url || '').split('/').pop();
+      if (!slug) continue;
+      out.push({ slug, name: m.name || m.label || slug, place: m.localisation || '', lat: m.latitude, lon: m.longitude });
+      if (out.length >= 40) break;
+    }
+    return { ok: true, status: 200, data: out };
+  } catch (e) { return authErr(e); }
+}
+
 // ---------- Antworten im Format der Uhr; null = nicht ohne die Uhr möglich
 export async function localApi(url, body) {
   const ok = data => ({ ok: true, status: 200, data });
@@ -171,6 +197,8 @@ export async function localApi(url, body) {
     case '/api/azan/stop': stopVoice(); return ok({ ok: true });
     case '/api/device/lang': return ok({ ok: true });
     case '/api/device/setup': return ok({ ok: true });
+    case '/api/mawaqit/login': return mawaqitLogin(body || {});
+    case '/api/mawaqit/search': return mawaqitSearch(body || {});
     case '/api/mawaqit/resolve': {
       const m = await resolveMosque(body || {});
       return m ? ok(m) : { ok: false, status: 404, data: null };

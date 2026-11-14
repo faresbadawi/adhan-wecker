@@ -61,15 +61,24 @@ public class Bridge {
     // ---------- Webseiten laden (CORS umgehen); nur Mawaqit
     @JavascriptInterface
     public void fetchText(final int id, final String url) {
+        fetchAuth(id, url, null, null);
+    }
+
+    // Wie fetchText, mit einem zusätzlichen Kopffeld für die Mawaqit-Schnittstelle
+    // (Authorization für die Anmeldung, Api-Access-Token für die Suche)
+    @JavascriptInterface
+    public void fetchAuth(final int id, final String url, final String header, final String value) {
         new Thread(() -> {
             String result;
             boolean ok = false;
             try {
                 if (url == null || !url.startsWith("https://mawaqit.net/")) throw new SecurityException("Adresse nicht erlaubt");
+                if (header != null && !("Authorization".equals(header) || "Api-Access-Token".equals(header))) throw new SecurityException("Kopffeld nicht erlaubt");
                 HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
                 c.setConnectTimeout(10000);
                 c.setReadTimeout(20000);
                 c.setRequestProperty("User-Agent", "Mozilla/5.0 (Bilal)");
+                if (header != null && value != null) c.setRequestProperty(header, value);
                 if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
                 try (InputStream in = c.getInputStream()) {
                     ByteArrayOutputStream out = new ByteArrayOutputStream();

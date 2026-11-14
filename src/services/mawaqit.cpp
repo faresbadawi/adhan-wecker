@@ -31,6 +31,38 @@ namespace mawaqit
         return ok;
     }
 
+    // HTTPS-Abruf der Mawaqit-Schnittstelle mit Anmeldung (Basic) oder Zugangsschlüssel
+    static bool apiGet(const String &url, const char *user, const char *pass, const char *token, String &body, int &code)
+    {
+        netlock::Guard net;
+        WiFiClientSecure client;
+        client.setInsecure();
+        HTTPClient http;
+        http.useHTTP10(true);
+        http.setTimeout(15000);
+        http.setUserAgent("Mozilla/5.0 (Bilal)");
+        code = 0;
+        if (!http.begin(client, url))
+            return false;
+        if (user)
+            http.setAuthorization(user, pass);
+        if (token)
+            http.addHeader("Api-Access-Token", token);
+        http.addHeader("Accept", "application/json");
+        code = http.GET();
+        if (code != 200)
+        {
+            Serial.printf("Mawaqit-API: HTTP %d\n", code);
+            http.end();
+            if (code < 0)
+                code = 0;
+            return false;
+        }
+        const bool ok = httputil::readBody(http, body);
+        http.end();
+        return ok;
+    }
+
     static String urlEncode(const char *s)
     {
         String out;
@@ -195,5 +227,33 @@ namespace mawaqit
         if (!out.name.length())
             out.name = out.slug;
         return true;
+    }
+
+    bool login(const char *user, const char *pass, String &token, int &code)
+    {
+        String body;
+        if (!user || !user[0] || !pass || !pass[0])
+            return false;
+        if (!apiGet("https://mawaqit.net/api/2.0/me", user, pass, nullptr, body, code))
+            return false;
+        JsonDocument filter;
+        filter["apiAccessToken"] = true;
+        JsonDocument doc;
+        if (deserializeJson(doc, body, DeserializationOption::Filter(filter)))
+            return false;
+        token = doc["apiAccessToken"] | "";
+        return token.length() > 0;
+    }
+
+    bool search(const char *token, const char *word, float lat, float lon, bool byPlace, String &body, int &code)
+    {
+        if (!token || !token[0])
+            return false;
+        String url = "https://mawaqit.net/api/2.0/mosque/search?";
+        if (byPlace)
+            url += "lat=" + String(lat, 5) + "&lon=" + String(lon, 5);
+        else
+            url += "word=" + urlEncode(word ? word : "");
+        return apiGet(url, nullptr, nullptr, token, body, code);
     }
 }

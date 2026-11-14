@@ -35,13 +35,16 @@ if (typeof window !== 'undefined') {
   };
 }
 // Webseite über die Android-App laden (ohne Browser-Sperre CORS), z. B. die Moscheeseite von Mawaqit
-export function nativeFetchText(url) {
+export function nativeFetchText(url, header, value) {
   return new Promise((res, rej) => {
     const n = native();
     if (!n) { rej(new Error('no-native')); return; }
     const id = ++nextId;
     waiting[id] = { res, rej };
     setTimeout(() => { if (waiting[id]) { delete waiting[id]; rej(new Error('timeout')); } }, 30000);
-    n.fetchText(id, url);
+    if (header) {
+      if (!n.fetchAuth) { delete waiting[id]; rej(new Error('old-app')); return; } // ältere Android-App
+      n.fetchAuth(id, url, header, value);
+    } else n.fetchText(id, url);
   });
 }
