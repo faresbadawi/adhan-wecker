@@ -1,5 +1,6 @@
 // Anzeige der Uhr: Reihenfolge der Seiten (am Griff ziehen), Hintergrund mit eigenem Bild,
-// Farbvorlagen und eigene Farben, Helligkeit mit Nachtdimmung, RGB-LED
+// Gehäuse (schwarz/weiß) bestimmt passende Hintergründe und Farbvorlagen, eigene Farben, Helligkeit mit Nachtdimmung.
+// Das LED-Licht steht als Lampen-Symbol oben auf der Startseite.
 import { useEffect, useRef, useState } from 'react';
 import {
   IonPage, IonContent, IonList, IonItem, IonLabel, IonToggle, IonReorderGroup, IonReorder, IonRange, IonIcon, IonNote, IonSpinner,
@@ -12,11 +13,10 @@ import Svg from '../components/Svg.jsx';
 import ColorSheet from '../components/ColorSheet.jsx';
 import { t, lang } from '../lib/i18n.js';
 import { PAGE_ICON } from '../lib/icons.js';
-import { PRESETS, LED_PRESETS, THEME_SWATCHES } from '../lib/constants.js';
-import { hex2hsl, hsl2hex } from '../lib/color.js';
+import { PRESETS, LIGHT_PRESETS, DARK_BGS, LIGHT_BGS, THEME_SWATCHES } from '../lib/constants.js';
+import { hex2hsl } from '../lib/color.js';
 import { cropImage } from '../lib/crop.js';
 import { useApp, set, api, save, toast, confirmBox, applyTheme } from '../lib/store.js';
-import { loadLed, ledSend } from '../lib/led.js';
 
 const same = (a, b) => (a || '').toUpperCase() === (b || '').toUpperCase();
 
@@ -76,25 +76,61 @@ export default function Display() {
     } catch (err) { toast(t('error'), true); }
   }
 
-  // Farben
+  // Gehäuse: weiß, wenn die Hauptschrift dunkel ist (helle Vorlagen), sonst schwarz. Die Wahl des Gehäuses
+  // stellt passende Farben und einen passenden Hintergrund ein; danach zeigt die Seite nur, was dazu passt.
+  const white = S ? hex2hsl(S.colors.main)[2] < 0.5 : false;
+  const fitsCase = n => n === 'custom' || (white ? LIGHT_BGS.includes(n) : !LIGHT_BGS.includes(n));
+  function pickCase(w) {
+    if (w === white) return;
+    const [, m, a, mu] = (w ? LIGHT_PRESETS : PRESETS)[0];
+    const part = { colors: { main: m, accent: a, muted: mu } };
+    if (S.background !== 'custom') part.background = w ? LIGHT_BGS[0] : DARK_BGS[0];
+    save(part);
+  }
+  function pickPreset(m, a, mu, light) {
+    const part = { colors: { main: m, accent: a, muted: mu } };
+    if (light && !LIGHT_BGS.includes(S.background) && S.background !== 'custom') part.background = LIGHT_BGS[0];
+    if (!light && LIGHT_BGS.includes(S.background)) part.background = DARK_BGS[0];
+    save(part);
+  }
+  const presetGrid = (list, light) => (
+    <div className="pad-x themes">
+      {list.map(([k, m, a, mu]) => (
+        <button key={k} className={same(S.colors.main, m) && same(S.colors.accent, a) && same(S.colors.muted, mu) ? 'on' : ''} onClick={() => pickPreset(m, a, mu, light)}>
+          <span className={'tprev' + (light ? ' light' : '')}><b style={{ color: m }}>12:30</b><i style={{ background: a }} /><small style={{ color: mu }}>{t('fajr')}</small></span>
+          <span className="tname">{t(k)}</span>
+        </button>
+      ))}
+    </div>
+  );
   const [colorReq, setColorReq] = useState(null);
   function editColor(role) {
     const base = { ...S.colors };
     setColorReq({
-      title: t('col_' + role), value: base[role], swatches: THEME_SWATCHES[role],
+      title: t('col_' + role), value: base[role],
+      swatches: THEME_SWATCHES[role].filter(c => role !== 'main' || (hex2hsl(c)[2] < 0.5) === white),
       live: hex => applyTheme({ ...base, [role]: hex }),
       done: v => { if (v && !same(v, base[role])) save({ colors: { ...base, [role]: v } }); else applyTheme(S.colors); },
     });
   }
 
-  const [led, setLed] = useState(loadLed);
-  const ledSet = part => { const n = { ...led, ...part }; setLed(n); ledSend(n); };
 
   return (
     <IonPage>
       <Bar title={t('nav_display')} back="/settings" />
       <IonContent>
         {!S ? <div className="center pad"><IonSpinner /></div> : <>
+          <Section title={t('case_title')} hint={t('case_hint')}>
+            <div className="pad-x cases">
+              {[false, true].map(w => (
+                <button key={String(w)} className={'case' + (w ? ' white' : ' black') + (w === white ? ' on' : '')} onClick={() => pickCase(w)}>
+                  <span className="case-body"><span className="case-screen"><b>12:30</b><i /></span></span>
+                  <span className="tname">{t(w ? 'case_white' : 'case_black')}</span>
+                </button>
+              ))}
+            </div>
+          </Section>
+
           <Section title={t('pages')} hint={t('pages_hint')}>
             <IonList inset>
               <IonReorderGroup disabled={false} onIonItemReorder={reorder}>
@@ -144,7 +180,7 @@ export default function Display() {
               {Array.isArray(bgs) && (
                 <div className="bgs">
                   <button className="bgadd" onClick={() => fileRef.current.click()}><IonIcon icon={addOutline} /><span>{t(bgs.includes('custom') ? 'bg_replace' : 'bg_own')}</span></button>
-                  {bgs.map(n => (
+                  {bgs.filter(fitsCase).map(n => (
                     <div className="bgwrap" key={n}>
                       <button className={'bg' + (n === S.background ? ' sel' : '')} onClick={() => save({ background: n })}>
                         <img src={`/bg/${encodeURIComponent(n)}.jpg?v=${bgVer}`} alt={n} loading="lazy" />
@@ -158,17 +194,7 @@ export default function Display() {
             </div>
           </Section>
 
-          <Section title={t('presets')}>
-            <div className="pad-x themes">
-              {PRESETS.map(([k, m, a, mu]) => (
-                <button key={k} className={same(S.colors.main, m) && same(S.colors.accent, a) && same(S.colors.muted, mu) ? 'on' : ''}
-                  onClick={() => save({ colors: { main: m, accent: a, muted: mu } })}>
-                  <span className="tprev"><b style={{ color: m }}>12:30</b><i style={{ background: a }} /><small style={{ color: mu }}>{t('fajr')}</small></span>
-                  <span className="tname">{t(k)}</span>
-                </button>
-              ))}
-            </div>
-          </Section>
+          <Section title={t('presets')}>{white ? presetGrid(LIGHT_PRESETS, true) : presetGrid(PRESETS, false)}</Section>
 
           <Section title={t('custom_colors')}>
             <IonList inset>
@@ -203,26 +229,6 @@ export default function Display() {
             </IonList>
           </Section>
 
-          <Section title={t('led')} hint={t('led_hint')}>
-            <IonList inset>
-              <IonItem>
-                <span className="ledglow" slot="start" style={{ '--c': led.on ? led.color : 'transparent' }} />
-                <IonToggle checked={led.on} onIonChange={e => ledSet({ on: e.detail.checked })}>{t('led_on')}</IonToggle>
-              </IonItem>
-              <IonItem lines="none">
-                <div className="led-box">
-                  <div className="swatches big">
-                    {LED_PRESETS.map(c => <button key={c} className={same(c, led.color) ? 'on' : ''} style={{ '--c': c }} aria-label={c} onClick={() => ledSet({ color: c, on: true })} />)}
-                  </div>
-                  <label className="f">{t('hue')}</label>
-                  <input type="range" className="slider hue" min="0" max="359" value={Math.round(hex2hsl(led.color)[0])}
-                    onChange={e => ledSet({ color: hsl2hex(Number(e.target.value), 1, 0.5), on: true })} />
-                  <label className="f">{t('led_bri')}</label>
-                  <input type="range" className="slider bri" min="5" max="100" value={led.bri} onChange={e => ledSet({ bri: Number(e.target.value), on: true })} />
-                </div>
-              </IonItem>
-            </IonList>
-          </Section>
         </>}
         <ColorSheet req={colorReq} onClose={() => setColorReq(null)} />
       </IonContent>

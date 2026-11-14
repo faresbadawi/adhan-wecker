@@ -6,6 +6,15 @@ namespace theme
     static lv_style_t s_style[3];
     static lv_color_t s_color[3] = {lv_color_hex(0xF4F1EA), lv_color_hex(0xC9A45C), lv_color_hex(0x8C978F)};
 
+    static lv_style_t s_surface;
+    static lv_color_t s_surfaceColor = lv_color_hex(0x040607);
+
+    static bool s_light = false;
+
+    bool light() { return s_light; }
+    lv_color_t surfaceColor() { return s_surfaceColor; }
+    void surface(lv_obj_t *obj) { lv_obj_add_style(obj, &s_surface, 0); } // nach setRole aufrufen (hat dann Vorrang)
+
     static void applyStyle(Role r)
     {
         lv_style_t *st = &s_style[(int)r];
@@ -25,6 +34,8 @@ namespace theme
             lv_style_init(&s_style[i]);
             applyStyle((Role)i);
         }
+        lv_style_init(&s_surface);
+        lv_style_set_bg_color(&s_surface, s_surfaceColor);
     }
 
     void setPalette(uint32_t main, uint32_t accent, uint32_t muted)
@@ -36,6 +47,11 @@ namespace theme
             applyStyle((Role)i);
             lv_obj_report_style_change(&s_style[i]);
         }
+        // dunkle Hauptschrift: Karten hell, sonst dunkel
+        s_light = ((main >> 16 & 255) * 3 + (main >> 8 & 255) * 6 + (main & 255)) < 1280;
+        s_surfaceColor = lv_color_hex(s_light ? 0xFFFFFF : 0x040607);
+        lv_style_set_bg_color(&s_surface, s_surfaceColor);
+        lv_obj_report_style_change(&s_surface);
     }
 
     void setRole(lv_obj_t *obj, Role role)
@@ -83,8 +99,10 @@ namespace theme
     bool setBackground(const char *name)
     {
         constexpr size_t SIZE = SCREEN_W * SCREEN_H * 2; // RGB565
+        // "hell": heller Grund für das weiße Gehäuse, aus dem Sternmuster berechnet (braucht keine eigene Datei)
+        const bool lightBg = strcmp(name, LIGHT_BG) == 0;
         char path[48];
-        snprintf(path, sizeof(path), "/bg/%s.bin", name);
+        snprintf(path, sizeof(path), "/bg/%s.bin", lightBg ? "muster" : name);
         File f = LittleFS.open(path, "r");
         if (!f || f.size() != SIZE)
         {
@@ -97,6 +115,19 @@ namespace theme
             return false;
         f.read(s_bgData, SIZE);
         f.close();
+        if (lightBg)
+        {
+            // dunkles Muster umkehren: Elfenbein, die Linien etwas dunkler und wärmer
+            for (size_t i = 0; i < SIZE; i += 2)
+            {
+                const uint16_t v = s_bgData[i] << 8 | s_bgData[i + 1]; // RGB565, hohes Byte zuerst
+                const int l = max(max((v >> 11) << 3, ((v >> 5) & 63) << 2), (v & 31) << 3);
+                const int k = max(0, l - 16);
+                const uint16_t o = ((250 - k * 9 / 8) >> 3) << 11 | ((246 - k * 10 / 8) >> 2) << 5 | (max(0, 237 - k * 13 / 8) >> 3);
+                s_bgData[i] = o >> 8;
+                s_bgData[i + 1] = o & 255;
+            }
+        }
 
         s_bg.header.cf = LV_IMG_CF_TRUE_COLOR;
         s_bg.header.w = SCREEN_W;

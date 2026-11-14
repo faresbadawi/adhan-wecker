@@ -206,6 +206,7 @@ namespace web
         }
         doc["azanOnClock"] = azan::onClock(); // false: Azan nur auf dem Handy
         doc["azanMaxSec"] = azan::maxSeconds(); // 0 = ganzer Azan
+        doc["azanRamadan"] = azan::ramadanMode(); // 0 = aus, 1 = alle Gebete, 2 = nur Maghrib
         doc["brightness"] = st.brightness;
         doc["autoDim"] = st.autoDim;
         doc["showNight"] = st.showNight;
@@ -342,6 +343,10 @@ namespace web
             azan::setOnClock(doc["azanOnClock"]);
         if (doc["azanMaxSec"].is<int>())
             azan::setMaxSeconds((uint16_t)doc["azanMaxSec"].as<int>());
+        if (doc["ownStore"].is<int>())
+            azan::setOwnStore((uint8_t)doc["ownStore"].as<int>());
+        if (doc["azanRamadan"].is<int>())
+            azan::setRamadanMode((uint8_t)doc["azanRamadan"].as<int>());
         st.brightness = doc["brightness"] | st.brightness;
         st.autoDim = doc["autoDim"] | st.autoDim;
         st.showNight = doc["showNight"] | st.showNight;
@@ -451,9 +456,10 @@ namespace web
         for (File f = dir.openNextFile(); f; f = dir.openNextFile())
         {
             String name = f.name();
-            if (name.endsWith(".bin"))
+            if (name.endsWith(".bin") && name != "muster.bin") // muster = Grundlage für "hell", nicht wählbar
                 list.add(name.substring(0, name.length() - 4));
         }
+        list.add(theme::LIGHT_BG); // heller Grund, wird aus dem Muster berechnet
         String out;
         serializeJson(doc, out);
         s_server.send(200, "application/json", out);
@@ -507,10 +513,11 @@ namespace web
         sendBackgrounds();
     }
 
-    // Sicherung eigener Dateien (vor einem Dateisystem-Update): nur diese vier Pfade, nur lesen
+    // Sicherung eigener Dateien (vor einem Dateisystem-Update): nur diese Pfade, nur lesen
     static void sendBackupFile()
     {
-        static const char *const OK[] = {"/bg/custom.bin", "/www/bg/custom.jpg", "/alarm.mp3", "/alarm.txt"};
+        static const char *const OK[] = {"/bg/custom.bin", "/www/bg/custom.jpg", "/alarm.mp3", "/alarm.txt",
+                                         "/azans/custom.mp3", "/azans/custom_fajr.mp3", "/azans/ramadan.mp3"};
         const String path = s_server.arg("path");
         bool allowed = false;
         for (const char *p : OK)
@@ -861,16 +868,21 @@ namespace web
             if (strcmp(doc["prayer"] | "", AZAN_KEYS[i]) == 0)
                 prayer = model::DAILY_PRAYERS[i];
         static char path[96];
-        if (azan::status().state != azan::State::IDLE || !azan::voiceFile(id, prayer, path, sizeof(path)))
+        fs::FS *fs = azan::status().state == azan::State::IDLE ? azan::voiceFile(id, prayer, path, sizeof(path)) : nullptr;
+        if (!fs)
         {
             s_server.send(409, "application/json", "{\"error\":\"azan\"}");
             return;
         }
         azan::applyVolume(prayer);
-        audio::play(LittleFS, path);
+        audio::play(*fs, path);
         azan::limitTo(5000); // Vorhören: nur die ersten 5 Sekunden
         s_server.send(200, "application/json", "{}");
     }
+
+    static const char *const OWN_SLOTS[3] = {"normal", "fajr", "ramadan"};
+    static const char *const OWN_FILES[3] = {"/azans/custom.mp3", "/azans/custom_fajr.mp3", azan::RAMADAN_FILE};
+    static constexpr const char *OWN_TMP = "/azans/upload.tmp";
 
     // Verfügbare Azan-Stimmen (Dateien in /azans ohne _fajr) und die gewählte
     static void sendVoices()
@@ -881,12 +893,31 @@ namespace web
         for (File f = dir.openNextFile(); f; f = dir.openNextFile())
         {
             String n = f.name();
-            if (n.endsWith(".mp3") && !n.endsWith("_fajr.mp3"))
+            if (n.endsWith(".mp3") && !n.endsWith("_fajr.mp3") && n != "ramadan.mp3" && n != "custom.mp3")
             {
                 n.remove(n.length() - 4);
                 list.add(n);
             }
         }
+        // Eigene Azane: normal (custom.mp3), Fajr (custom_fajr.mp3), Ramadan; die Größe in Bytes, 0 = keiner
+        JsonObject own = doc["own"].to<JsonObject>();
+        // Ort je Datei ("sd" oder "clock"); neue Uploads gehen nach ownTarget(), "free" ist der Platz dort
+        JsonObject where = doc["where"].to<JsonObject>();
+        for (int i = 0; i < 3; i++)
+        {
+            fs::FS *fs = azan::ownFs(OWN_FILES[i]);
+            File f = fs ? fs->open(OWN_FILES[i], "r") : File();
+            own[OWN_SLOTS[i]] = f ? f.size() : 0;
+            if (fs)
+                where[OWN_SLOTS[i]] = fs == &LittleFS ? "clock" : "sd";
+        }
+        if (own["fajr"].as<size_t>() || own["normal"].as<size_t>())
+            list.add("custom");
+        fs::FS &target = azan::ownTarget();
+        doc["free"] = azan::freeBytes(target);
+        doc["sd"] = storage::sdAvailable();
+        doc["store"] = azan::ownStore();
+        doc["target"] = &target == &LittleFS ? "clock" : "sd";
         doc["selected"] = azan::voice();
         String out;
         serializeJson(doc, out);
@@ -902,6 +933,85 @@ namespace web
             s_server.send(400, "application/json", "{\"error\":\"voice\"}");
             return;
         }
+        sendVoices();
+    }
+
+    // Eigener Azan aus der App: POST /api/azan/upload?slot=normal|fajr|ramadan (Datei als MP3, von der App
+    // verkleinert). Erst in eine Zwischendatei, damit nie eine halbe Datei als Azan abgespielt wird.
+    static bool s_ownOk = false;
+    static int ownSlot()
+    {
+        for (int i = 0; i < 3; i++)
+            if (s_server.arg("slot") == OWN_SLOTS[i])
+                return i;
+        return -1;
+    }
+
+    static void azanUploadData()
+    {
+        HTTPUpload &up = s_server.upload();
+        if (up.status == UPLOAD_FILE_START)
+        {
+            azan::skip();
+            audio::stop();
+            fs::FS &fs = azan::ownTarget();
+            fs.remove(OWN_TMP);
+            for (int k = 0; k < 2 && ownSlot() >= 0; k++) // auf SD-Karte und im Flash
+                if (fs::FS *old = azan::ownFs(OWN_FILES[ownSlot()]))
+                    old->remove(OWN_FILES[ownSlot()]); // der Speicher reicht nicht für alten und neuen Azan zugleich
+            s_upFile = ownSlot() >= 0 ? fs.open(OWN_TMP, "w") : File();
+            s_ownOk = (bool)s_upFile;
+        }
+        else if (up.status == UPLOAD_FILE_WRITE && s_upFile)
+        {
+            // 64 kB bleiben frei (Einstellungen der App, Platz für das Dateisystem selbst)
+            if (s_ownOk && azan::freeBytes(azan::ownTarget()) < up.currentSize + 65536)
+                s_ownOk = false;
+            if (s_ownOk && s_upFile.write(up.buf, up.currentSize) != up.currentSize)
+                s_ownOk = false;
+        }
+        else if (up.status == UPLOAD_FILE_END || up.status == UPLOAD_FILE_ABORTED)
+        {
+            if (s_upFile)
+                s_upFile.close();
+            if (up.status == UPLOAD_FILE_ABORTED)
+                s_ownOk = false;
+        }
+    }
+
+    static void azanUploadDone()
+    {
+        const int slot = ownSlot();
+        fs::FS &fs = azan::ownTarget();
+        File f = fs.open(OWN_TMP, "r");
+        const size_t size = f ? f.size() : 0;
+        f.close();
+        if (!s_ownOk || slot < 0 || size < 4096)
+        {
+            fs.remove(OWN_TMP);
+            s_server.send(400, "application/json", "{\"error\":\"space\"}");
+            return;
+        }
+        s_ownOk = false;
+        fs.rename(OWN_TMP, OWN_FILES[slot]);
+        if (slot < 2)
+            azan::setVoice("custom"); // der eigene Azan gilt sofort
+        sendVoices();
+    }
+
+    static void azanOwnDelete()
+    {
+        const int slot = ownSlot();
+        if (slot < 0)
+        {
+            s_server.send(400, "application/json", "{\"error\":\"slot\"}");
+            return;
+        }
+        azan::skip();
+        audio::stop();
+        for (int k = 0; k < 2; k++) // auf SD-Karte und im Flash
+            if (fs::FS *fs = azan::ownFs(OWN_FILES[slot]))
+                fs->remove(OWN_FILES[slot]);
         sendVoices();
     }
 
@@ -1041,6 +1151,8 @@ namespace web
         s_server.on("/api/azan/preview", HTTP_POST, azanPreview);
         s_server.on("/api/azan/voices", HTTP_GET, sendVoices);
         s_server.on("/api/azan/voice", HTTP_POST, selectVoice);
+        s_server.on("/api/azan/upload", HTTP_POST, azanUploadDone, azanUploadData);
+        s_server.on("/api/azan/delete", HTTP_POST, azanOwnDelete);
         s_server.on("/api/sounds", HTTP_GET, sendSounds);
         s_server.on("/api/sound", HTTP_POST, selectSound);
         s_server.on("/api/preview", HTTP_POST, previewSound);

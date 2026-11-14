@@ -10,16 +10,19 @@ export function cropImage(file, colors, t, onError) {
       const m = document.createElement("div");
       m.className = "cropper";
       const sample = colors || { main: "#ffffff", accent: "#e9a27c" };
+      // dunkle Schrift (heller Stil): das Bild hell lassen; helle Schrift: abdunkeln, damit sie lesbar bleibt
+      const n = parseInt((sample.main || "#ffffff").slice(1), 16);
+      const bri0 = ((n >> 16 & 255) * 3 + (n >> 8 & 255) * 6 + (n & 255)) < 1280 ? 100 : 70;
       m.innerHTML = `<div class="crophead"><button class="btn" data-a="0">${t("cancel")}</button><b>${t("bg_crop")}</b><button class="btn gold" data-a="1">${t("bg_use")}</button></div>
         <div class="cropframe" id="cframe"><img id="cimg" draggable="false" alt="">
           <div class="cropsample ltr"><span style="color:${sample.main}">12:30</span><small style="color:${sample.accent}">${t("next_prayer")}</small></div></div>
         <p class="hint" style="text-align:center">${t("bg_crop_hint")}</p>
         <div class="cropctl"><label class="f">${t("zoom")}</label><input type="range" id="czoom" min="1" max="4" step="0.01" value="1">
-          <label class="f">${t("bg_brightness")}</label><input type="range" id="cbri" min="30" max="100" value="70"></div>`;
+          <label class="f">${t("bg_brightness")}</label><input type="range" id="cbri" min="30" max="100" value="${bri0}"></div>`;
       document.body.appendChild(m);
       const frame = m.querySelector("#cframe"), el = m.querySelector("#cimg");
       el.src = url;
-      let zoom = 1, x = 0, y = 0, bri = 70; // x/y: Verschiebung in Rahmen-Pixeln
+      let zoom = 1, x = 0, y = 0, bri = bri0; // x/y: Verschiebung in Rahmen-Pixeln
       const fw = () => frame.clientWidth, fh = () => frame.clientHeight;
       const base = () => Math.max(fw() / img.naturalWidth, fh() / img.naturalHeight); // füllt den Rahmen
       const clamp = () => {

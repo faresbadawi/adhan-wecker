@@ -9,4 +9,7 @@ namespace display
 
     // Initialisiert Panel, Touch und LVGL. Gibt false zurück, wenn der Touch nicht antwortet.
     bool begin();
+
+    // true, wenn der Bildschirm seit dem letzten Aufruf doppelt angetippt wurde
+    bool takeDoubleTap();
 }

@@ -10,7 +10,6 @@ import { DAILY, KEYS, dayTimes, ensureData, epochOf, addDays, zoned, hm, maxDela
 // Azan-Stimmen im Handy (liegen in der App bzw. auf dem Server der Web-App); fajr = eigene Fassung für Fajr
 export const VOICES = [
   { id: 'alafasy', fajr: true }, { id: 'islam_sobhi', fajr: true },
-  { id: 'beautiful', fajr: false }, { id: 'madinah', fajr: false },
 ];
 export const voiceFile = (id, fajr) => { const v = VOICES.find(x => x.id === id) || VOICES[0]; return `${v.id}${fajr && v.fajr ? '_fajr' : ''}.mp3`; };
 
@@ -32,7 +31,10 @@ const merge = (a, b) => {
 
 let P = null;
 export function phone() {
-  if (!P) P = merge(DEFAULTS, kvGet('P', {}));
+  if (!P) {
+    P = merge(DEFAULTS, kvGet('P', {}));
+    if (!VOICES.some(v => v.id === P.voice)) { P.voice = VOICES[0].id; persist(); } // entfernte Stimme -> Standard
+  }
   return P;
 }
 function persist() { kvSet('P', P); }

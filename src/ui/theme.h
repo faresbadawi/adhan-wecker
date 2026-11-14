@@ -23,8 +23,11 @@ namespace theme
     constexpr lv_coord_t SCREEN_H = 320;
     constexpr lv_coord_t MARGIN = 24;
 
-    // Hintergrund dunkler Karten und Overlays
-    inline lv_color_t black() { return lv_color_hex(0x040607); }
+    // Fläche hinter Karten und Overlays. Sie folgt der Hauptschrift: helle Schrift = dunkle Fläche,
+    // dunkle Schrift (helles Gehäuse, heller Hintergrund) = helle Fläche. Wechselt mit setPalette().
+    bool light();
+    lv_color_t surfaceColor();
+    void surface(lv_obj_t *obj);
 
     // Drei Farbgruppen, über die Weboberfläche änderbar. Jedes Element gehört genau einer an.
     enum class Role : uint8_t
@@ -49,6 +52,8 @@ namespace theme
 
     // Hintergrundbild für Bildschirm und Overlays; lädt /bg/<name>.bin aus dem LittleFS in den PSRAM.
     // Alle mit background() erzeugten Bilder wechseln mit.
+    // LIGHT_BG ("hell") ist ein heller Grund ohne eigene Datei (aus /bg/muster.bin berechnet).
+    constexpr const char *LIGHT_BG = "hell";
     lv_obj_t *background(lv_obj_t *parent);
     bool setBackground(const char *name);
 

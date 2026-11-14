@@ -55,10 +55,58 @@ namespace display
         a->y2 |= 3;
     }
 
+    // Doppeltippen erkennen: zwei kurze Berührungen ohne Wischen kurz nacheinander
+    static bool s_doubleTap = false;
+
+    static void trackTap(bool down, int x, int y)
+    {
+        static bool wasDown = false, moved = false;
+        static uint32_t downAt = 0, lastTapAt = 0;
+        static int x0 = 0, y0 = 0;
+        const uint32_t now = millis();
+        if (down && !wasDown)
+        {
+            downAt = now;
+            x0 = x;
+            y0 = y;
+            moved = false;
+        }
+        else if (down && (abs(x - x0) > 25 || abs(y - y0) > 25))
+        {
+            moved = true;
+        }
+        else if (!down && wasDown && !moved && now - downAt < 400)
+        {
+            if (lastTapAt && now - lastTapAt < 700)
+            {
+                s_doubleTap = true;
+                lastTapAt = 0;
+            }
+            else
+            {
+                lastTapAt = now;
+            }
+        }
+        else if (!down && wasDown)
+        {
+            lastTapAt = 0; // langes Drücken oder Wischen
+        }
+        wasDown = down;
+    }
+
+    bool takeDoubleTap()
+    {
+        const bool t = s_doubleTap;
+        s_doubleTap = false;
+        return t;
+    }
+
     static void touchCb(lv_indev_drv_t *, lv_indev_data_t *data)
     {
         uint16_t nx, ny;
-        if (touch::read(nx, ny))
+        const bool down = touch::read(nx, ny);
+        trackTap(down, nx, ny);
+        if (down)
         {
             // Umkehrung von toNativeX/toNativeY
             data->point.x = FLIP_180 ? lcd::NATIVE_H - 1 - ny : ny;

@@ -20,6 +20,7 @@ namespace moon_screen
     static lv_obj_t *s_wdImg, *s_wdRange, *s_wdDates; // weiße Tage: Beschriftung, Daten (s_wdDates = s_wdRange)
     static lv_color_t *s_buf = nullptr;
     static int s_lastAge10 = -1;
+    static bool s_lastLight = false;
 
     // Mond immer links, Text rechts – in allen Sprachen gleich
     static lv_coord_t mx(lv_coord_t x) { return x; }
@@ -37,7 +38,9 @@ namespace moon_screen
     {
         const double th = 2 * M_PI * age / SYNODIC;
         const double r = MOON / 2.0 - 1;
-        const lv_color_t lit = lv_color_hex(0xF2E6C9), dark = lv_color_hex(0x161925);
+        // heller Stil: goldener Mond mit grauem Schatten, sonst verschwindet er im Hintergrund
+        s_lastLight = light();
+        const lv_color_t lit = lv_color_hex(s_lastLight ? 0xDDA92A : 0xF2E6C9), dark = lv_color_hex(s_lastLight ? 0x6F7682 : 0x161925);
         for (int y = 0; y < MOON; y++)
         {
             for (int x = 0; x < MOON; x++)
@@ -163,7 +166,7 @@ namespace moon_screen
     {
         const double age = moonAge(now);
         const int age10 = (int)(age * 10);
-        if (age10 != s_lastAge10)
+        if (age10 != s_lastAge10 || light() != s_lastLight)
         {
             s_lastAge10 = age10;
             drawMoon(age);

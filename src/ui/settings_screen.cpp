@@ -27,7 +27,7 @@ namespace settings_screen
         lv_obj_set_size(c, w, 236);
         lv_obj_set_style_radius(c, 12, 0);
         setRole(c, Role::ACCENT);
-        lv_obj_set_style_bg_color(c, black(), 0);
+        surface(c);
         lv_obj_set_style_bg_opa(c, LV_OPA_60, 0);
         lv_obj_set_style_border_opa(c, LV_OPA_70, 0);
         lv_obj_set_style_border_width(c, 2, 0);

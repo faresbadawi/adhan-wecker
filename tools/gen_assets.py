@@ -184,12 +184,13 @@ const lv_img_dsc_t {name} = {{
     (OUT / f"{name}.c").write_text(src)
 
 
-def write_bg(name, img):
+def write_bg(name, img, preview=True):
     (DATA / "bg").mkdir(parents=True, exist_ok=True)
     (DATA / "www" / "bg").mkdir(parents=True, exist_ok=True)
     rgb = dither565(img)
     (DATA / "bg" / f"{name}.bin").write_bytes(rgb565_be(rgb).tobytes())
-    Image.fromarray(rgb).resize((160, 107), Image.LANCZOS).save(DATA / "www" / "bg" / f"{name}.jpg", quality=80)
+    if preview:
+        Image.fromarray(rgb).resize((160, 107), Image.LANCZOS).save(DATA / "www" / "bg" / f"{name}.jpg", quality=80)
 
 
 def arabic_font(size, font_file):
@@ -407,6 +408,12 @@ TEXTS = {
     "azan_now": (28, False, {"ar": "حان الآن وقت صلاة", "de": "Es ist Zeit für das Gebet", "en": "It is time for"}),
     "azan_stop": (22, False, {"ar": "المس الشاشة لإيقاف الأذان", "de": "Bildschirm berühren, um den Azan zu beenden",
                               "en": "Touch the screen to stop the azan"}),
+    "fajr_ends": (22, False, {"ar": "ينتهي وقت الفجر بعد", "de": "Fajr-Zeit endet in", "en": "Fajr time ends in"}),
+    "sunrise_title": (28, False, {"ar": "انتهى وقت صلاة الفجر", "de": "Die Fajr-Gebetszeit ist beendet",
+                                  "en": "The Fajr prayer time has ended"}),
+    "sunrise_sub": (24, False, {"ar": "لقد طلعت الشمس", "de": "Die Sonne ist aufgegangen", "en": "The sun has risen"}),
+    "sunrise_hint": (20, False, {"ar": "المس الشاشة للإغلاق", "de": "Bildschirm berühren zum Schließen",
+                                 "en": "Touch the screen to close"}),
     "weather": (30, True, {"ar": "الطقس", "de": "Wetter", "en": "Weather"}),
     "feels": (22, False, {"ar": "الإحساس", "de": "Gefühlt", "en": "Feels like"}),
     "humidity": (22, False, {"ar": "الرطوبة", "de": "Feuchte", "en": "Humidity"}),
@@ -620,7 +627,11 @@ def main():
         old.unlink()
 
     bg = make_background()
-    write_bg("muster", bg)
+    write_bg("muster", bg, preview=False)  # nur Grundlage für "hell", nicht als Hintergrund wählbar
+    # Vorschau des hellen Grunds "hell": die Uhr berechnet ihn aus muster.bin (theme::setBackground), keine eigene Datei
+    k = np.clip(dither565(bg).max(axis=2).astype(np.float32) - 16, 0, None)[..., None]
+    light = np.clip(np.array([250, 246, 237], np.float32) - k * np.array([9, 10, 13], np.float32) / 8, 0, 255).astype(np.uint8)
+    Image.fromarray(light).resize((160, 107), Image.LANCZOS).save(DATA / "www" / "bg" / "hell.jpg", quality=80)
     for f in sorted(BACKGROUND_DIR.glob("*")):
         if f.suffix.lower() in (".jpg", ".jpeg", ".png"):
             write_bg(f.stem, load_background(f))

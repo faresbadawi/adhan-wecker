@@ -22,6 +22,7 @@ namespace prayer_screen
     static lv_obj_t *s_cell[CELLS], *s_cellTime[CELLS], *s_cellName[CELLS];
     static lv_obj_t *s_wifi;
     static lv_obj_t *s_azan, *s_azanName;
+    static lv_obj_t *s_sunrise, *s_nextLbl;
     static void (*s_onAzanTap)() = nullptr;
     static lv_obj_t *s_wxIcon, *s_wxTemp, *s_city;
     static lv_obj_t *s_wifiIcon;
@@ -30,7 +31,7 @@ namespace prayer_screen
     {
         s_wifi = box(scr);
         lv_obj_set_size(s_wifi, SCREEN_W, SCREEN_H);
-        lv_obj_set_style_bg_color(s_wifi, black(), 0);
+        surface(s_wifi);
         lv_obj_set_style_bg_opa(s_wifi, LV_OPA_COVER, 0);
         lv_obj_add_flag(s_wifi, LV_OBJ_FLAG_HIDDEN);
 
@@ -39,7 +40,7 @@ namespace prayer_screen
         lv_obj_center(card);
         lv_obj_set_style_radius(card, 14, 0);
         setRole(card, Role::ACCENT);
-        lv_obj_set_style_bg_color(card, black(), 0);
+        surface(card);
         lv_obj_set_style_border_opa(card, LV_OPA_60, 0);
         lv_obj_set_style_border_width(card, 2, 0);
 
@@ -73,7 +74,7 @@ namespace prayer_screen
         lv_obj_center(card);
         lv_obj_set_style_radius(card, 14, 0);
         setRole(card, Role::ACCENT);
-        lv_obj_set_style_bg_color(card, black(), 0);
+        surface(card);
         lv_obj_set_style_bg_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_width(card, 2, 0);
@@ -83,6 +84,32 @@ namespace prayer_screen
         lv_obj_align(s_azanName, LV_ALIGN_TOP_MID, 0, 72);
         divider(card, 190, 140, 140);
         lv_obj_align(image(card, lang::text(TXT_AZAN_STOP), Role::MUTED), LV_ALIGN_TOP_MID, 0, 160);
+    }
+
+    // Hinweis nach dem Sonnenaufgang; Tippen schließt ihn
+    static void createSunriseOverlay(lv_obj_t *scr)
+    {
+        s_sunrise = box(scr);
+        lv_obj_add_flag(s_sunrise, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_flag(s_sunrise, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_set_size(s_sunrise, SCREEN_W, SCREEN_H);
+        lv_obj_add_event_cb(s_sunrise, [](lv_event_t *) { showSunrise(false); }, LV_EVENT_CLICKED, nullptr);
+        background(s_sunrise);
+
+        lv_obj_t *card = box(s_sunrise);
+        lv_obj_set_size(card, 420, 200);
+        lv_obj_center(card);
+        lv_obj_set_style_radius(card, 14, 0);
+        setRole(card, Role::ACCENT);
+        surface(card);
+        lv_obj_set_style_bg_opa(card, LV_OPA_70, 0);
+        lv_obj_set_style_border_opa(card, LV_OPA_70, 0);
+        lv_obj_set_style_border_width(card, 2, 0);
+
+        lv_obj_align(image(card, lang::text(TXT_SUNRISE_TITLE), Role::MAIN), LV_ALIGN_TOP_MID, 0, 28);
+        lv_obj_align(image(card, lang::text(TXT_SUNRISE_SUB), Role::ACCENT), LV_ALIGN_TOP_MID, 0, 80);
+        divider(card, 210, 128, 150);
+        lv_obj_align(image(card, lang::text(TXT_SUNRISE_HINT), Role::MUTED), LV_ALIGN_TOP_MID, 0, 150);
     }
 
     void create(lv_obj_t *scr, const char *city)
@@ -149,7 +176,8 @@ namespace prayer_screen
         lv_obj_set_size(s_content, SCREEN_W, SCREEN_H);
         lv_obj_add_flag(s_content, LV_OBJ_FLAG_HIDDEN);
 
-        lv_obj_align(image(s_content, lang::text(TXT_NEXT), Role::MUTED), LV_ALIGN_TOP_MID, 0, 118);
+        s_nextLbl = image(s_content, lang::text(TXT_NEXT), Role::MUTED);
+        lv_obj_align(s_nextLbl, LV_ALIGN_TOP_MID, 0, 118);
         s_nextName = image(s_content, nullptr, Role::ACCENT);
         lv_obj_align(s_nextName, LV_ALIGN_TOP_MID, 0, 138);
         s_countdown = label(s_content, &font_count_52, Role::MAIN, "--:--:--");
@@ -176,6 +204,7 @@ namespace prayer_screen
 
         // Overlays über allen Seiten
         createWifiOverlay(lv_layer_top());
+        createSunriseOverlay(lv_layer_top());
         createAzanOverlay(lv_layer_top()); // ganz oben
     }
 
@@ -221,6 +250,9 @@ namespace prayer_screen
             s_lastNext = p;
             lv_img_set_src(s_nextName, prayerName(p, true));
             lv_obj_align(s_nextName, LV_ALIGN_TOP_MID, 0, 138);
+            // Nach dem Fajr-Azan zählt die Uhr bis zum Sonnenaufgang (Ende der Fajr-Zeit)
+            lv_img_set_src(s_nextLbl, lang::text(p == model::SUNRISE ? TXT_FAJR_ENDS : TXT_NEXT));
+            lv_obj_align(s_nextLbl, LV_ALIGN_TOP_MID, 0, 118);
             for (int i = 0; i < CELLS; i++)
             {
                 const bool on = model::DAILY_PRAYERS[i] == p;
@@ -244,6 +276,16 @@ namespace prayer_screen
     }
 
     void setAzanCallback(void (*onTap)()) { s_onAzanTap = onTap; }
+
+    void showSunrise(bool show)
+    {
+        if (show)
+            lv_obj_clear_flag(s_sunrise, LV_OBJ_FLAG_HIDDEN);
+        else
+            lv_obj_add_flag(s_sunrise, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    bool sunriseShown() { return !lv_obj_has_flag(s_sunrise, LV_OBJ_FLAG_HIDDEN); }
 
     void showAzan(bool show, model::Prayer p)
     {

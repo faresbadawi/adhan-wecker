@@ -91,7 +91,9 @@ static void applySettings()
     if (strcmp(shownBackground, st.background) != 0)
     {
         // Fehlt die gewählte Datei, ersatzweise einen der mitgelieferten Hintergründe
-        if (theme::setBackground(st.background) || theme::setBackground("islamic") || theme::setBackground("muster"))
+        // "muster" ist nur noch die Grundlage für "hell" und nicht mehr wählbar; "islamic" ist entfernt
+        const bool gone = strcmp(st.background, "muster") == 0 || strcmp(st.background, "islamic") == 0;
+        if ((!gone && theme::setBackground(st.background)) || theme::setBackground("noir"))
             strlcpy(shownBackground, st.background, sizeof(shownBackground));
     }
 }
@@ -287,8 +289,40 @@ static void refreshEverySecond(const struct tm &now)
         model::Prayer next;
         int32_t secondsLeft;
         prayers::next(now, s_today, next, secondsLeft);
+        // Nach dem Fajr-Azan bis zum Sonnenaufgang: Countdown zum Ende der Fajr-Zeit statt zu Dhuhr
+        const int32_t nowSec = now.tm_hour * 3600 + now.tm_min * 60 + now.tm_sec;
+        const int32_t sunriseSec = s_today.minutes[model::SUNRISE] * 60;
+        int32_t fajrSec = azan::azanMinute(s_today, 0) * 60;
+        if (fajrSec >= sunriseSec)
+            fajrSec = s_today.minutes[model::FAJR] * 60;
+        if (nowSec >= fajrSec && nowSec < sunriseSec)
+        {
+            next = model::SUNRISE;
+            secondsLeft = sunriseSec - nowSec;
+        }
         prayer_screen::setNext(next, secondsLeft);
     }
+}
+
+// Sonnenaufgang: kleiner Klang (kein Azan) und Hinweis, dass die Fajr-Zeit zu Ende ist
+static void refreshSunrise(const struct tm &now)
+{
+    static int32_t lastKey = -1;
+    static uint32_t shownAt = 0;
+    const bool busy = azan::status().state != azan::State::IDLE || alarmclock::ringing();
+    if (prayer_screen::sunriseShown() && (busy || millis() - shownAt > 60000UL))
+        prayer_screen::showSunrise(false);
+    if (!s_today.valid || busy)
+        return;
+    const int nowMin = now.tm_hour * 60 + now.tm_min;
+    const int32_t key = (now.tm_year + 1900) * 10000 + (now.tm_mon + 1) * 100 + now.tm_mday;
+    if (nowMin != s_today.minutes[model::SUNRISE] || key == lastKey)
+        return;
+    lastKey = key;
+    if (settings::get().azanEnabled[0])
+        azan::playChime(); // nur wenn auch der Fajr-Azan eingeschaltet ist
+    prayer_screen::showSunrise(true);
+    shownAt = millis();
 }
 
 // Azan zur Gebetszeit starten und die Anzeige nachführen
@@ -309,6 +343,7 @@ static void refreshAzan(const struct tm &now)
 
     azan::update(now, s_today, azanMask());
     refreshReminder(now);
+    refreshSunrise(now);
     const azan::Status st = azan::status();
     const bool active = st.state == azan::State::PLAYING;
     if (active != shown)
@@ -427,6 +462,10 @@ void loop()
     timemgr::update();
     web::update();
     handleSerial();
+
+    // Doppeltippen springt zur Gebetszeitenseite, solange der automatische Seitenwechsel aktiv ist
+    if (display::takeDoubleTap() && s_rotateSec)
+        ui::showPage(ui::PAGE_PRAYER);
 
     prayer_screen::showWifiSetup(!DEMO_MODE && wifimgr::info().portalActive);
 

@@ -143,9 +143,9 @@ namespace calendar_screen
             setRole(s_greg[i], isFriday && inMonth ? Role::ACCENT : Role::MAIN);
             if (isToday)
             {
-                // dunkle Schrift auf der Akzentfläche
-                lv_obj_set_style_text_color(s_greg[i], black(), 0);
-                lv_obj_set_style_text_color(s_hijri[i], black(), 0);
+                // Schrift in der Flächenfarbe auf der Akzentfläche
+                lv_obj_set_style_text_color(s_greg[i], surfaceColor(), 0);
+                lv_obj_set_style_text_color(s_hijri[i], surfaceColor(), 0);
             }
             else
             {

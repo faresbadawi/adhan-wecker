@@ -10,6 +10,7 @@ namespace prayer_screen
 
     void setClock(const struct tm &t);
     void setPrayers(const model::PrayerDay &day); // ungültig -> "Lade Zeiten"
+    // p = SUNRISE: Countdown bis zum Sonnenaufgang (nach dem Fajr-Azan)
     void setNext(model::Prayer p, int32_t secondsLeft);
     void setWeather(const model::Weather &w);
     void setCity(const char *city);
@@ -29,4 +30,8 @@ namespace prayer_screen
     void setAzanCallback(void (*onTap)());
 
     void showAzan(bool show, model::Prayer p);
+
+    // Hinweis "Fajr-Zeit beendet, die Sonne ist aufgegangen"; Tippen schließt ihn
+    void showSunrise(bool show);
+    bool sunriseShown();
 }

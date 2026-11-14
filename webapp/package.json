@@ -11,6 +11,7 @@
     "build:app": "vite build --mode app"
   },
   "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
     "@ionic/react": "^9.0.7",
     "@ionic/react-router": "^9.0.7",
     "adhan": "^4.4.3",

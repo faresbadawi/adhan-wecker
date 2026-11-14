@@ -1,6 +1,7 @@
 // Azan-Logik: erkennt den Beginn einer Gebetszeit, startet die passende MP3
 // und verwaltet die Zustände (läuft / stumm / beendet). Kennt keine Oberfläche.
 #pragma once
+#include <FS.h>
 #include <Arduino.h>
 #include <time.h>
 #include "model.h"
@@ -48,6 +49,11 @@ namespace azan
     // (z. B. wenn nur das Handy rufen soll); maxSeconds = 0: ganzer Azan, sonst Dauer in Sekunden (5..600).
     bool onClock();
     bool setOnClock(bool on);
+    // Eigener Azan im Ramadan (Datei RAMADAN_FILE, aus der App hochgeladen):
+    // 0 = aus, 1 = für alle Gebete, 2 = nur Maghrib (Fastenbrechen)
+    constexpr const char *RAMADAN_FILE = "/azans/ramadan.mp3";
+    uint8_t ramadanMode();
+    bool setRamadanMode(uint8_t mode);
     uint16_t maxSeconds();
     bool setMaxSeconds(uint16_t seconds);
 
@@ -62,6 +68,9 @@ namespace azan
 
     // Hinweiston vor dem Gebet i (leiser Ton, nur wenn gerade nichts spielt); true, wenn er gestartet wurde
     bool playReminder(int i);
+
+    // Kleiner Klang (ein paar Glockentöne, kein Azan), z. B. beim Sonnenaufgang; true, wenn er gestartet wurde
+    bool playChime();
 
     // Nach ms Millisekunden den Ton beenden (Vorhören: nur die ersten Sekunden des Azans)
     void limitTo(uint32_t ms);
@@ -82,6 +91,15 @@ namespace azan
     String voice();
     bool setVoice(const String &id);
     bool voiceExists(const String &id);
-    // Datei der Stimme für ein Gebet (Fajr: eigene Fassung, falls vorhanden); false, wenn keine da ist
-    bool voiceFile(const String &id, model::Prayer p, char *path, size_t len);
+    // Datei der Stimme für ein Gebet (Fajr: eigene Fassung, falls vorhanden); zuerst auf der SD-Karte, dann im
+    // LittleFS. Gibt das Dateisystem zurück, nullptr, wenn keine Datei da ist.
+    fs::FS *voiceFile(const String &id, model::Prayer p, char *path, size_t len);
+
+    // Eigene Azane (aus der App hochgeladen) liegen unter /azans/ im Flash oder auf der SD-Karte.
+    // ownStore: 0 = automatisch (SD-Karte, wenn eingelegt), 1 = Uhr (Flash), 2 = SD-Karte
+    uint8_t ownStore();
+    bool setOwnStore(uint8_t mode);
+    fs::FS &ownTarget();              // hierhin gehen neue Uploads
+    fs::FS *ownFs(const char *path);  // wo die Datei liegt (SD zuerst), nullptr = nirgends
+    uint64_t freeBytes(fs::FS &fs);
 }

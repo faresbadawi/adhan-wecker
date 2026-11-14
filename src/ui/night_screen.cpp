@@ -109,8 +109,8 @@ namespace night_screen
         lv_obj_set_size(ring, 18, 18);
         lv_obj_set_pos(ring, tx - 9, LINE_Y - 9);
         lv_obj_set_style_radius(ring, LV_RADIUS_CIRCLE, 0);
-        setRole(ring, Role::ACCENT); // Rand in der Akzentfarbe, Füllung dunkel (lokaler Stil hat Vorrang)
-        lv_obj_set_style_bg_color(ring, black(), 0);
+        setRole(ring, Role::ACCENT); // Rand in der Akzentfarbe, Füllung in der Flächenfarbe
+        surface(ring);
         lv_obj_set_style_bg_opa(ring, LV_OPA_COVER, 0);
         lv_obj_set_style_border_width(ring, 4, 0);
         lv_obj_set_style_border_opa(ring, LV_OPA_COVER, 0);

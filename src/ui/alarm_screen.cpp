@@ -70,7 +70,7 @@ namespace alarm_screen
         lv_obj_center(card);
         lv_obj_set_style_radius(card, 14, 0);
         setRole(card, Role::ACCENT);
-        lv_obj_set_style_bg_color(card, black(), 0);
+        surface(card);
         lv_obj_set_style_bg_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_width(card, 1, 0);

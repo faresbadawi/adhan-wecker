@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <Preferences.h>
+#include <SD_MMC.h>
 #include "audio_manager.h"
 #include "config.h"
 #include "storage.h"
@@ -33,7 +34,54 @@ namespace azan
         return !id.isEmpty() && id.length() <= 24 && id.indexOf('/') < 0 && id.indexOf('.') < 0;
     }
 
-    bool voiceExists(const String &id) { return validId(id) && LittleFS.exists("/azans/" + id + ".mp3"); }
+    fs::FS *ownFs(const char *path)
+    {
+        if (storage::sdAvailable() && SD_MMC.exists(path))
+            return &SD_MMC;
+        return LittleFS.exists(path) ? &LittleFS : nullptr;
+    }
+
+    uint8_t ownStore()
+    {
+        Preferences pr;
+        pr.begin("azanx", true);
+        const uint8_t m = pr.getUChar("store", 0);
+        pr.end();
+        return m;
+    }
+
+    bool setOwnStore(uint8_t mode)
+    {
+        if (mode > 2)
+            return false;
+        Preferences pr;
+        pr.begin("azanx", false);
+        pr.putUChar("store", mode);
+        pr.end();
+        return true;
+    }
+
+    fs::FS &ownTarget()
+    {
+        if (storage::sdAvailable() && ownStore() != 1)
+        {
+            SD_MMC.mkdir("/azans");
+            return SD_MMC;
+        }
+        return LittleFS;
+    }
+
+    uint64_t freeBytes(fs::FS &fs)
+    {
+        if (&fs == &SD_MMC)
+            return SD_MMC.totalBytes() - SD_MMC.usedBytes();
+        return LittleFS.totalBytes() - LittleFS.usedBytes();
+    }
+
+    bool voiceExists(const String &id)
+    {
+        return validId(id) && (ownFs(("/azans/" + id + ".mp3").c_str()) || ownFs(("/azans/" + id + "_fajr.mp3").c_str()));
+    }
 
     String voice()
     {
@@ -55,18 +103,19 @@ namespace azan
         return true;
     }
 
-    bool voiceFile(const String &id, model::Prayer p, char *path, size_t len)
+    fs::FS *voiceFile(const String &id, model::Prayer p, char *path, size_t len)
     {
         if (!validId(id))
-            return false;
+            return nullptr;
+        fs::FS *fs = nullptr;
         if (p == model::FAJR)
         {
             snprintf(path, len, "/azans/%s_fajr.mp3", id.c_str());
-            if (LittleFS.exists(path))
-                return true;
+            if ((fs = ownFs(path)))
+                return fs;
         }
         snprintf(path, len, "/azans/%s.mp3", id.c_str());
-        return LittleFS.exists(path);
+        return ownFs(path);
     }
 
     static Timing s_timing = {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}};
@@ -113,6 +162,8 @@ namespace azan
 
     static bool s_onClock = true;
     static uint16_t s_maxSec = 0;
+    static uint8_t s_ramadanMode = 1;
+    static bool s_ramadan = false; // heute ist Ramadan (Hijri-Monat 9)
     static bool s_outLoaded = false;
 
     static void loadOut()
@@ -124,7 +175,27 @@ namespace azan
         pr.begin("azanx", true);
         s_onClock = pr.getBool("onclock", true);
         s_maxSec = pr.getUShort("maxsec", 0);
+        s_ramadanMode = pr.getUChar("ramadan", 1);
         pr.end();
+    }
+
+    uint8_t ramadanMode()
+    {
+        loadOut();
+        return s_ramadanMode;
+    }
+
+    bool setRamadanMode(uint8_t mode)
+    {
+        if (mode > 2)
+            return false;
+        loadOut();
+        s_ramadanMode = mode;
+        Preferences pr;
+        pr.begin("azanx", false);
+        pr.putUChar("ramadan", mode);
+        pr.end();
+        return true;
     }
 
     bool onClock()
@@ -198,6 +269,20 @@ namespace azan
         return true;
     }
 
+    bool playChime()
+    {
+        if (!onClock() || audio::isPlaying() || s_status.state != State::IDLE)
+            return false;
+        char path[96];
+        fs::FS *fs = storage::find(AZAN_DIR_SD, "/sounds", "calm.mp3", path, sizeof(path));
+        if (!fs)
+            return false;
+        audio::setVolume(max(1, (int)((s_volume[0] * 21 + 50) / 100 * 6 / 10)));
+        audio::play(*fs, path);
+        limitTo(1500); // nur die ersten Glockentöne, kein Azan
+        return true;
+    }
+
     void setVolumes(const uint8_t percent[5]) { memcpy(s_volume, percent, sizeof(s_volume)); }
 
     void applyVolume(model::Prayer p)
@@ -226,8 +311,14 @@ namespace azan
         fs::FS *fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, fileName(p), path, sizeof(path));
         if (!fs)
             fs = storage::find(AZAN_DIR_SD, AZAN_DIR_FLASH, "azan.mp3", path, sizeof(path));
-        if (!fs && (voiceFile(voice(), p, path, sizeof(path)) || voiceFile("alafasy", p, path, sizeof(path))))
-            fs = &LittleFS;
+        // Im Ramadan der eigene Ramadan-Azan (für alle Gebete oder nur Maghrib), falls hochgeladen
+        const uint8_t rm = ramadanMode();
+        if (!fs && s_ramadan && (rm == 1 || (rm == 2 && p == model::MAGHRIB)) && (fs = ownFs(RAMADAN_FILE)))
+            strlcpy(path, RAMADAN_FILE, sizeof(path));
+        if (!fs)
+            fs = voiceFile(voice(), p, path, sizeof(path));
+        if (!fs)
+            fs = voiceFile("alafasy", p, path, sizeof(path));
         s_status.hasAudio = fs != nullptr;
         if (fs)
         {
@@ -271,6 +362,8 @@ namespace azan
             else
                 audio::stop();
         }
+
+        s_ramadan = day.valid && day.hijriMonth == 9;
 
         // Beginn einer Gebetszeit erkennen (einmal pro Gebet und Tag)
         if (day.valid && s_status.state == State::IDLE)

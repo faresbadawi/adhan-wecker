@@ -1,26 +1,28 @@
-// Wecker: bis zu vier Weckzeiten (Zeit am Drehrad, Name, Wochentage, zum Löschen zur Seite wischen),
+// Wecker: Weckzeiten (Zeit in der eigenen Zeitwahl mit Schnellwahl, Name, Wochentage, zum Löschen zur Seite wischen),
 // Wecker zum letzten Drittel der Nacht, Weckton und Lautstärke
 import { useEffect, useState } from 'react';
 import {
   IonPage, IonContent, IonList, IonItem, IonItemSliding, IonItemOptions, IonItemOption, IonLabel, IonToggle, IonIcon,
-  IonButton, IonRange, IonModal, IonDatetime, IonHeader, IonToolbar, IonTitle, IonButtons, IonSpinner, IonInput,
+  IonButton, IonRange, IonSpinner, IonInput,
 } from '@ionic/react';
 import { addOutline, trashOutline, moonOutline, play, checkmark, volumeLowOutline, volumeHighOutline, removeOutline } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
 import Section from '../components/Section.jsx';
+import TimeSheet from '../components/TimeSheet.jsx';
 import { t } from '../lib/i18n.js';
 import { MAX_ALARMS, DAY_ORDER } from '../lib/constants.js';
-import { useApp, api, save, saveLater, toast, confirmBox, toMin, two } from '../lib/store.js';
+import { useApp, api, save, saveLater, toast, confirmBox, toMin, two, nowSec } from '../lib/store.js';
 
 const volPct = v => Math.round(v * 100 / 21); // Decoder 0..21 <-> Prozent
 
 export default function Alarm() {
-  const { S, ST, local } = useApp();
+  const st = useApp();
+  const { S, ST, local } = st;
   const [alarms, setAlarms] = useState(null);
   const [tj, setTj] = useState(null);
   const [edit, setEdit] = useState(-1); // Index des Weckers, dessen Zeit gerade gewählt wird
-  const [pick, setPick] = useState('06:00');
   const [sounds, setSounds] = useState(null);
+  const [fresh, setFresh] = useState(false); // gerade hinzugefügter Wecker, noch ohne Zeit
   useEffect(() => {
     if (!S) return;
     setAlarms(S.alarms.map(a => ({ ...a })));
@@ -46,15 +48,27 @@ export default function Alarm() {
     if (!m) { toast(t('day_min'), true); return; }
     patch(i, { days: m });
   }
-  const add = () => store([...alarms, { on: true, time: '06:00', days: 127, name: '' }]);
+  // Neuer Wecker: gleich die Zeitwahl öffnen; Abbrechen entfernt ihn wieder
+  function add() {
+    const list = [...alarms, { on: true, time: '06:00', days: 127, name: '' }];
+    setAlarms(list); setFresh(true); setEdit(list.length - 1);
+  }
   async function remove(i) {
     if (!await confirmBox(t('are_you_sure'), alarms[i].name || alarms[i].time, true)) return;
     store(alarms.filter((_, j) => j !== i));
   }
-  function openTime(i) { setPick(alarms[i].time); setEdit(i); }
-  function takeTime() {
-    if (edit >= 0 && pick !== alarms[edit].time) patch(edit, { time: pick });
-    setEdit(-1);
+  function openTime(i) { setFresh(false); setEdit(i); }
+  function takeTime(time, nameHint) {
+    const i = edit;
+    setEdit(-1); setFresh(false);
+    if (i < 0) return;
+    const a = alarms[i];
+    if (fresh || time !== a.time || (nameHint && !a.name)) patch(i, { time, ...(nameHint && !a.name ? { name: nameHint } : {}) });
+  }
+  function cancelTime() {
+    if (edit < 0) return;
+    if (fresh) setAlarms(alarms.slice(0, -1));
+    setEdit(-1); setFresh(false);
   }
   // Nachtwecker: höchstens bis zur Fajr-Zeit verschieben (die Uhr begrenzt ebenso)
   const night = ST && ST.night;
@@ -166,21 +180,8 @@ export default function Alarm() {
           </Section>
         </>}
 
-        <IonModal isOpen={edit >= 0} onDidDismiss={() => setEdit(-1)} initialBreakpoint={0.5} breakpoints={[0, 0.5]} className="sheet time-sheet">
-          <IonHeader>
-            <IonToolbar>
-              <IonButtons slot="start"><IonButton onClick={() => setEdit(-1)}>{t('cancel')}</IonButton></IonButtons>
-              <IonTitle>{t('alarm_time')}</IonTitle>
-              <IonButtons slot="end"><IonButton strong onClick={takeTime}>{t('done')}</IonButton></IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            {edit >= 0 && (
-              <IonDatetime presentation="time" preferWheel hourCycle="h23" value={pick} minuteValues={undefined}
-                onIonChange={e => { const v = String(e.detail.value || ''); const m = v.match(/(\d{2}):(\d{2})/); if (m) setPick(`${m[1]}:${m[2]}`); }} />
-            )}
-          </IonContent>
-        </IonModal>
+        <TimeSheet open={edit >= 0} value={edit >= 0 && alarms ? alarms[edit].time : '06:00'} nowSec={ST ? nowSec(st) : null} ST={ST}
+          onCancel={cancelTime} onDone={takeTime} />
       </IonContent>
     </IonPage>
   );

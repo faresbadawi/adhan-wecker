@@ -4,8 +4,8 @@
      Teilen aus der Mawaqit-App (Text/Link) übernimmt die Moschee. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.smartazan.wecker"
-    android:versionCode="4"
-    android:versionName="2.1">
+    android:versionCode="5"
+    android:versionName="2.2">
 
     <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
 

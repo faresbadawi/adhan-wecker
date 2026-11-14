@@ -20,11 +20,16 @@ export default function Home() {
   const router = useIonRouter();
   const p = ST && ST.prayer;
   const wx = ST && ST.weather;
-  const next = p && p.next ? p.next.key : '';
   const ns = nowSec(st);
+  // Nach dem Fajr-Azan zählt der Countdown bis zum Sonnenaufgang (Ende der Fajr-Zeit), danach bis Dhuhr
+  let next = p && p.next ? p.next.key : '';
+  let left = p && p.next ? Math.max(0, p.next.seconds - elapsed(st)) : 0;
+  if (next === 'dhuhr' && p.times && p.times.fajr && p.times.sunrise && ns >= toMin(p.times.fajr) * 60 && ns < toMin(p.times.sunrise) * 60) {
+    next = 'sunrise';
+    left = toMin(p.times.sunrise) * 60 - ns;
+  }
   const clock = `${two(Math.floor(ns / 3600))}:${two(Math.floor(ns % 3600 / 60))}`;
   const date = ST && ST.time ? new Date(ST.time.date + 'T12:00:00').toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }) : '';
-  const left = p && p.next ? Math.max(0, p.next.seconds - elapsed(st)) : 0;
 
   // Anteil der Zeit vom vorigen Gebet bis zum nächsten
   let progress = 0;
@@ -58,7 +63,7 @@ export default function Home() {
 
   return (
     <IonPage>
-      <Bar title={t('tab_home')} />
+      <Bar title={t('tab_home')} light />
       <IonContent fullscreen>
         <IonRefresher slot="fixed" onIonRefresh={async e => { await refreshStatus(); e.detail.complete(); }}>
           <IonRefresherContent />
@@ -104,7 +109,7 @@ export default function Home() {
                 </div>
                 <div className="hero-next">
                   {next ? <>
-                    <small>{t('next_prayer')}</small>
+                    <small>{t(next === 'sunrise' ? 'fajr_ends' : 'next_prayer')}</small>
                     <b className="pn">{pname(next, ST)}</b>
                     <span className="time num ltr">{p.times[next]}</span>
                     <span className="cd">{t('in')} {duration(left)}</span>
