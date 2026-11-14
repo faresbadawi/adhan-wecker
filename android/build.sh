@@ -5,8 +5,8 @@
 # Ergebnis: build/Bilal.apk
 set -euo pipefail
 cd "$(dirname "$0")"
-VERSION_CODE=${VERSION_CODE:-6}
-VERSION_NAME=${VERSION_NAME:-2.3}
+VERSION_CODE=${VERSION_CODE:-7}
+VERSION_NAME=${VERSION_NAME:-2.5}
 export JAVA_HOME=$(ls -d ~/.local/jdk/jdk-21* | head -1)
 export PATH=$JAVA_HOME/bin:$PATH
 SDK=~/Android/Sdk

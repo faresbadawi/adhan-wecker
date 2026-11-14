@@ -22,6 +22,8 @@
 #include "storage.h"
 #include "time_manager.h"
 #include "weather.h"
+#include "selfupdate.h"
+#include "fleet.h"
 #include "wifi_manager.h"
 
 namespace web
@@ -674,6 +676,65 @@ namespace web
         s_server.send(200, "application/json", outStr);
     }
 
+    // Selbst-Update: GET Stand; POST {"auto":bool} und/oder {"action":"check"|"install"}
+    static void sendSelfUpdate()
+    {
+        static const char *STATES[] = {"idle", "checking", "uptodate", "available", "installing", "done", "failed"};
+        const selfupdate::Status u = selfupdate::status();
+        JsonDocument doc;
+        doc["version"] = FW_VERSION;
+        doc["build"] = FW_BUILD;
+        doc["auto"] = selfupdate::autoUpdate();
+        doc["state"] = STATES[(int)u.state];
+        doc["progress"] = u.progress;
+        doc["reset"] = (int)esp_reset_reason(); // Fehlersuche: Grund des letzten Neustarts
+        if (u.latestBuild)
+        {
+            doc["latest"] = u.latestVersion;
+            doc["latestBuild"] = u.latestBuild;
+        }
+        if (u.error[0])
+            doc["error"] = u.error;
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+    // Zentrale: GET Stand; POST {"enabled":bool,"name":"…"}
+    static void sendFleet()
+    {
+        JsonDocument doc;
+        doc["enabled"] = fleet::enabled();
+        doc["name"] = fleet::name();
+        doc["id"] = fleet::id();
+        doc["contactAgo"] = fleet::lastContactAgoSec();
+        String out;
+        serializeJson(doc, out);
+        s_server.send(200, "application/json", out);
+    }
+    static void postFleet()
+    {
+        JsonDocument in;
+        deserializeJson(in, s_server.arg("plain"));
+        if (in["enabled"].is<bool>())
+            fleet::setEnabled(in["enabled"].as<bool>());
+        if (in["name"].is<const char *>())
+            fleet::setName(in["name"]);
+        sendFleet();
+    }
+    static void postSelfUpdate()
+    {
+        JsonDocument in;
+        deserializeJson(in, s_server.arg("plain"));
+        if (in["auto"].is<bool>())
+            selfupdate::setAutoUpdate(in["auto"].as<bool>());
+        const String action = in["action"] | "";
+        if (action == "check")
+            selfupdate::requestCheck();
+        else if (action == "install")
+            selfupdate::requestInstall();
+        sendSelfUpdate();
+    }
+
     // Wecktöne: /sounds/<name>.mp3; der gewählte liegt als /alarm.mp3, sein Name in /alarm.txt
     static bool validSound(const String &name)
     {
@@ -771,7 +832,7 @@ namespace web
         doc["lang"] = webLang();
 
         JsonObject dev = doc["device"].to<JsonObject>();
-        dev["name"] = DEVICE_NAME;
+        dev["name"] = fleet::name();
         dev["firmware"] = FW_VERSION;
         dev["host"] = String(HOSTNAME) + ".local";
         dev["ip"] = WiFi.localIP().toString();
@@ -1239,6 +1300,10 @@ namespace web
         s_server.on("/api/preview", HTTP_POST, previewSound);
         s_server.on("/api/mawaqit/resolve", HTTP_POST, resolveMosque);
         s_server.on("/api/mawaqit/login", HTTP_POST, mawaqitLogin);
+        s_server.on("/api/selfupdate", HTTP_GET, sendSelfUpdate);
+        s_server.on("/api/fleet", HTTP_GET, sendFleet);
+        s_server.on("/api/fleet", HTTP_POST, postFleet);
+        s_server.on("/api/selfupdate", HTTP_POST, postSelfUpdate);
         s_server.on("/api/mawaqit/search", HTTP_POST, mawaqitSearch);
         s_server.on("/api/backgrounds", HTTP_GET, sendBackgrounds);
         s_server.on("/api/update", HTTP_POST, updateDone, updateData);

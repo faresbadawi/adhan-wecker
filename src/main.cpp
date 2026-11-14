@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include <Preferences.h>
+#include <mbedtls/platform.h>
 #include "config.h"
 #include "hal/display_port.h"
 #include "hal/lcd_st77922.h"
@@ -14,6 +15,8 @@
 #include "services/storage.h"
 #include "services/time_manager.h"
 #include "services/weather.h"
+#include "services/selfupdate.h"
+#include "services/fleet.h"
 #include "services/web_server.h"
 #include "services/wifi_manager.h"
 #include "ui/alarm_screen.h"
@@ -406,8 +409,18 @@ static void handleSerial()
     free(buf);
 }
 
+// TLS (HTTPS) braucht große Puffer; im knappen internen RAM fehlt nach einiger Laufzeit ein zusammenhängender
+// Block. Große Blöcke kommen deshalb aus dem PSRAM, kleine bleiben (schneller) intern.
+static void *tlsCalloc(size_t n, size_t size)
+{
+    const size_t bytes = n * size;
+    void *p = bytes >= 2048 ? heap_caps_calloc(n, size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT) : nullptr;
+    return p ? p : heap_caps_calloc(n, size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+}
+
 void setup()
 {
+    mbedtls_platform_set_calloc_free(tlsCalloc, heap_caps_free);
     Serial.begin(115200);
     delay(300);
     Serial.println("\n=== BILAL ===");
@@ -450,6 +463,8 @@ void setup()
     wifimgr::begin(SETUP_AP_NAME);
     prayers::begin(DEMO_MODE);
     weather::begin();
+    selfupdate::begin(); // signierte Updates aus dem Internet
+    fleet::begin();      // Meldung an die Zentrale des Herausgebers
     Serial.printf("RAM frei: intern %u kB (groesster Block %u kB), PSRAM %u kB\n",
                   heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024,
                   heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024,

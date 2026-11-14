@@ -3,7 +3,11 @@
 
 // Gerät und Firmware (angezeigt in der Web-App)
 #define DEVICE_NAME "Bilal"
-#define FW_VERSION "1.0.0"
+#define FW_VERSION "2.5"
+#define FW_BUILD 25 // fortlaufende Nummer; die Uhr installiert nur Updates mit höherer Nummer
+
+// Selbst-Updates: signiertes Verzeichnis (tools/release.py) auf GitHub Pages
+#define OTA_MANIFEST_URL "https://faresbadawi.github.io/adhan-wecker/ota/manifest.json"
 
 // Standard-Adressen der App, solange keine eigenen eingestellt sind (QR-Code, Downloadlink, Web-Version).
 // GitHub: Release mit der APK und GitHub Pages für die Web-Version; in der App unter Installieren änderbar.

@@ -1,0 +1,15 @@
+# Zentrale für die Bilal-Uhren (Cloudflare Worker + D1-Datenbank, kostenloser Tarif)
+# Einrichten: siehe README.md in diesem Ordner
+name = "bilal-zentrale"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bilal-zentrale"
+database_id = "local"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
+fallthrough = true
