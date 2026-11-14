@@ -1,6 +1,6 @@
 // Heute: nächstes Gebet im Ring (Anteil der Zeit seit dem letzten Gebet), Wetter, letztes Drittel der Nacht,
 // WLAN und die Zeiten des Tages. Die Glocke je Gebet schaltet den Azan. Zum Aktualisieren nach unten ziehen.
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IonPage, IonContent, IonRefresher, IonRefresherContent, IonButton, IonIcon, useIonRouter } from '@ionic/react';
 import { notifications, notificationsOffOutline, close, downloadOutline, phonePortraitOutline, chevronForward, chevronBack } from 'ionicons/icons';
 import { Bar, BigTitle } from '../components/Header.jsx';
@@ -13,13 +13,36 @@ import { useApp, set, save, refreshStatus, locale, duration, hijri, hms, nowSec,
 
 const RING = 2 * Math.PI * 104; // Umfang des Fortschrittsrings
 
+// WMO-Wettercode -> Himmel (wie die Uhr)
+const skyOf = c => c === 0 ? 'clear' : c <= 2 ? 'partly_cloudy' : c === 3 ? 'cloudy' : c === 45 || c === 48 ? 'fog'
+  : c >= 51 && c <= 57 ? 'drizzle' : (c >= 61 && c <= 67) || (c >= 80 && c <= 82) ? 'rain' : (c >= 71 && c <= 77) || c === 85 || c === 86 ? 'snow' : c >= 95 ? 'thunder' : 'cloudy';
+// Ohne Uhr holt das Handy das Wetter selbst (Open-Meteo, ohne Schlüssel)
+function usePhoneWeather(on, lat, lon) {
+  const [wx, setWx] = useState(null);
+  useEffect(() => {
+    if (!on || (!lat && !lon)) return undefined;
+    let stop = false;
+    const load = () => fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day&daily=precipitation_probability_max&timezone=auto&forecast_days=1`)
+      .then(r => r.json()).then(d => {
+        if (stop || !d.current) return;
+        const rain = d.daily && d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[0] : null;
+        setWx({ temp: Math.round(d.current.temperature_2m), sky: skyOf(d.current.weather_code), day: d.current.is_day === 1, ...(rain != null ? { rain } : {}) });
+      }).catch(() => {});
+    load();
+    const id = setInterval(load, 30 * 60000);
+    return () => { stop = true; clearInterval(id); };
+  }, [on, lat, lon]);
+  return wx;
+}
+
 export default function Home() {
   const st = useApp();
   useNow(); // Uhr und Countdowns jede Sekunde
   const { ST, S, online, installEvt, local } = st;
   const router = useIonRouter();
   const p = ST && ST.prayer;
-  const wx = ST && ST.weather;
+  const phoneWx = usePhoneWeather(!!local && !(ST && ST.weather), S && S.latitude, S && S.longitude);
+  const wx = (ST && ST.weather) || phoneWx;
   const ns = nowSec(st);
   // Nach dem Fajr-Azan zählt der Countdown bis zum Sonnenaufgang (Ende der Fajr-Zeit), danach bis Dhuhr
   let next = p && p.next ? p.next.key : '';
@@ -124,7 +147,10 @@ export default function Home() {
             <div className="tiles two">
               <div className="tile">
                 <Svg html={skyIcon} className="accent" />
-                <b className="num ltr">{wx ? wx.temp + '°' : '—'}</b>
+                <div className="wx-row">
+                  <b className="num ltr">{wx ? wx.temp + '°' : '—'}</b>
+                  {wx && wx.rain != null && <span className="wx-rain num ltr" title={t('rain_chance')}><Svg html={I.rain} />{wx.rain} %</span>}
+                </div>
                 <small>{wx ? t('sky_' + wx.sky) : t('weather_now')}</small>
               </div>
               <button className="tile" onClick={() => router.push(local ? '/settings' : '/settings/wifi')}>

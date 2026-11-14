@@ -31,11 +31,11 @@ namespace weather
 
     static bool fetch(float lat, float lon, model::Weather &w)
     {
-        char url[320];
+        char url[420];
         snprintf(url, sizeof(url),
                  "http://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f"
                  "&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day"
-                 "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=3",
+                 "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=3",
                  lat, lon);
 
         // Einfaches HTTP: öffentliche Daten, und TLS bräuchte ~40 kB internen RAM
@@ -86,6 +86,8 @@ namespace weather
             w.forecast[i].tempMax = lroundf(daily["temperature_2m_max"][i] | 0.0f);
             w.forecast[i].tempMin = lroundf(daily["temperature_2m_min"][i] | 0.0f);
         }
+        if (!daily["precipitation_probability_max"][0].isNull())
+            w.rainChance = constrain(daily["precipitation_probability_max"][0].as<int>(), 0, 100);
         w.tempMax = w.forecast[0].tempMax;
         w.tempMin = w.forecast[0].tempMin;
         return true;

@@ -173,6 +173,7 @@ namespace web
         doc["latitude"] = st.latitude;
         doc["longitude"] = st.longitude;
         doc["method"] = st.calculationMethod;
+        doc["alarmGentle"] = alarmclock::gentle();
         doc["madhhab"] = st.madhhab;
         JsonObject off = doc["offsets"].to<JsonObject>();
         off["fajr"] = st.fajrOffset;
@@ -314,6 +315,8 @@ namespace web
         st.latitude = doc["latitude"] | st.latitude;
         st.longitude = doc["longitude"] | st.longitude;
         st.calculationMethod = doc["method"] | st.calculationMethod;
+        if (st.calculationMethod == 0 || st.calculationMethod == 7)
+            st.calculationMethod = 3; // keine schiitischen Methoden
         st.madhhab = doc["madhhab"] | st.madhhab;
         JsonObject off = doc["offsets"];
         st.fajrOffset = off["fajr"] | st.fajrOffset;
@@ -343,6 +346,8 @@ namespace web
             azan::setOnClock(doc["azanOnClock"]);
         if (doc["azanMaxSec"].is<int>())
             azan::setMaxSeconds((uint16_t)doc["azanMaxSec"].as<int>());
+        if (doc["alarmGentle"].is<bool>())
+            alarmclock::setGentle(doc["alarmGentle"].as<bool>());
         if (doc["ownStore"].is<int>())
             azan::setOwnStore((uint8_t)doc["ownStore"].as<int>());
         if (doc["azanRamadan"].is<int>())
@@ -847,6 +852,8 @@ namespace web
             doc["weather"]["temp"] = lroundf(wx.temp);
             doc["weather"]["sky"] = skyKey(wx.sky);
             doc["weather"]["day"] = wx.isDay;
+            if (wx.rainChance >= 0)
+                doc["weather"]["rain"] = wx.rainChance;
         }
 
         String out;

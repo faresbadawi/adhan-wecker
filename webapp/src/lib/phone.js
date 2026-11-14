@@ -21,7 +21,7 @@ const DEFAULTS = {
   source: 'calculated', mawaqit: { slug: '', name: '' },
   voice: 'alafasy', alerts: true, remindNotify: true,
   azanOnPhone: true, azanOnClock: true, azanMaxSec: 0, phoneVolume: 90, phoneAzanSec: 0, // wo der Azan ertönt, Dauer (0 = ganz), Lautstärke am Handy
-  colors: { main: '#FFFFFF', accent: '#D4AF6A', muted: '#C4B6AE' },
+  colors: { main: '#FFF4E6', accent: '#E8A04E', muted: '#A08E7C' },
 };
 const merge = (a, b) => {
   const o = { ...a };
@@ -34,6 +34,7 @@ export function phone() {
   if (!P) {
     P = merge(DEFAULTS, kvGet('P', {}));
     if (!VOICES.some(v => v.id === P.voice)) { P.voice = VOICES[0].id; persist(); } // entfernte Stimme -> Standard
+    if (P.method === 0 || P.method === 7) { P.method = 3; persist(); } // schiitische Methoden entfernt
   }
   return P;
 }

@@ -1,5 +1,6 @@
 #include "alarm_clock.h"
 #include <Arduino.h>
+#include <Preferences.h>
 #include "audio_manager.h"
 #include "config.h"
 #include "prayer_times.h"
@@ -8,9 +9,31 @@
 namespace alarmclock
 {
     static constexpr uint32_t MAX_RING_MS = 10 * 60 * 1000; // spätestens nach 10 Minuten aufhören
-    static constexpr uint32_t RAMP_MS = 45 * 1000;          // sanft lauter bis zur eingestellten Lautstärke
+    static constexpr uint32_t RAMP_MS = 60 * 1000;          // Leichtschläfer: in einer Minute bis zur eingestellten Lautstärke
     static constexpr int START_VOLUME = 2;                   // Decoder 0..21
     static int s_rampVolume = -1;
+    static int8_t s_gentle = -1; // -1 = noch nicht gelesen
+
+    bool gentle()
+    {
+        if (s_gentle < 0)
+        {
+            Preferences p;
+            p.begin("alarmx", true);
+            s_gentle = p.getBool("gentle", true) ? 1 : 0;
+            p.end();
+        }
+        return s_gentle == 1;
+    }
+
+    void setGentle(bool on)
+    {
+        Preferences p;
+        p.begin("alarmx", false);
+        p.putBool("gentle", on);
+        p.end();
+        s_gentle = on ? 1 : 0;
+    }
 
     static bool s_ringing = false;
     static int s_index = -1;
@@ -41,7 +64,7 @@ namespace alarmclock
         else
             Serial.printf("Wecker %02d:%02d: %s\n", s_list[index].hour, s_list[index].minute,
                           s_fs ? s_path : "keine alarm.mp3");
-        s_rampVolume = min<int>(START_VOLUME, st.volume);
+        s_rampVolume = gentle() ? min<int>(START_VOLUME, st.volume) : st.volume; // Tiefschläfer: sofort laut
         audio::setVolume(s_rampVolume);
         play();
     }
@@ -74,7 +97,7 @@ namespace alarmclock
             else
             {
                 // leise beginnen und in RAMP_MS bis zur eingestellten Lautstärke steigern
-                const uint32_t t = min<uint32_t>(millis() - s_startedMs, RAMP_MS);
+                const uint32_t t = gentle() ? min<uint32_t>(millis() - s_startedMs, RAMP_MS) : RAMP_MS;
                 const int start = min<int>(START_VOLUME, st.volume);
                 const int v = start + (int)((st.volume - start) * t / RAMP_MS);
                 if (v != s_rampVolume)

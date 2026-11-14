@@ -309,6 +309,7 @@ function Ramadan({ S, voices, setVoices, playOn }) {
 export default function Azan() {
   const { S, ST, local } = useApp();
   const [voices, setVoices] = useState(null);
+  const [perOpen, setPerOpen] = useState(false); // Azan und Lautstärke je Gebet: eingeklappt
   useEffect(() => {
     api('/api/azan/voices').then(r => { if (r.data) setVoices(sortV(r.data)); })
       .catch(() => setVoices({ list: [], selected: '' }));
@@ -328,9 +329,17 @@ export default function Azan() {
           {!local && (voices ? <Voices voices={voices} setVoices={setVoices} playOn={playOn} /> : <div className="center pad"><IonSpinner /></div>)}
           <PhoneVoices />
 
-          <Section title={t('azan')} hint={t('azan_volume_hint')}>
+          <Section title={t('azan')} hint={perOpen ? t('azan_volume_hint') : null}>
             <IonList inset className="azan-list">
-              {PRAYERS.map((k, i) => (
+              <IonItem button detail={false} onClick={() => setPerOpen(!perOpen)} lines={perOpen ? 'full' : 'none'}>
+                <IonIcon slot="start" icon={volumeHighOutline} />
+                <IonLabel className="ion-text-wrap">{t('azan_per_prayer')}
+                  <p>{PRAYERS.filter(k => S.azan[k]).length === PRAYERS.length ? t('azan_all_on')
+                    : PRAYERS.filter(k => S.azan[k]).map(k => t(k)).join(' · ') || t('off')}</p>
+                </IonLabel>
+                <IonIcon slot="end" icon={perOpen ? chevronUp : chevronDown} />
+              </IonItem>
+              {perOpen && PRAYERS.map((k, i) => (
                 <IonItem key={k} lines={i < PRAYERS.length - 1 ? 'full' : 'none'} className={S.azan[k] ? '' : 'off'}>
                   <div className="pvol">
                     <div className="prow">

@@ -59,9 +59,9 @@ namespace settings
     // Standardwerte der mit Fassung 2 hinzugekommenen Felder (entspricht dem bisherigen Aussehen)
     static void setNewDefaults(Settings &s)
     {
-        s.colorMain = 0xFFFFFF;   // Schrift weiß
-        s.colorAccent = 0xE9A27C; // Roségold (Gold, Orange, etwas Rosa)
-        s.colorMuted = 0xC4B6AE;  // warmes helles Grau
+        s.colorMain = 0xFFF4E6;   // Anbari (Bernstein): warmes Weiß
+        s.colorAccent = 0xE8A04E; // Bernstein
+        s.colorMuted = 0xA08E7C;  // warmes Grau
         strlcpy(s.background, "noir", sizeof(s.background));
         for (bool &on : s.azanEnabled)
             on = true;
@@ -269,6 +269,8 @@ namespace settings
         s_current.mawaqitName[sizeof(s_current.mawaqitName) - 1] = 0;
         s_current.city[sizeof(s_current.city) - 1] = 0;
         s_current.country[sizeof(s_current.country) - 1] = 0;
+        if (s_current.calculationMethod == 0 || s_current.calculationMethod == 7)
+            s_current.calculationMethod = 3; // schiitische Methoden gibt es nicht mehr: Muslim World League
         loadAlarms();
         Serial.printf("Einstellungen: %s (%.4f, %.4f), Methode %d, Madhhab %d\n", s_current.city,
                       s_current.latitude, s_current.longitude, s_current.calculationMethod, s_current.madhhab);

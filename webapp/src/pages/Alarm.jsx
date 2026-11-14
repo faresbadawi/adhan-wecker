@@ -178,6 +178,19 @@ export default function Alarm() {
               </IonItem>
             </IonList>
           </Section>
+
+          {S.alarmGentle !== undefined && (
+            <Section title={t('wake_style')} hint={t('wake_style_hint')}>
+              <IonList inset>
+                {[[true, 'wake_light', 'wake_light_sub'], [false, 'wake_deep', 'wake_deep_sub']].map(([v, k, sub]) => (
+                  <IonItem key={k} button detail={false} onClick={() => S.alarmGentle !== v && save({ alarmGentle: v })}>
+                    <IonIcon slot="start" icon={checkmark} className={'check' + (S.alarmGentle === v ? '' : ' hidden')} />
+                    <IonLabel><h3>{t(k)}</h3><p>{t(sub)}</p></IonLabel>
+                  </IonItem>
+                ))}
+              </IonList>
+            </Section>
+          )}
         </>}
 
         <TimeSheet open={edit >= 0} value={edit >= 0 && alarms ? alarms[edit].time : '06:00'} nowSec={ST ? nowSec(st) : null} ST={ST}

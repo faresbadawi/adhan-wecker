@@ -44,7 +44,7 @@ export function hijriOf(y, m, d) {
 const ANGLES = { 12: [12, 12], 14: [16, 15], 17: [20, 18], 18: [18, 18], 19: [18, 17], 20: [20, 18], 21: [19, 17], 23: [18, 18], 0: [16, 14], 8: [19.5, null] };
 function paramsFor(method, school, coords) {
   const M = adhan.CalculationMethod;
-  const table = { 3: M.MuslimWorldLeague, 4: M.UmmAlQura, 5: M.Egyptian, 1: M.Karachi, 2: M.NorthAmerica, 7: M.Tehran, 16: M.Dubai, 15: M.MoonsightingCommittee, 9: M.Kuwait, 10: M.Qatar, 11: M.Singapore, 13: M.Turkey };
+  const table = { 3: M.MuslimWorldLeague, 4: M.UmmAlQura, 5: M.Egyptian, 1: M.Karachi, 2: M.NorthAmerica, 16: M.Dubai, 15: M.MoonsightingCommittee, 9: M.Kuwait, 10: M.Qatar, 11: M.Singapore, 13: M.Turkey };
   let p;
   if (table[method]) p = table[method]();
   else {

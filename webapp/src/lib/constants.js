@@ -3,18 +3,18 @@
 export const METHODS = [
   [3, "رابطة العالم الإسلامي", "Muslim World League"], [4, "أم القرى، مكة المكرمة", "Umm al-Qura, Makkah"],
   [5, "الهيئة المصرية العامة للمساحة", "Egyptian General Authority of Survey"], [1, "جامعة العلوم الإسلامية، كراتشي", "University of Islamic Sciences, Karachi"],
-  [2, "الجمعية الإسلامية لأمريكا الشمالية", "ISNA (North America)"], [7, "معهد الجيوفيزياء، جامعة طهران", "Institute of Geophysics, Tehran"],
-  [0, "الشيعة الإثنا عشرية، قم", "Shia Ithna-Ashari, Qum"], [8, "منطقة الخليج", "Gulf Region"], [9, "الكويت", "Kuwait"], [10, "قطر", "Qatar"],
+  [2, "الجمعية الإسلامية لأمريكا الشمالية", "ISNA (North America)"],
+  [8, "منطقة الخليج", "Gulf Region"], [9, "الكويت", "Kuwait"], [10, "قطر", "Qatar"],
   [16, "دبي", "Dubai"], [11, "سنغافورة", "Singapore (MUIS)"], [12, "اتحاد المنظمات الإسلامية في فرنسا", "UOIF (France)"],
   [13, "رئاسة الشؤون الدينية التركية", "Diyanet (Türkiye)"], [14, "الإدارة الدينية لمسلمي روسيا", "Spiritual Administration of Muslims of Russia"],
   [15, "لجنة رؤية الهلال", "Moonsighting Committee"], [17, "ماليزيا (JAKIM)", "JAKIM (Malaysia)"], [18, "تونس", "Tunisia"],
   [19, "الجزائر", "Algeria"], [20, "إندونيسيا", "KEMENAG (Indonesia)"], [21, "المغرب", "Morocco"], [23, "الأردن", "Jordan"],
 ];
 export const PRESETS = [
+  ["preset_amber", "#FFF4E6", "#E8A04E", "#A08E7C"], // Anbari: Standard
   ["preset_rosegold", "#FFFFFF", "#E9A27C", "#C4B6AE"],
   ["preset_gold", "#F4F1EA", "#C9A45C", "#8C978F"], ["preset_silver", "#FFFFFF", "#C3CAD3", "#8A929C"],
   ["preset_emerald", "#F1F5EC", "#6FC79A", "#869A8E"], ["preset_turquoise", "#EAF6F6", "#5EC4CC", "#86A0A3"],
-  ["preset_amber", "#FFF4E6", "#E8A04E", "#A08E7C"],
 ];
 // Für das weiße Gehäuse mit hellem Hintergrund: dunkle Schrift, kräftiger Akzent
 export const LIGHT_PRESETS = [

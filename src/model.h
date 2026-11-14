@@ -99,6 +99,7 @@ namespace model
         uint8_t humidity = 0; // %
         float windKmh = 0;
         int8_t tempMax = 0, tempMin = 0;
+        int8_t rainChance = -1; // Regenwahrscheinlichkeit heute in %, -1 = unbekannt
         DayForecast forecast[3]; // heute, morgen, übermorgen
     };
 

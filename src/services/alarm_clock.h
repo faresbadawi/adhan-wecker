@@ -23,4 +23,9 @@ namespace alarmclock
     // Nächste aktive Weckzeit ab jetzt (Minuten seit Mitternacht), -1 wenn keiner aktiv ist.
     // Ein geschlummerter Wecker zählt mit seiner Wiederholzeit.
     int nextAlarmMinutes(const struct tm &now, const settings::Settings &st);
+
+    // Weckart: true = Leichtschläfer (leise beginnen, langsam bis zur eingestellten Lautstärke),
+    // false = Tiefschläfer (sofort mit der eingestellten Lautstärke). Dauerhaft gespeichert.
+    bool gentle();
+    void setGentle(bool on);
 }

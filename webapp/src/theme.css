@@ -626,3 +626,9 @@ html[lang=ar] .cal-head b { font-family: var(--arabic); font-size: 24px; }
 .tp-chips:not(.small) button.on span { color: inherit; }
 .tp-chips.small button { flex-direction: row; padding: 8px 14px; }
 ion-item.own-sub small { font-size: 14px; color: var(--dim); }
+
+/* Wetterkachel: Temperatur und Regenwahrscheinlichkeit nebeneinander */
+.tile .wx-row { display: flex; align-items: baseline; gap: 10px; width: 100%; }
+.tile .wx-rain { display: inline-flex; align-items: center; gap: 3px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.tile .wx-rain .svg { margin: 0; }
+.tile .wx-rain .svg svg { width: 16px; height: 16px; }
