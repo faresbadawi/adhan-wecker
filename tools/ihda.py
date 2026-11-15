@@ -32,13 +32,13 @@ def render(lines, out_png):
     page = f"""<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><style>
 html,body{{margin:0;width:{W}px;height:{H}px;overflow:hidden;background:#000 url(data:image/png;base64,{bg}) 0 0/{W}px {H}px}}
 body{{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Amiri,serif;color:#FFF4E6;text-align:center}}
-.box{{position:absolute;inset:10px;border:1px solid #E8A04E99;border-radius:10px}}
+.box{{position:absolute;inset:6px;border:1px solid #E8A04E99;border-radius:10px}}
 .box::after{{content:"";position:absolute;inset:4px;border:1px solid #E8A04E44;border-radius:7px}}
-h1{{margin:0 0 2px;font-size:27px;font-weight:700;color:#E8A04E;line-height:1.3}}
-.rule{{width:150px;height:1px;background:linear-gradient(90deg,transparent,#E8A04E,transparent);margin:2px 0 8px}}
-p{{margin:0;font-size:19px;line-height:1.62;max-width:420px}}
-p.hi{{font-size:22px;font-weight:700;margin-bottom:2px}}
-.sign{{margin-top:9px;font-size:17px;color:#E8A04E}}
+h1{{margin:0;font-size:36px;font-weight:700;color:#E8A04E;line-height:1.2}}
+.rule{{width:150px;height:1px;background:linear-gradient(90deg,transparent,#E8A04E,transparent);margin:0 0 4px}}
+p{{margin:0;font-size:27px;line-height:1.45;max-width:448px}}
+p.hi{{font-size:31px;font-weight:700}}
+.sign{{margin-top:4px;font-size:24px;color:#E8A04E}}
 </style><div class="box"></div><h1>{html.escape(title)}</h1><div class="rule"></div>{rows}<p class="sign">{html.escape(sign)}</p></html>"""
     with tempfile.TemporaryDirectory() as d:
         f = pathlib.Path(d) / "ihda.html"
