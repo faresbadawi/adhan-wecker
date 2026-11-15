@@ -18,7 +18,9 @@ trap 'git -C "$ROOT" worktree remove --force "$WT" >/dev/null 2>&1 || true' EXIT
 git fetch -q origin gh-pages
 git worktree add -q --detach "$WT" origin/gh-pages
 
-rsync -a --checksum --delete --exclude .git --exclude .nojekyll --exclude ota pwa/ "$WT"/
+rsync -a --checksum --delete --exclude .git --exclude .nojekyll --exclude ota --exclude anleitung pwa/ "$WT"/
+# Anleitungen (PDF) zum Verlinken: https://faresbadawi.github.io/adhan-wecker/anleitung/…
+if [ -d anleitung ]; then rsync -a --checksum --delete anleitung/ "$WT"/anleitung/; fi
 touch "$WT/.nojekyll"
 python3 tools/release.py "$WT"
 
