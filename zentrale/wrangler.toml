@@ -7,7 +7,7 @@ compatibility_date = "2025-06-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "bilal-zentrale"
-database_id = "local"
+database_id = "a240dbea-d38b-4bf9-b821-e571a692663a"
 
 [[rules]]
 type = "Text"
