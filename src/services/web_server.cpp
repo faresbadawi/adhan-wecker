@@ -507,6 +507,40 @@ namespace web
         sendBackgrounds();
     }
 
+    // Widmung (Ihda) für eine einzelne Uhr: Vollbild 480x320 RGB565, erscheint nach dem Startbild
+    static void dedicationUploadData()
+    {
+        HTTPUpload &up = s_server.upload();
+        if (up.status == UPLOAD_FILE_START)
+            s_upFile = LittleFS.open("/ihda.tmp", "w");
+        else if (up.status == UPLOAD_FILE_WRITE && s_upFile)
+            s_upFile.write(up.buf, up.currentSize);
+        else if ((up.status == UPLOAD_FILE_END || up.status == UPLOAD_FILE_ABORTED) && s_upFile)
+            s_upFile.close();
+    }
+
+    static void dedicationUploadDone()
+    {
+        File f = LittleFS.open("/ihda.tmp", "r");
+        const size_t size = f ? f.size() : 0;
+        f.close();
+        if (size != (size_t)theme::SCREEN_W * theme::SCREEN_H * 2)
+        {
+            LittleFS.remove("/ihda.tmp");
+            s_server.send(400, "application/json", "{\"error\":\"size\"}");
+            return;
+        }
+        LittleFS.remove(splash::DEDICATION_PATH);
+        LittleFS.rename("/ihda.tmp", splash::DEDICATION_PATH);
+        s_server.send(200, "application/json", "{}");
+    }
+
+    static void dedicationDelete()
+    {
+        LittleFS.remove(splash::DEDICATION_PATH);
+        s_server.send(200, "application/json", "{}");
+    }
+
     static void backgroundDelete()
     {
         LittleFS.remove("/bg/custom.bin");
@@ -523,7 +557,7 @@ namespace web
     // Sicherung eigener Dateien (vor einem Dateisystem-Update): nur diese Pfade, nur lesen
     static void sendBackupFile()
     {
-        static const char *const OK[] = {"/bg/custom.bin", "/www/bg/custom.jpg", "/alarm.mp3", "/alarm.txt",
+        static const char *const OK[] = {"/bg/custom.bin", "/www/bg/custom.jpg", "/alarm.mp3", "/alarm.txt", "/ihda.bin",
                                          "/azans/custom.mp3", "/azans/custom_fajr.mp3", "/azans/ramadan.mp3"};
         const String path = s_server.arg("path");
         bool allowed = false;
@@ -1309,6 +1343,8 @@ namespace web
         s_server.on("/api/update", HTTP_POST, updateDone, updateData);
         s_server.on("/api/background/upload", HTTP_POST, backgroundUploadDone, backgroundUploadData);
         s_server.on("/api/background/delete", HTTP_POST, backgroundDelete);
+        s_server.on("/api/dedication/upload", HTTP_POST, dedicationUploadDone, dedicationUploadData);
+        s_server.on("/api/dedication/delete", HTTP_POST, dedicationDelete);
         s_server.on("/api/settings", HTTP_GET, sendSettings);
         s_server.on("/api/settings", HTTP_POST, receiveSettings);
         // Startseite ausdrücklich: serveStatic sucht bei "/" nur nach index.htm
