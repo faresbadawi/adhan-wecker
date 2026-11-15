@@ -72,7 +72,8 @@ namespace fleet
         if (!n.length())
         {
             const String i = id();
-            n = "Bilal-" + i.substring(i.length() - 4);
+            // die vorderen Stellen sind je Uhr verschieden; die hinteren sind die Herstellerkennung (bei allen gleich)
+            n = "Bilal-" + i.substring(0, 4);
             n.toUpperCase();
             n.replace("BILAL", "Bilal");
         }
