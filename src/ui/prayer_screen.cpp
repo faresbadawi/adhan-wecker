@@ -21,7 +21,7 @@ namespace prayer_screen
     static lv_obj_t *s_nextName, *s_countdown;
     static lv_obj_t *s_cell[CELLS], *s_cellTime[CELLS], *s_cellName[CELLS];
     static lv_obj_t *s_wifi;
-    static lv_obj_t *s_azan, *s_azanName;
+    static lv_obj_t *s_azan, *s_azanName, *s_azanTitle, *s_azanVoice;
     static lv_obj_t *s_sunrise, *s_nextLbl;
     static void (*s_onAzanTap)() = nullptr;
     static lv_obj_t *s_wxIcon, *s_wxTemp, *s_city;
@@ -79,7 +79,16 @@ namespace prayer_screen
         lv_obj_set_style_border_opa(card, LV_OPA_70, 0);
         lv_obj_set_style_border_width(card, 2, 0);
 
-        lv_obj_align(image(card, lang::text(TXT_AZAN_NOW), Role::MAIN), LV_ALIGN_TOP_MID, 0, 26);
+        s_azanTitle = image(card, lang::text(TXT_AZAN_NOW), Role::MAIN);
+        lv_obj_align(s_azanTitle, LV_ALIGN_TOP_MID, 0, 26);
+        // Hörprobe: Name des Muezzins (kommt aus der App, auch arabisch) anstelle des Titels
+        s_azanVoice = label(card, &font_josefin_20, Role::MAIN, "");
+        lv_obj_set_width(s_azanVoice, 350);
+        lv_label_set_long_mode(s_azanVoice, LV_LABEL_LONG_DOT);
+        lv_obj_set_style_text_align(s_azanVoice, LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_base_dir(s_azanVoice, LV_BASE_DIR_AUTO, 0);
+        lv_obj_align(s_azanVoice, LV_ALIGN_TOP_MID, 0, 28);
+        lv_obj_add_flag(s_azanVoice, LV_OBJ_FLAG_HIDDEN);
         s_azanName = image(card, nullptr, Role::ACCENT);
         lv_obj_align(s_azanName, LV_ALIGN_TOP_MID, 0, 72);
         divider(card, 190, 140, 140);
@@ -287,12 +296,28 @@ namespace prayer_screen
 
     bool sunriseShown() { return !lv_obj_has_flag(s_sunrise, LV_OBJ_FLAG_HIDDEN); }
 
-    void showAzan(bool show, model::Prayer p)
+    void showAzan(bool show, model::Prayer p, bool preview, const char *label, bool showPrayer)
     {
         if (show)
         {
             lv_img_set_src(s_azanName, prayerName(p, true));
             lv_obj_align(s_azanName, LV_ALIGN_TOP_MID, 0, 72);
+            if (preview)
+            {
+                lv_label_set_text(s_azanVoice, label);
+                lv_obj_align(s_azanVoice, LV_ALIGN_TOP_MID, 0, showPrayer ? 28 : 62);
+                lv_obj_clear_flag(s_azanVoice, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(s_azanTitle, LV_OBJ_FLAG_HIDDEN);
+            }
+            else
+            {
+                lv_obj_add_flag(s_azanVoice, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(s_azanTitle, LV_OBJ_FLAG_HIDDEN);
+            }
+            if (preview && !showPrayer)
+                lv_obj_add_flag(s_azanName, LV_OBJ_FLAG_HIDDEN);
+            else
+                lv_obj_clear_flag(s_azanName, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(s_azan, LV_OBJ_FLAG_HIDDEN);
         }
         else

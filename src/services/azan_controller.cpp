@@ -296,10 +296,33 @@ namespace azan
 
     void limitTo(uint32_t ms) { s_limitAt = millis() + ms; if (!s_limitAt) s_limitAt = 1; }
 
+    static uint32_t s_serial = 0;
+
+    bool preview(fs::FS &fs, const char *path, model::Prayer p, const char *label, const char *key, bool showPrayer)
+    {
+        if (s_status.state != State::IDLE && !s_status.preview)
+            return false; // ein echter Azan hat Vorrang
+        s_limitAt = 0;
+        s_status = {};
+        s_status.serial = ++s_serial;
+        s_status.state = State::PLAYING;
+        s_status.prayer = p;
+        s_status.preview = true;
+        s_status.showPrayer = showPrayer;
+        s_status.hasAudio = true;
+        strlcpy(s_status.label, label, sizeof(s_status.label));
+        strlcpy(s_status.key, key, sizeof(s_status.key));
+        s_startedMs = millis();
+        applyVolume(p);
+        audio::play(fs, path);
+        return true;
+    }
+
     void start(model::Prayer p, uint16_t minutes)
     {
         s_limitAt = 0; // ein echter Azan läuft ganz
         s_status = {};
+        s_status.serial = ++s_serial;
         s_status.state = State::PLAYING;
         s_status.prayer = p;
         s_status.minutes = minutes;
@@ -366,7 +389,7 @@ namespace azan
         s_ramadan = day.valid && day.hijriMonth == 9;
 
         // Beginn einer Gebetszeit erkennen (einmal pro Gebet und Tag)
-        if (day.valid && s_status.state == State::IDLE)
+        if (day.valid && (s_status.state == State::IDLE || s_status.preview)) // ein fälliger Azan löst die Hörprobe ab
         {
             const int nowMin = now.tm_hour * 60 + now.tm_min;
             const int32_t date = (now.tm_year + 1900) * 10000 + (now.tm_mon + 1) * 100 + now.tm_mday;

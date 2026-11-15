@@ -939,7 +939,11 @@ namespace web
             }
         }
 
-        doc["azan"]["playing"] = azan::status().state == azan::State::PLAYING;
+        {
+            const azan::Status as = azan::status();
+            doc["azan"]["playing"] = as.state == azan::State::PLAYING;
+            doc["azan"]["preview"] = as.state == azan::State::PLAYING && as.preview ? as.key : ""; // welche Hörprobe läuft
+        }
 
         model::Weather wx;
         if (weather::get(wx))
@@ -1044,15 +1048,15 @@ namespace web
             if (strcmp(doc["prayer"] | "", AZAN_KEYS[i]) == 0)
                 prayer = model::DAILY_PRAYERS[i];
         static char path[96];
-        fs::FS *fs = azan::status().state == azan::State::IDLE ? azan::voiceFile(id, prayer, path, sizeof(path)) : nullptr;
-        if (!fs)
+        // Hörprobe: der ganze Azan, mit Hinweis auf der Uhr (Name des Muezzins); Tippen oder die App beendet ihn
+        const azan::Status cur = azan::status();
+        fs::FS *fs = (cur.state == azan::State::IDLE || cur.preview) ? azan::voiceFile(id, prayer, path, sizeof(path)) : nullptr;
+        const char *name = doc["name"] | id.c_str();
+        if (!fs || !azan::preview(*fs, path, prayer, name, doc["key"] | "", id != "ramadan"))
         {
             s_server.send(409, "application/json", "{\"error\":\"azan\"}");
             return;
         }
-        azan::applyVolume(prayer);
-        audio::play(*fs, path);
-        azan::limitTo(5000); // Vorhören: nur die ersten 5 Sekunden
         s_server.send(200, "application/json", "{}");
     }
 

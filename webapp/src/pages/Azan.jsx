@@ -8,7 +8,7 @@ import Svg from '../components/Svg.jsx';
 import { t } from '../lib/i18n.js';
 import { PRAYER_ICON } from '../lib/icons.js';
 import { PRAYERS } from '../lib/constants.js';
-import { useApp, api, save, toast, toMin, two, mb, confirmBox } from '../lib/store.js';
+import { useApp, api, save, toast, toMin, two, mb, confirmBox, refreshStatus } from '../lib/store.js';
 import { encodeAzan } from '../lib/azanFile.js';
 import { hasNative } from '../lib/native.js';
 import { phone, saveLocal, scheduleSoon, playVoice, VOICES } from '../lib/phone.js';
@@ -184,12 +184,12 @@ function useOwn(voices, setVoices, onDone) {
 }
 
 // Knöpfe für einen eigenen Platz: anhören, ersetzen/hochladen, löschen
-function OwnButtons({ o, slot, onPlay }) {
+function OwnButtons({ o, slot, onPlay, on }) {
   const has = o.own[slot] > 0;
   if (o.busy && o.busy.slot === slot) return <IonSpinner slot="end" name="crescent" />;
   if (o.busy) return null;
   return <>
-    {has && <IonButton slot="end" fill="clear" className="play" aria-label={t('listen')} onClick={e => { e.stopPropagation(); onPlay(); }}><IonIcon slot="icon-only" icon={play} /></IonButton>}
+    {has && <IonButton slot="end" fill="clear" className="play" aria-label={t(on ? 'stop' : 'listen')} onClick={e => { e.stopPropagation(); onPlay(); }}><IonIcon slot="icon-only" icon={on ? stop : play} /></IonButton>}
     <IonButton slot="end" fill="clear" className="play" aria-label={t(has ? 'own_replace' : 'own_upload')} onClick={e => { e.stopPropagation(); o.pick(slot); }}><IonIcon slot="icon-only" icon={cloudUploadOutline} /></IonButton>
     {has && <IonButton slot="end" fill="clear" color="danger" aria-label={t('delete')} onClick={e => { e.stopPropagation(); o.del(slot); }}><IonIcon slot="icon-only" icon={trashOutline} /></IonButton>}
   </>;
@@ -217,11 +217,11 @@ function Voices({ voices, setVoices, playOn }) {
           <IonItem key={id} button detail={false} onClick={() => choose(id)}>
             <IonIcon slot="start" icon={checkmark} className={'check' + (id === voices.selected ? '' : ' hidden')} />
             <IonLabel>{voiceName(id)}</IonLabel>
-            <IonButton slot="end" fill="clear" className="play fajr-btn" onClick={e => { e.stopPropagation(); playOn('/api/azan/preview', { id, prayer: 'fajr' }); }} aria-label={t('fajr') + ' – ' + t('listen')}>
-              <span className="fajr-lbl">{t('fajr')}</span><IonIcon slot="end" icon={play} />
+            <IonButton slot="end" fill="clear" className="play fajr-btn" onClick={e => { e.stopPropagation(); playOn('/api/azan/preview', { id, prayer: 'fajr' }, voiceName(id)); }} aria-label={t('fajr') + ' – ' + t(playOn.on({ id, prayer: 'fajr' }) ? 'stop' : 'listen')}>
+              <span className="fajr-lbl">{t('fajr')}</span><IonIcon slot="end" icon={playOn.on({ id, prayer: 'fajr' }) ? stop : play} />
             </IonButton>
-            <IonButton slot="end" fill="clear" className="play" onClick={e => { e.stopPropagation(); playOn('/api/azan/preview', { id }); }} aria-label={t('listen')}>
-              <IonIcon slot="icon-only" icon={play} />
+            <IonButton slot="end" fill="clear" className="play" onClick={e => { e.stopPropagation(); playOn('/api/azan/preview', { id }, voiceName(id)); }} aria-label={t(playOn.on({ id }) ? 'stop' : 'listen')}>
+              <IonIcon slot="icon-only" icon={playOn.on({ id }) ? stop : play} />
             </IonButton>
           </IonItem>
         ))}
@@ -229,12 +229,12 @@ function Voices({ voices, setVoices, playOn }) {
           <IonItem button detail={false} lines="none" onClick={() => choose('custom')}>
             <IonIcon slot="start" icon={checkmark} className={'check' + (voices.selected === 'custom' ? '' : ' hidden')} />
             <IonLabel className="ion-text-wrap">{t('voice_custom')}<p>{ownSub(o, 'normal', voices.where)}</p></IonLabel>
-            <OwnButtons o={o} slot="normal" onPlay={() => playOn('/api/azan/preview', { id: 'custom', prayer: 'dhuhr' })} />
+            <OwnButtons o={o} slot="normal" on={playOn.on({ id: 'custom', prayer: 'dhuhr' })} onPlay={() => playOn('/api/azan/preview', { id: 'custom', prayer: 'dhuhr' }, t('voice_custom'))} />
           </IonItem>
           <IonItem className="own-sub">
             <IonIcon slot="start" icon={checkmark} className="check hidden" />
             <IonLabel className="ion-text-wrap"><small>{t('own_fajr_opt')}</small><p>{ownSub(o, 'fajr', voices.where)}</p></IonLabel>
-            <OwnButtons o={o} slot="fajr" onPlay={() => playOn('/api/azan/preview', { id: 'custom', prayer: 'fajr' })} />
+            <OwnButtons o={o} slot="fajr" on={playOn.on({ id: 'custom', prayer: 'fajr' })} onPlay={() => playOn('/api/azan/preview', { id: 'custom', prayer: 'fajr' }, t('voice_custom'))} />
           </IonItem>
         </> : (
           <IonItem button detail={false} disabled={!!o.busy} onClick={() => o.pick('normal')}>
@@ -293,7 +293,7 @@ function Ramadan({ S, voices, setVoices, playOn }) {
         {open && <>
           <IonItem lines={has ? 'full' : 'none'}>
             <IonLabel className="ion-text-wrap">{t('ramadan_file')}<p>{ownSub(o, 'ramadan', voices.where)}</p></IonLabel>
-            <OwnButtons o={o} slot="ramadan" onPlay={() => playOn('/api/azan/preview', { id: 'ramadan' })} />
+            <OwnButtons o={o} slot="ramadan" on={playOn.on({ id: 'ramadan' })} onPlay={() => playOn('/api/azan/preview', { id: 'ramadan' }, t('ramadan_title'))} />
           </IonItem>
           {has && <IonItem lines="none">
             <IonToggle checked={on} onIonChange={e => save({ azanRamadan: e.detail.checked ? 2 : 0 }, true)}>{t('ramadan_on')}</IonToggle>
@@ -314,11 +314,32 @@ export default function Azan() {
     api('/api/azan/voices').then(r => { if (r.data) setVoices(sortV(r.data)); })
       .catch(() => setVoices({ list: [], selected: '' }));
   }, []);
-  async function playOn(url, body) {
-    try { const r = await api(url, body); toast(r.ok ? t('azan_playing') : t('error'), !r.ok); }
+  // Hörprobe: läuft ganz durch; der Knopf wird solange zum Stopp-Knopf. Die Uhr meldet im Status, welche läuft
+  // (so stimmt die Anzeige auch auf einem zweiten Handy und nach dem Ende des Azans).
+  const [cur, setCur] = useState(null); // { key, at }: eigener Tipp gilt, bis der Status der Uhr nachzieht
+  const live = (ST && ST.azan && ST.azan.preview) || '';
+  const playing = cur && (local || Date.now() - cur.at < 6000) ? cur.key : live;
+  const keyOf = b => (b.id || '') + '|' + (b.prayer || '');
+  useEffect(() => {
+    if (local || !playing) return undefined;
+    const tm = setInterval(refreshStatus, 4000); // Ende des Azans mitbekommen
+    return () => clearInterval(tm);
+  }, [local, playing]);
+  async function playOn(url, body, name) {
+    const preview = url === '/api/azan/preview';
+    const key = preview ? keyOf(body) : '';
+    if (preview && playing === key) { setCur({ key: '', at: Date.now() }); return stopAzan(); }
+    try {
+      const r = await api(url, preview ? { ...body, key, name: name || '' } : body);
+      toast(r.ok ? t('azan_playing') : t('error'), !r.ok);
+      if (r.ok && preview) setCur({ key, at: Date.now() });
+    }
     catch (e) { toast(t('offline'), true); }
   }
-  const stopAzan = () => api('/api/azan/stop', {}).catch(() => toast(t('offline'), true));
+  playOn.on = body => !!playing && playing === keyOf(body);
+  const stopAzan = () => api('/api/azan/stop', {}).then(() => { setCur({ key: '', at: Date.now() }); refreshStatus(); }).catch(() => toast(t('offline'), true));
+  const vName = id => (t('voice_' + id) === 'voice_' + id ? id : t('voice_' + id));
+  const selName = voices && voices.selected ? vName(voices.selected) : '';
 
   return (
     <IonPage>
@@ -352,8 +373,8 @@ export default function Azan() {
                         <IonIcon slot="start" icon={volumeLowOutline} />
                         <IonIcon slot="end" icon={volumeHighOutline} />
                       </IonRange>
-                      <IonButton fill="clear" className="play" onClick={() => playOn('/api/azan/preview', { prayer: k })} aria-label={t('listen')}>
-                        <IonIcon slot="icon-only" icon={play} />
+                      <IonButton fill="clear" className="play" onClick={() => playOn('/api/azan/preview', { prayer: k }, selName)} aria-label={t(playOn.on({ prayer: k }) ? 'stop' : 'listen')}>
+                        <IonIcon slot="icon-only" icon={playOn.on({ prayer: k }) ? stop : play} />
                       </IonButton>
                     </div>}
                   </div>

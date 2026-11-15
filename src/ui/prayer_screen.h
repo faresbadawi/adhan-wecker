@@ -29,7 +29,8 @@ namespace prayer_screen
     // Azan-Anzeige; Tippen irgendwo auf den Bildschirm ruft onTap auf (Azan beenden).
     void setAzanCallback(void (*onTap)());
 
-    void showAzan(bool show, model::Prayer p);
+    // preview: Hörprobe aus der App – statt "Zeit für das Gebet" steht der Name des Muezzins (label) da
+    void showAzan(bool show, model::Prayer p, bool preview = false, const char *label = "", bool showPrayer = true);
 
     // Hinweis "Fajr-Zeit beendet, die Sonne ist aufgegangen"; Tippen schließt ihn
     void showSunrise(bool show);

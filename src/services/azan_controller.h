@@ -23,6 +23,11 @@ namespace azan
         bool hasAudio = false;     // MP3-Datei gefunden
         uint32_t elapsed = 0;      // Sekunden
         uint32_t duration = 0;     // Sekunden, 0 = unbekannt
+        bool preview = false;      // Hörprobe aus der App (ganzer Azan, kein Gebet)
+        bool showPrayer = true;    // Hörprobe: Gebetsname mit anzeigen
+        char label[64] = "";       // Hörprobe: Name des Muezzins zur Anzeige
+        char key[40] = "";         // Hörprobe: Kennung der App (welcher Knopf läuft)
+        uint32_t serial = 0;       // zählt bei jedem Start hoch (Anzeige erneuern)
     };
 
     // Verschieben und Erinnerung je Gebet (Fajr, Dhuhr, Asr, Maghrib, Isha), in Minuten.
@@ -83,6 +88,8 @@ namespace azan
 
     void mute(); // Ton aus, Hinweis bleibt kurz sichtbar
     void skip(); // Ton aus, sofort beenden
+    // Hörprobe: spielt die Datei ganz und zeigt den Hinweis mit dem Namen; false, wenn gerade ein echter Azan läuft
+    bool preview(fs::FS &fs, const char *path, model::Prayer p, const char *label, const char *key, bool showPrayer);
 
     Status status();
 

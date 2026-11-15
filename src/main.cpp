@@ -349,14 +349,16 @@ static void refreshAzan(const struct tm &now)
     refreshSunrise(now);
     const azan::Status st = azan::status();
     const bool active = st.state == azan::State::PLAYING;
-    if (active != shown)
+    static uint32_t shownSerial = 0;
+    if (active != shown || (active && st.serial != shownSerial)) // auch wenn eine Hörprobe die andere ablöst
     {
         shown = active;
+        shownSerial = st.serial;
         if (active)
         {
             ui::showPage(ui::PAGE_PRAYER); // danach steht wieder die Hauptseite da
         }
-        prayer_screen::showAzan(active, st.prayer);
+        prayer_screen::showAzan(active, st.prayer, st.preview, st.label, st.showPrayer);
     }
 }
 
