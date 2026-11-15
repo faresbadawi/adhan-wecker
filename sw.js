@@ -1,5 +1,5 @@
 // Service Worker der Web-App (automatisch erzeugt): alles offline bereit, Azan-Dateien nach dem ersten Abspielen.
-const CACHE = "bilal-pwa-mwhlose1";
+const CACHE = "bilal-pwa-mwid5oq5";
 const SHELL = ["assets/app.js","assets/lamejs-D2d3HPyl.js","assets/p-BVNUhOOf-CPT2BVJr.js","assets/p-C1AxSUnp-rYGe6s9V.js","assets/p-Ct2aBEue-DSA0eRZM.js","assets/p-DD92Fw3n-DuL_pGOm.js","assets/p-YNnH1_Hs-DqXwl2AG.js","assets/p-ZjP4CjeZ-DJ1DGIsW.js","assets/style.css","icons/apple-touch-icon.png","icons/favicon.png","icons/icon-192.png","icons/icon-512.png","icons/maskable-512.png","./","manifest.json"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
