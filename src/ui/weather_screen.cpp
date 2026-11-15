@@ -46,7 +46,7 @@ namespace weather_screen
     static lv_obj_t *detail(lv_obj_t *parent, int row, const lv_img_dsc_t *icon)
     {
         lv_obj_t *r = box(parent);
-        lv_obj_set_size(r, 122, 36);
+        lv_obj_set_size(r, 152, 36); // breit genug für "100 km/h"
         lv_obj_set_style_base_dir(r, lang::rtl() ? LV_BASE_DIR_RTL : LV_BASE_DIR_LTR, 0);
         lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
         lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);

@@ -4,7 +4,7 @@ const QR = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 
-const SH = path.join(__dirname, 'shots2');
+const SH = process.env.SHOTS || path.join(__dirname, 'shots2'); // Bildschirmfotos (shot.js, shot2.js, Uhr: /api/screenshot)
 const ICON = path.join(__dirname, '../../webapp/public/icons/icon-512.png');
 const OUT = path.join(__dirname, '../../anleitung');
 const APK_URL = 'https://github.com/faresbadawi/adhan-wecker/releases/latest';
@@ -32,7 +32,7 @@ const mock = {
       <div class="mk-app big"><img src="${img(ICON)}"><b>Bilal</b></div><p class="mk-small">${t.mk_home_note}</p></div>`,
   portal: t => `<div class="mock light"><div class="mk-top">${t.mk_wifi}</div>
       <div class="mk-switch"><span>${t.mk_wifi}</span><i class="on"></i></div>
-      <div class="mk-net hl-row"><b>Bilal-Setup</b><span>${t.mk_open}</span></div><div class="mk-net"><b>FRITZ!Box</b><span>🔒</span></div>
+      <div class="mk-net hl-row"><b class="l">Bilal-Setup</b><span>${t.mk_open}</span></div><div class="mk-net"><b>FRITZ!Box</b><span>🔒</span></div>
       <div class="mk-net"><b>Vodafone-WLAN</b><span>🔒</span></div></div>`,
 };
 
@@ -40,8 +40,8 @@ const mock = {
 const T = {
   de: {
     lang: 'de', dir: 'ltr', title: 'Bilal – Anleitung', sub: 'Gebetszeiten, Azan und Wecker',
-    toc: ['App installieren: Android', 'App installieren: iPhone', 'Die Uhr einrichten', 'Die App benutzen'],
-    note: 'Fotos mit Beispielort. Grau umrandete Bilder sind Beispieldarstellungen – je nach Handy sieht es etwas anders aus.',
+    toc: ['App installieren: Android', 'App installieren: iPhone', 'Die Uhr einrichten', 'Die App benutzen', 'Die Bildschirme der Uhr'],
+    note: 'Die Bilder der App und der Uhr sind echte Bildschirmfotos, mit Berlin als Beispielstadt. Bilder mit grauem Rahmen sind nachgezeichnet: Sie zeigen, wie das Fenster auf dem Handy ungefähr aussieht.',
     p1: 'App installieren: Android', p1i: 'Die Android-App kommt nicht aus dem Play Store, sondern direkt von GitHub. Das ist sicher, Android fragt beim ersten Mal nur nach.',
     a: [
       ['Download-Seite öffnen', `Den QR-Code scannen oder im Browser öffnen:<br><code>${APK_URL}</code>`, 'github.png', 'qr-apk'],
@@ -58,10 +58,10 @@ const T = {
       ['Zum Home-Bildschirm', 'In der Liste etwas nach unten wischen und <b>„Zum Home-Bildschirm“</b> wählen.', 'shareSheet'],
       ['Hinzufügen', 'Oben rechts auf <b>„Hinzufügen“</b> tippen. Bilal startet ab jetzt über das Symbol auf dem Home-Bildschirm.', 'addHome'],
     ],
-    iTip: '<b>Uhr vom iPhone aus einstellen:</b> Im WLAN zu Hause in Safari <code>http://azan-clock.local</code> öffnen und diese Seite genauso zum Home-Bildschirm hinzufügen.',
+    iTip: '<b>Uhr vom iPhone aus einstellen:</b> Im WLAN zu Hause in Safari <code class="s">http://azan-clock.local</code> öffnen und diese Seite genauso zum Home-Bildschirm hinzufügen.',
     p3: 'Die Uhr einrichten', p3i: 'Beim ersten Einschalten kennt die Uhr dein WLAN noch nicht. Das geht in einer Minute:',
     c: [
-      ['Mit „Bilal-Setup“ verbinden', 'Uhr einschalten. Am Handy unter WLAN das Netz <b>„Bilal-Setup“</b> wählen. Die Einrichtungsseite öffnet sich von selbst (sonst <code>http://192.168.4.1</code> öffnen).', 'portal'],
+      ['Mit „Bilal-Setup“ verbinden', 'Uhr einschalten. Am Handy unter WLAN das Netz <b>„Bilal-Setup“</b> wählen. Die Einrichtungsseite öffnet sich von selbst (sonst <code class="s">http://192.168.4.1</code> öffnen).', 'portal'],
       ['Heim-WLAN wählen', 'Auf der Einrichtungsseite dein WLAN auswählen, das Passwort eingeben und speichern. Die Uhr startet neu und verbindet sich.', null],
       ['App öffnen', 'Handy wieder mit dem Heim-WLAN verbinden und Bilal öffnen. Die Android-App findet die Uhr im selben WLAN selbst. Ein Assistent führt durch Sprache, Ort, Azan und Wecker.', 'de-pwa.png'],
     ],
@@ -78,6 +78,20 @@ const T = {
       ['Farben der Uhr', 'Unter „Darstellung“: Hintergrund, Reihenfolge der Seiten und Farbvorlagen. Standard ist <b>Bernstein (Anbari)</b>.', 'display2'],
       ['Name und Updates', 'Unter „Gerät“: Name der Uhr und Updates. Die Uhr aktualisiert sich nachts selbst; „Jetzt nach Update suchen“ geht auch sofort.', 'device2'],
     ],
+    p5: 'Die Bildschirme der Uhr', p5i: 'Die Uhr hat mehrere Seiten. Wische auf dem Bildschirm nach links oder rechts, um die Seite zu wechseln. Die Punkte unten zeigen, auf welcher Seite du bist.',
+    d: [
+      ['Startbild', 'Erscheint kurz nach dem Einschalten.', 'splash'],
+      ['Gebetszeiten', 'Die Hauptseite. Oben stehen Uhrzeit, Datum, Wetter und Ort. In der Mitte steht das nächste Gebet mit der Zeit bis dahin. Unten stehen die fünf Gebetszeiten, das nächste Gebet ist umrahmt. Das Weckersymbol zeigt den nächsten Wecker.', '2'],
+      ['Uhr', 'Große Uhrzeit mit Sekunden, darunter Wochentag, Hijri-Datum und Datum. Oben rechts steht der nächste Wecker.', '1'],
+      ['Wetter', 'Temperatur und Himmel von jetzt. Daneben stehen gefühlte Temperatur, Luftfeuchtigkeit und Wind. Unten steht die Vorhersage für drei Tage mit Höchst- und Tiefstwert.', '3'],
+      ['Kalender', 'Der Monat in beiden Kalendern: groß der normale Tag, klein daneben der Hijri-Tag. Der heutige Tag ist markiert.', '4'],
+      ['Mond & Hijri', 'Die Mondphase, das Hijri-Datum und die Weißen Tage (13. bis 15. des Monats). Unten steht, wie viel vom Mond beleuchtet ist.', '7'],
+      ['Letztes Drittel der Nacht', 'Zeigt, wann das letzte Drittel der Nacht beginnt (die Zeit für Tahajjud). Dazu Maghrib, Mitte der Nacht, Fajr und Sonnenaufgang.', '6'],
+      ['Einstellungen', 'Immer die letzte Seite. Scanne den QR-Code mit dem Handy, dann öffnet sich die Einstellungsseite der Uhr. Daneben stehen WLAN, Signalstärke und Adresse der Uhr.', '5'],
+    ],
+    dTips: ['<b>Azan stoppen:</b> Während des Azans irgendwo auf den Bildschirm tippen.',
+      '<b>Wecker:</b> Tippen auf den Bildschirm stoppt den Wecker. Die Taste in der Mitte lässt ihn schlummern; mit − und + stellst du 5 bis 30 Minuten ein.',
+      '<b>Seiten auswählen:</b> Welche Seiten die Uhr zeigt, in welcher Reihenfolge und ob sie von selbst wechselt, stellst du in der App unter Einstellungen → Darstellung ein.'],
     mk_warn: 'Diese Art von Datei kann schädlich sein. Trotzdem herunterladen?', mk_cancel: 'Abbrechen', mk_download_anyway: 'Trotzdem herunterladen',
     mk_unknown_title: 'Unbekannte Apps installieren', mk_allow: 'Aus dieser Quelle zulassen', mk_unknown_note: 'Nur einmal nötig.',
     mk_install_q: 'Möchtest du diese App installieren?', mk_install: 'Installieren',
@@ -87,12 +101,12 @@ const T = {
   },
   ar: {
     lang: 'ar', dir: 'rtl', title: 'بلال – دليل الاستخدام', sub: 'مواقيت الصلاة والأذان والمنبه',
-    toc: ['تثبيت التطبيق: أندرويد', 'تثبيت التطبيق: آيفون', 'إعداد الساعة', 'استخدام التطبيق'],
-    note: 'الصور بمدينة على سبيل المثال. الصور ذات الإطار الرمادي توضيحية فقط – قد يختلف الشكل قليلًا حسب الهاتف.',
+    toc: ['تثبيت التطبيق: أندرويد', 'تثبيت التطبيق: آيفون', 'إعداد الساعة', 'استخدام التطبيق', 'شاشات الساعة'],
+    note: 'صور التطبيق والساعة لقطات شاشة حقيقية، ومدينة برلين فيها مثال فقط. أما الصور ذات الإطار الرمادي فهي مرسومة للتوضيح: تبيّن شكل النافذة في الهاتف تقريبًا.',
     p1: 'تثبيت التطبيق: أندرويد', p1i: 'تطبيق أندرويد لا يأتي من متجر Play، بل مباشرة من GitHub. هذا آمن، ويسألك أندرويد في المرة الأولى فقط للتأكيد.',
     a: [
       ['افتح صفحة التنزيل', `امسح رمز QR أو افتح في المتصفح:<br><code>${APK_URL}</code>`, 'github.png', 'qr-apk'],
-      ['اضغط على «Bilal.apk»', 'تحت «Assets» اضغط على <b>Bilal.apk</b>. يبدأ تنزيل الملف (حوالي ٥ ميغابايت).', 'github2.png'],
+      ['اضغط على <span class="nw">«<span class="l">Bilal.apk</span>»</span>', 'تحت <span class="nw">«<span class="l">Assets</span>»</span> اضغط على <b>Bilal.apk</b>. يبدأ تنزيل الملف (حوالي ٥ ميغابايت).', 'github2.png'],
       ['أكّد التنزيل', 'يحذّر Chrome من التطبيقات القادمة من الإنترنت. اضغط <b>«التنزيل على أي حال»</b>.', 'chromeWarn'],
       ['اسمح بالتثبيت', 'افتح الملف. في المرة الأولى يسأل أندرويد: فعّل <b>«السماح من هذا المصدر»</b> ثم ارجع.', 'unknown'],
       ['التثبيت', 'اضغط <b>«تثبيت»</b> ثم <b>«فتح»</b>. انتهى – بلال الآن على الشاشة الرئيسية.', 'install'],
@@ -105,10 +119,10 @@ const T = {
       ['إضافة إلى الشاشة الرئيسية', 'اسحب القائمة قليلًا إلى الأسفل واختر <b>«إضافة إلى الشاشة الرئيسية»</b>.', 'shareSheet'],
       ['إضافة', 'اضغط <b>«إضافة»</b> في الأعلى. من الآن تفتح بلال من رمزه على الشاشة الرئيسية.', 'addHome'],
     ],
-    iTip: '<b>ضبط الساعة من الآيفون:</b> في شبكة البيت افتح في Safari العنوان <code>http://azan-clock.local</code> وأضف هذه الصفحة أيضًا إلى الشاشة الرئيسية بالطريقة نفسها.',
+    iTip: '<b>ضبط الساعة من الآيفون:</b> في شبكة البيت افتح في Safari العنوان <code class="s">http://azan-clock.local</code> وأضف هذه الصفحة أيضًا إلى الشاشة الرئيسية بالطريقة نفسها.',
     p3: 'إعداد الساعة', p3i: 'عند التشغيل الأول لا تعرف الساعة شبكة الواي فاي عندك بعد. الإعداد يستغرق دقيقة واحدة:',
     c: [
-      ['اتصل بشبكة «Bilal-Setup»', 'شغّل الساعة. في إعدادات الواي فاي في الهاتف اختر الشبكة <b>«Bilal-Setup»</b>. تفتح صفحة الإعداد وحدها (وإلا افتح <code>http://192.168.4.1</code>).', 'portal'],
+      ['اتصل بشبكة <span class="nw">«<span class="l">Bilal-Setup</span>»</span>', 'شغّل الساعة. في إعدادات الواي فاي في الهاتف اختر الشبكة <b><span class="nw">«<span class="l">Bilal-Setup</span>»</span></b>. تفتح صفحة الإعداد وحدها (وإلا افتح <code class="s">http://192.168.4.1</code>).', 'portal'],
       ['اختر شبكة البيت', 'في صفحة الإعداد اختر شبكتك، واكتب كلمة المرور واحفظ. تُعيد الساعة التشغيل وتتصل.', null],
       ['افتح التطبيق', 'أعد الهاتف إلى شبكة البيت وافتح بلال. تطبيق أندرويد يجد الساعة في الشبكة نفسها تلقائيًا. يرشدك مساعد إلى اللغة والمكان والأذان والمنبه.', 'ar-pwa.png'],
     ],
@@ -116,7 +130,7 @@ const T = {
     u: [
       ['الرئيسية', 'الصلاة القادمة مع العدّ التنازلي، والوقت والتاريخ، والطقس مع احتمال المطر، والثلث الأخير من الليل، والتقويم الهجري. الجرس بجانب كل صلاة يشغّل الأذان لها أو يوقفه.', 'home'],
       ['المواقيت: المكان والحساب', 'اضغط على المكان وابحث عن مدينتك. في «طريقة الحساب» اختر الطريقة المعتمدة في منطقتك؛ وفي «التصحيح» يمكن تقديم أو تأخير كل وقت بالدقائق.', 'prayer'],
-      ['مواقيت مسجدك', 'اختر «مسجد من Mawaqit». سجّل الدخول مرة واحدة بحساب Mawaqit المجاني، ثم ابحث بالاسم أو المدينة أو الرمز البريدي – أو شارك المسجد من تطبيق Mawaqit واختر «Bilal».', 'mawaqit'],
+      ['مواقيت مسجدك', 'اختر «مسجد من Mawaqit». سجّل الدخول مرة واحدة بحساب Mawaqit المجاني، ثم ابحث بالاسم أو المدينة أو الرمز البريدي – أو شارك المسجد من تطبيق Mawaqit واختر <span class="nw">«<span class="l">Bilal</span>»</span>.', 'mawaqit'],
       ['الأذان: اختيار المؤذن', 'اضغط على المؤذن، و▶ للاستماع. ومن «إضافة أذان خاص» ترفع تسجيلًا من عندك.', 'azan'],
       ['الأذان لكل صلاة', 'افتح «الأذان ومستوى الصوت لكل صلاة»: تشغيل الأذان أو إيقافه ومستوى الصوت لكل صلاة. وتحتها: المدة، وتأخير الأذان، والتذكير قبل الصلاة.', 'azan2'],
       ['المنبه', '«إضافة منبه»، اختر الوقت واضغط على أيام الأسبوع. وتحته منبه الثلث الأخير من الليل (التهجد).', 'alarm'],
@@ -125,6 +139,20 @@ const T = {
       ['ألوان الساعة', 'في «المظهر»: الخلفية، وترتيب الصفحات، والألوان الجاهزة. الافتراضي هو <b>العنبري</b>.', 'display2'],
       ['الاسم والتحديثات', 'في «الجهاز»: اسم الساعة والتحديثات. تحدّث الساعة نفسها ليلًا؛ ويمكن أيضًا الضغط على «البحث عن تحديث الآن».', 'device2'],
     ],
+    p5: 'شاشات الساعة', p5i: 'للساعة عدة صفحات. اسحب بإصبعك على الشاشة يمينًا أو يسارًا للانتقال بينها. النقاط في الأسفل تبيّن الصفحة التي أنت فيها.',
+    d: [
+      ['شاشة البداية', 'تظهر لحظات بعد تشغيل الساعة.', 'splash'],
+      ['مواقيت الصلاة', 'الصفحة الرئيسية. في الأعلى الوقت والتاريخ والطقس والمدينة. في الوسط الصلاة القادمة والوقت المتبقي لها. في الأسفل أوقات الصلوات الخمس، والصلاة القادمة داخل إطار. رمز المنبه يبيّن المنبه القادم.', '2'],
+      ['الساعة', 'الوقت بخط كبير مع الثواني، وتحته اليوم والتاريخ الهجري والتاريخ الميلادي. في الأعلى المنبه القادم.', '1'],
+      ['الطقس', 'درجة الحرارة وحالة السماء الآن. بجانبها الحرارة المحسوسة والرطوبة والرياح. في الأسفل توقعات ثلاثة أيام مع العظمى والصغرى.', '3'],
+      ['التقويم', 'الشهر بالتقويمين: اليوم الميلادي بخط كبير، وبجانبه اليوم الهجري بخط صغير. اليوم الحالي مميَّز.', '4'],
+      ['القمر والتقويم الهجري', 'شكل القمر والتاريخ الهجري والأيام البيض (١٣ إلى ١٥ من الشهر). في الأسفل نسبة الجزء المضيء من القمر.', '7'],
+      ['الثلث الأخير من الليل', 'تبيّن متى يبدأ الثلث الأخير من الليل (وقت التهجد). ومعه المغرب ومنتصف الليل والفجر والشروق.', '6'],
+      ['الإعدادات', 'دائمًا آخر صفحة. امسح رمز QR بالهاتف فتفتح صفحة إعدادات الساعة. بجانبه شبكة الواي فاي وقوة الإشارة وعنوان الساعة.', '5'],
+    ],
+    dTips: ['<b>إيقاف الأذان:</b> اضغط في أي مكان على الشاشة أثناء الأذان.',
+      '<b>المنبه:</b> الضغط على الشاشة يوقف المنبه. الزر في الوسط للغفوة، وبالزرّين − و + تختار من ٥ إلى ٣٠ دقيقة.',
+      '<b>اختيار الصفحات:</b> من التطبيق، في الإعدادات ← المظهر، تختار الصفحات التي تعرضها الساعة وترتيبها وهل تتبدّل تلقائيًا.'],
     mk_warn: 'قد يكون هذا النوع من الملفات ضارًا. هل تريد تنزيله على أي حال؟', mk_cancel: 'إلغاء', mk_download_anyway: 'التنزيل على أي حال',
     mk_unknown_title: 'تثبيت تطبيقات غير معروفة', mk_allow: 'السماح من هذا المصدر', mk_unknown_note: 'مرة واحدة فقط.',
     mk_install_q: 'هل تريد تثبيت هذا التطبيق؟', mk_install: 'تثبيت',
@@ -155,13 +183,22 @@ h2 .n { background: #E8A04E; color: #1A1206; width: 9mm; height: 9mm; border-rad
 .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm 7mm; }
 .steps.app { grid-template-columns: 1fr 1fr; }
 .step { break-inside: avoid; display: flex; gap: 4mm; align-items: flex-start; }
-.phone { flex: none; width: 33mm; border-radius: 5mm; overflow: hidden; border: 1.6mm solid #0B0A08; background: #0B0A08; box-shadow: 0 1mm 3mm rgba(0,0,0,.15); position: relative; }
+.phone { flex: none; width: 33mm; border-radius: 5mm; overflow: hidden; border: 1.6mm solid #0B0A08; background: #0B0A08; position: relative; }
 .phone img { display: block; width: 100%; }
 .phone.mock-frame { border-color: #B9B2A6; background: #fff; }
 .txt h3 { margin: 0 0 1.5mm; font-size: 11.5pt; display: flex; gap: 2mm; align-items: baseline; }
 html[lang=ar] .txt h3 { font-size: 12pt; }
 .txt h3 small { color: #E8A04E; font-weight: 700; }
 .txt p { margin: 0; color: #2E2820; }
+code.s { white-space: nowrap; word-break: normal; display: inline-block; }
+.l { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+.nw { white-space: nowrap; }
+.steps.dev { gap: 6mm 8mm; }
+.steps.dev .step { flex-direction: column; gap: 2.5mm; }
+.device { width: 100%; border-radius: 3mm; overflow: hidden; border: 1.4mm solid #0B0A08; background: #0B0A08; }
+.device img { display: block; width: 100%; }
+.tips { margin-top: 6mm; display: grid; gap: 3mm; }
+.tips .tip { margin: 0; }
 .qr { width: 26mm; margin-top: 3mm; display: block; }
 .ex { font-size: 7pt; color: #8A8172; text-align: center; padding: 1mm 0; background: #fff; }
 .tip.in { margin: 0; align-self: start; }
@@ -176,14 +213,17 @@ html[lang=ar] .mock { font-family: "IBM Plex Sans Arabic", sans-serif; }
 .mk-sheet p { margin: 2mm 0 3mm; }
 .mk-row { display: flex; align-items: center; gap: 2mm; }
 .mk-file { background: #3DDC84; color: #000; font-weight: 700; font-size: 6pt; padding: 1mm 1.4mm; border-radius: 1mm; }
-.mk-btns { display: flex; justify-content: flex-end; gap: 4mm; font-weight: 600; color: #8AB4F8; }
+.mk-btns { display: flex; flex-direction: column; align-items: flex-end; gap: 2.2mm; font-weight: 600; color: #8AB4F8; font-size: 6.8pt; padding: 0 1mm 1mm; }
+.mk-btns span { max-width: 100%; text-align: end; }
+.mk-btns .hl { outline-offset: .3mm; margin-inline-end: .6mm; }
 .mk-dialog { position: absolute; left: 3mm; right: 3mm; top: 22mm; background: #2A2A2E; border-radius: 4mm; padding: 4mm; text-align: center; }
 .mk-dialog img { width: 10mm; border-radius: 2.5mm; }
 .mk-dialog b { display: block; margin: 1mm 0; }
 .mk-dialog p { margin: 0 0 3mm; }
 .mk-top { padding: 4mm 3mm 3mm; font-weight: 600; font-size: 8pt; }
 .mk-title { text-align: center; font-weight: 700; font-size: 8pt; }
-.mk-top.between { display: flex; justify-content: space-between; align-items: center; }
+.mk-top.between { display: flex; justify-content: space-between; align-items: center; font-size: 5.6pt; gap: 2mm; padding: 4mm 3.5mm 3mm; }
+.mk-top.between span { white-space: nowrap; }
 .mk-app { display: flex; align-items: center; gap: 2mm; padding: 2mm 3mm; }
 .mk-app.big { flex-direction: column; padding-top: 6mm; }
 .mk-app.big img { width: 14mm; border-radius: 3.5mm; }
@@ -196,7 +236,7 @@ html[lang=ar] .mock { font-family: "IBM Plex Sans Arabic", sans-serif; }
 .mk-page img { width: 100%; }
 .mk-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 9mm; background: #F7F7F7; display: flex; justify-content: space-around; align-items: center; font-size: 10pt; color: #007AFF; border-top: .3mm solid #ddd; direction: ltr; }
 .mk-list div { display: flex; justify-content: space-between; padding: 2.3mm 1mm; border-bottom: .3mm solid #eee; }
-.mk-net { display: flex; justify-content: space-between; background: #fff; margin: 0 2.5mm; padding: 2.5mm; border-bottom: .3mm solid #eee; }
+.mk-net { display: flex; justify-content: space-between; gap: 1.5mm; font-size: 6.3pt; align-items: center; background: #fff; margin: 0 2.5mm; padding: 2.5mm; border-bottom: .3mm solid #eee; }
 .hl { outline: .7mm solid #E8A04E; outline-offset: .6mm; border-radius: 1.5mm; }
 .hl-row { outline: .7mm solid #E8A04E; border-radius: 1.5mm; background: #FFF7EA; }
 .hl-text { color: #007AFF; font-weight: 700; outline: .7mm solid #E8A04E; outline-offset: .6mm; border-radius: 1mm; }
@@ -213,7 +253,7 @@ async function page(t) {
     return `<div class="phone"><img src="${shot(t.lang, key)}"></div>`;
   };
   const steps = (list, cls = '', extra = '') => `<div class="steps ${cls}">${list.map(([h, p, k, q], i) => `
-    <div class="step">${pic(k)}<div class="txt"><h3><small>${i + 1}</small>${h}</h3><p>${p}</p>${q ? `<img class="qr" src="${qrs[q]}">` : ''}</div></div>`).join('')}${extra}</div>`;
+    <div class="step">${pic(k)}<div class="txt"><h3><small>${i + 1}</small><span>${h}</span></h3><p>${p}</p>${q ? `<img class="qr" src="${qrs[q]}">` : ''}</div></div>`).join('')}${extra}</div>`;
   return `<!doctype html><html lang="${t.lang}" dir="${t.dir}"><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>${CSS}</style></head><body>
@@ -223,6 +263,9 @@ async function page(t) {
 <section class="part"><h2><span class="n">2</span>${t.p2}</h2><p class="intro">${t.p2i}</p>${steps(t.i)}<div class="tip">${t.iTip}</div></section>
 <section class="part"><h2><span class="n">3</span>${t.p3}</h2><p class="intro">${t.p3i}</p>${steps(t.c)}</section>
 <section class="part"><h2><span class="n">4</span>${t.p4}</h2>${steps(t.u, 'app')}</section>
+<section class="part"><h2><span class="n">5</span>${t.p5}</h2><p class="intro">${t.p5i}</p><div class="steps dev">${t.d.map(([h, p, k], i) => `
+    <div class="step"><div class="device"><img src="${shot(t.lang, 'dev-' + k)}"></div><div class="txt"><h3><small>${i + 1}</small><span>${h}</span></h3><p>${p}</p></div></div>`).join('')}</div>
+  <div class="tips">${t.dTips.map(x => `<div class="tip">${x}</div>`).join('')}</div></section>
 </body></html>`;
 }
 

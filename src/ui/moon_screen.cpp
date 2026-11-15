@@ -110,7 +110,7 @@ namespace moon_screen
         }
 
         // Hijri-Datum groß, an der anderen Seite
-        const lv_coord_t TX = 262; // linker Rand der Textspalte (LTR)
+        const lv_coord_t TX = 236; // linker Rand der Textspalte (LTR)
         lv_obj_t *col = box(parent);
         lv_obj_set_size(col, SCREEN_W - TX - MARGIN, 236);
         lv_obj_set_pos(col, TX, 60);
