@@ -190,12 +190,12 @@ export const T = {
   // ---------- Einrichtung in drei Schritten
   'setup.eyebrow': { ar: 'سهل التشغيل', de: 'Einfach eingerichtet', en: 'Easy setup' },
   'setup.title': { ar: 'جاهز في <g>ثلاث خطوات</g>', de: 'Bereit in <g>drei Schritten.</g>', en: 'Ready in <g>three steps.</g>' },
-  's1.t': { ar: 'وصله بالكهرباء', de: 'Einstecken', en: 'Plug it in' },
+  's1.t': { ar: 'صِلْه بالكهرباء', de: 'Einstecken', en: 'Plug it in' },
   's1.p': { ar: 'تظهر شاشة البداية، ثم يفتح بلال شبكة باسم Bilal-Setup.', de: 'Der Startbildschirm erscheint, dann öffnet Bilal ein WLAN namens „Bilal-Setup“.', en: 'The start screen appears, then Bilal opens a Wi-Fi network called “Bilal-Setup”.' },
-  's2.t': { ar: 'اربطه بشبكة البيت', de: 'Mit dem WLAN verbinden', en: 'Connect to Wi-Fi' },
-  's2.p': { ar: 'اتصل من هاتفك بشبكة Bilal-Setup واختر شبكة الواي فاي في بيتك.', de: 'Mit dem Handy „Bilal-Setup“ öffnen und dein Heim-WLAN wählen.', en: 'Join “Bilal-Setup” from your phone and pick your home Wi-Fi.' },
+  's2.t': { ar: 'صِلْه بشبكة المنزل', de: 'Mit dem WLAN verbinden', en: 'Connect to Wi-Fi' },
+  's2.p': { ar: 'اتصل من هاتفك بشبكة Bilal-Setup، ثم اختر الشبكة اللاسلكية في منزلك.', de: 'Mit dem Handy „Bilal-Setup“ öffnen und dein Heim-WLAN wählen.', en: 'Join “Bilal-Setup” from your phone and pick your home Wi-Fi.' },
   's3.t': { ar: 'اختر مدينتك أو مسجدك', de: 'Stadt oder Moschee wählen', en: 'Choose city or mosque' },
-  's3.p': { ar: 'في التطبيق تختار مدينتك وطريقة الحساب، أو مسجدك عبر مواقيت. ومن بعدها يؤذن بلال في كل وقت.', de: 'In der App wählst du deine Stadt und die Berechnungsmethode, oder deine Moschee über Mawaqit. Ab dann ruft Bilal zu jedem Gebet.', en: 'In the app, choose your city and calculation method, or your mosque via Mawaqit. From then on, Bilal calls every prayer.' },
+  's3.p': { ar: 'في التطبيق تختار مدينتك وطريقة الحساب، أو مسجدك عبر مواقيت. وبعد ذلك يؤذن بلال لكل صلاة في وقتها.', de: 'In der App wählst du deine Stadt und die Berechnungsmethode, oder deine Moschee über Mawaqit. Ab dann ruft Bilal zu jedem Gebet.', en: 'In the app, choose your city and calculation method, or your mosque via Mawaqit. From then on, Bilal calls every prayer.' },
 
   // ---------- App
   'app.eyebrow': { ar: 'التطبيق', de: 'Die App', en: 'The app' },
@@ -260,7 +260,9 @@ export const T = {
   'sim.off':     { ar: 'إيقاف', de: 'Ausschalten', en: 'Power off' },
   'sim.white':   { ar: 'أبيض', de: 'Weiß', en: 'White' },
   'sim.black':   { ar: 'أسود', de: 'Schwarz', en: 'Black' },
-  'sim.hint':    { ar: 'اسحب لتدوير الجهاز، واسحب على الشاشة لتصفح الصفحات', de: 'Ziehen zum Drehen · auf dem Display wischen zum Blättern', en: 'Drag to rotate · swipe the screen to browse' },
+  'sim.hint':    { ar: 'اسحب لتدوير الجهاز، وقرّب بإصبعين، واسحب على الشاشة لتصفح الصفحات', de: 'Ziehen zum Drehen · zwei Finger zum Zoomen · auf dem Display wischen zum Blättern', en: 'Drag to rotate · pinch to zoom · swipe the screen to browse' },
+  'sim.zin': { ar: 'تقريب', de: 'Näher heran', en: 'Zoom in' },
+  'sim.zout': { ar: 'تبعيد', de: 'Weiter weg', en: 'Zoom out' },
   'sim.city':    { ar: 'ابحث عن مدينتك', de: 'Deine Stadt suchen', en: 'Find your city' },
   'sim.here':    { ar: 'موقعي', de: 'Mein Standort', en: 'My location' },
   'sim.azan':    { ar: 'استمع إلى الأذان', de: 'Azan anhören', en: 'Hear the Azan' },
