@@ -29,6 +29,91 @@ export const T = {
   'st3': { ar: 'لغات', de: 'Sprachen', en: 'languages' },
   'st4': { ar: 'لونان', de: 'Farben', en: 'finishes' },
 
+  // ---------- Warum Bilal
+  'story.eyebrow': { ar: 'لماذا بلال', de: 'Warum Bilal', en: 'Why Bilal' },
+  'story.title': { ar: 'صوت <g>نفتقده في الغربة</g>', de: 'Ein Klang, <g>den wir in der Fremde vermissen.</g>', en: 'A sound <g>we miss far from home.</g>' },
+  'story.p1': {
+    ar: 'في كثير من البلاد غير الإسلامية لا نسمع الأذان من المآذن. ذلك النداء الذي رافقنا منذ الصغر، وينظم يومنا خمس مرات، ويذكرنا بما هو أهم من كل شيء. بلال يعيد هذا الصوت إلى بيتك، في وقته تماما.',
+    de: 'In vielen nicht-muslimischen Ländern hört man den Azan nicht von den Minaretten. Dabei hat uns dieser Ruf seit der Kindheit begleitet: Er gliedert unseren Tag fünfmal und erinnert uns an das, was wirklich zählt. Bilal bringt diesen Klang zurück in dein Zuhause, genau zur rechten Zeit.',
+    en: 'In many non-Muslim countries, the Azan is not heard from the minarets. Yet this call has accompanied us since childhood: it shapes our day five times and reminds us of what truly matters. Bilal brings that sound back into your home, right on time.',
+  },
+  'story.b.t': { ar: 'بلال بن رباح رضي الله عنه', de: 'Bilal ibn Rabah', en: 'Bilal ibn Rabah' },
+  'story.b.p': {
+    ar: 'أول مؤذن في الإسلام. اختاره النبي صلى الله عليه وسلم لجمال صوته، فصار رمزا للثبات على الإيمان وللمساواة بين الناس. وباسمه سمينا هذه الساعة.',
+    de: 'Der erste Muezzin des Islam. Der Prophet ﷺ wählte ihn wegen seiner schönen Stimme. Er steht für Standhaftigkeit im Glauben und für die Gleichheit aller Menschen. Nach ihm ist diese Uhr benannt.',
+    en: 'The first muezzin of Islam. The Prophet ﷺ chose him for his beautiful voice. He stands for steadfast faith and for the equality of all people. This clock carries his name.',
+  },
+  'story.b.q': { ar: '«يا بلال، أقم الصلاة، أرحنا بها»', de: '„O Bilal, rufe zum Gebet, lass uns darin Ruhe finden.“', en: '“O Bilal, call to the prayer, let us find rest in it.”' },
+  'story.b.src': { ar: 'رواه أبو داود', de: 'Überliefert von Abu Dawud', en: 'Reported by Abu Dawud' },
+  'story.p.t': { ar: 'الصلاة في وقتها', de: 'Das Gebet zu seiner Zeit', en: 'Prayer at its time' },
+  'story.p.p': {
+    ar: 'سئل النبي صلى الله عليه وسلم: أي العمل أحب إلى الله؟ قال: «الصلاة على وقتها». ولهذا صنعنا بلال: لكي لا تفوتك صلاة.',
+    de: 'Der Prophet ﷺ wurde gefragt, welche Tat Allah am liebsten ist. Er sagte: „Das Gebet zu seiner Zeit.“ (Bukhari und Muslim). Dafür ist Bilal gemacht: damit dir kein Gebet entgeht.',
+    en: 'The Prophet ﷺ was asked which deed is most beloved to Allah. He said: “Prayer at its proper time.” (Bukhari and Muslim). That is why Bilal exists: so you never miss a prayer.',
+  },
+  'story.verse.tr': { ar: 'سورة النساء، الآية 103', de: '„Das Gebet ist den Gläubigen zu festgesetzten Zeiten vorgeschrieben.“ (Sure An-Nisa, 4:103)', en: '“Indeed, prayer has been decreed upon the believers at fixed times.” (Surah An-Nisa, 4:103)' },
+
+  // ---------- Einrichtung in drei Schritten
+  'setup.eyebrow': { ar: 'سهل التشغيل', de: 'Einfach eingerichtet', en: 'Easy setup' },
+  'setup.title': { ar: 'جاهز في <g>ثلاث خطوات</g>', de: 'Bereit in <g>drei Schritten.</g>', en: 'Ready in <g>three steps.</g>' },
+  's1.t': { ar: 'وصله بالكهرباء', de: 'Einstecken', en: 'Plug it in' },
+  's1.p': { ar: 'تظهر شاشة البداية، ثم يفتح بلال شبكة باسم Bilal-Setup.', de: 'Der Startbildschirm erscheint, dann öffnet Bilal ein WLAN namens „Bilal-Setup“.', en: 'The start screen appears, then Bilal opens a Wi-Fi network called “Bilal-Setup”.' },
+  's2.t': { ar: 'اربطه بشبكة البيت', de: 'Mit dem WLAN verbinden', en: 'Connect to Wi-Fi' },
+  's2.p': { ar: 'اتصل من هاتفك بشبكة Bilal-Setup واختر شبكة الواي فاي في بيتك.', de: 'Mit dem Handy „Bilal-Setup“ öffnen und dein Heim-WLAN wählen.', en: 'Join “Bilal-Setup” from your phone and pick your home Wi-Fi.' },
+  's3.t': { ar: 'اختر مدينتك أو مسجدك', de: 'Stadt oder Moschee wählen', en: 'Choose city or mosque' },
+  's3.p': { ar: 'في التطبيق تختار مدينتك وطريقة الحساب، أو مسجدك عبر مواقيت. ومن بعدها يؤذن بلال في كل وقت.', de: 'In der App wählst du deine Stadt und die Berechnungsmethode, oder deine Moschee über Mawaqit. Ab dann ruft Bilal zu jedem Gebet.', en: 'In the app, choose your city and calculation method, or your mosque via Mawaqit. From then on, Bilal calls every prayer.' },
+
+  // ---------- App
+  'app.eyebrow': { ar: 'التطبيق', de: 'Die App', en: 'The app' },
+  'app.title': { ar: 'بلال <g>في جيبك أيضا</g>', de: 'Bilal <g>auch in deiner Tasche.</g>', en: 'Bilal <g>in your pocket, too.</g>' },
+  'app.lead': {
+    ar: 'تطبيق لأندرويد وآيفون يضبط الساعة من هاتفك، ويعرض المواقيت ويؤذن ويذكرك قبل الصلاة، حتى من دون الساعة.',
+    de: 'Die App für Android und iPhone stellt die Uhr vom Handy aus ein. Sie zeigt die Gebetszeiten, ruft zum Azan und erinnert dich vor dem Gebet, auch ganz ohne Uhr.',
+    en: 'The app for Android and iPhone sets up the clock from your phone. It shows prayer times, calls the Azan and reminds you before prayer, even without the clock.',
+  },
+  'app.android': { ar: 'تحميل لأندرويد', de: 'Für Android laden', en: 'Get it for Android' },
+  'app.iphone': { ar: 'آيفون ونسخة الويب', de: 'iPhone & Web-Version', en: 'iPhone & web version' },
+  'app.qr': { ar: 'امسح الرمز بكاميرا هاتفك', de: 'Mit der Handykamera scannen', en: 'Scan with your phone camera' },
+
+  // ---------- Widmung
+  'gift.eyebrow': { ar: 'هدية', de: 'Ein Geschenk', en: 'A gift' },
+  'gift.title': { ar: 'هدية <g>بإهداء شخصي</g>', de: 'Ein Geschenk <g>mit persönlicher Widmung.</g>', en: 'A gift <g>with a personal dedication.</g>' },
+  'gift.lead': {
+    ar: 'يمكن أن يحمل بلال إهداء شخصيا يظهر بعد شاشة البداية في كل تشغيل: لوالدك، لأخيك، لصديقك. هدية تذكر بالصلاة كل يوم، تناسب رمضان والعيد.',
+    de: 'Bilal kann eine persönliche Widmung tragen, die bei jedem Start nach dem Startbildschirm erscheint: für den Vater, den Bruder, einen Freund. Ein Geschenk, das jeden Tag ans Gebet erinnert, ideal zu Ramadan und zum Eid.',
+    en: 'Bilal can carry a personal dedication that appears after the start screen every time it starts: for your father, your brother, a friend. A gift that reminds of prayer every day, perfect for Ramadan and Eid.',
+  },
+
+  // ---------- Fragen & Antworten
+  'faq.eyebrow': { ar: 'أسئلة وأجوبة', de: 'Fragen & Antworten', en: 'Questions & answers' },
+  'faq.title': { ar: 'كل ما <g>تريد معرفته</g>', de: 'Alles, was <g>du wissen willst.</g>', en: 'Everything <g>you want to know.</g>' },
+  'q1': { ar: 'هل يحتاج بلال إلى الإنترنت؟', de: 'Braucht Bilal Internet?', en: 'Does Bilal need the internet?' },
+  'a1': { ar: 'يحتاج إلى الواي فاي لضبط الوقت وتحميل المواقيت والطقس. وإذا انقطع الإنترنت يستمر بالمواقيت التي حملها لهذا الشهر.', de: 'Er braucht WLAN für die Uhrzeit, die Gebetszeiten und das Wetter. Fällt das Internet aus, arbeitet er mit den Zeiten weiter, die er für den Monat geladen hat.', en: 'It needs Wi-Fi for the time, prayer times and weather. If the internet drops, it keeps working with the times it has loaded for the month.' },
+  'q2': { ar: 'ما طرق حساب المواقيت؟', de: 'Welche Berechnungsmethoden gibt es?', en: 'Which calculation methods are there?' },
+  'a2': { ar: '22 طريقة، منها رابطة العالم الإسلامي وأم القرى والهيئة المصرية العامة للمساحة ورئاسة الشؤون الدينية التركية والمغرب والجزائر وتونس والأردن. ويمكنك ضبط كل صلاة بالدقائق.', de: '22 Methoden, darunter Muslim World League, Umm al-Qura, die ägyptische Behörde, Diyanet (Türkei), Marokko, Algerien, Tunesien und Jordanien. Jedes Gebet lässt sich zusätzlich um Minuten anpassen.', en: '22 methods, including Muslim World League, Umm al-Qura, the Egyptian Authority, Diyanet (Türkiye), Morocco, Algeria, Tunisia and Jordan. Each prayer can also be adjusted by minutes.' },
+  'q3': { ar: 'هل يمكن استخدام مواقيت مسجدي؟', de: 'Kann ich die Zeiten meiner Moschee nutzen?', en: 'Can I use my mosque’s times?' },
+  'a3': { ar: 'نعم، عبر منصة مواقيت (Mawaqit). عندها تطبق مواقيت مسجدك بالضبط، وتضبط المدينة والوقت والطقس على مدينة المسجد.', de: 'Ja, über Mawaqit. Dann gelten genau die Zeiten deiner Moschee, und Ort, Uhrzeit und Wetter stellen sich auf die Stadt der Moschee ein.', en: 'Yes, via Mawaqit. Then exactly your mosque’s times apply, and place, time and weather follow the mosque’s city.' },
+  'q4': { ar: 'هل أختار صوت المؤذن؟', de: 'Kann ich den Muezzin wählen?', en: 'Can I choose the muezzin?' },
+  'a4': { ar: 'نعم، تختار المؤذن وتستمع إليه قبل ذلك، ولصلاة الفجر أذان خاص. ويمكنك رفع أذان من عندك، وضبط مستوى الصوت لكل صلاة.', de: 'Ja. Du wählst den Muezzin und hörst ihn vorher an, für Fajr gibt es einen eigenen Azan. Du kannst auch deinen eigenen Azan hochladen und die Lautstärke je Gebet einstellen.', en: 'Yes. You pick the muezzin and listen first; Fajr has its own Azan. You can also upload your own Azan and set the volume per prayer.' },
+  'q5': { ar: 'كيف يوقظني؟', de: 'Wie weckt mich Bilal?', en: 'How does Bilal wake me?' },
+  'a5': { ar: 'حتى 30 منبها بأسماء وأيام، ومنبه لقيام الليل يحسب كل ليلة من المغرب والفجر. وتؤجل المنبه بلمسة من 5 إلى 30 دقيقة.', de: 'Mit bis zu 30 Weckern mit Namen und Wochentagen und einem Wecker fürs Nachtgebet, der jede Nacht aus Maghrib und Fajr berechnet wird. Schlummern geht mit einem Tipp, 5 bis 30 Minuten.', en: 'With up to 30 named alarms on chosen weekdays, plus a night-prayer alarm calculated every night from Maghrib and Fajr. Snooze with one tap, 5 to 30 minutes.' },
+  'q6': { ar: 'هل يزعجني ضوؤه في الليل؟', de: 'Stört das Licht nachts?', en: 'Is it too bright at night?' },
+  'a6': { ar: 'لا، تخفت الشاشة تلقائيا من العشاء إلى الفجر. وفيه ضوء ملون يمكن أن يكون ضوءا ليليا هادئا.', de: 'Nein, das Display dimmt sich von Isha bis Fajr von selbst. Dazu hat Bilal ein farbiges Licht, das als sanftes Nachtlicht dienen kann.', en: 'No, the screen dims itself from Isha to Fajr. Bilal also has a colour light that can serve as a gentle night light.' },
+  'q7': { ar: 'هل يعمل من دون التطبيق؟', de: 'Geht es auch ohne App?', en: 'Does it work without the app?' },
+  'a7': { ar: 'نعم، فبلال يقدم صفحة الإعدادات بنفسه في شبكة البيت، وتفتحها من أي متصفح.', de: 'Ja. Bilal liefert die Einstellungsseite im Heimnetz selbst aus, du öffnest sie in jedem Browser.', en: 'Yes. Bilal serves its own settings page on your home network; open it in any browser.' },
+  'q8': { ar: 'هل تصل تحديثات إلى بلال؟', de: 'Bekommt Bilal Neuerungen?', en: 'Does Bilal get new features?' },
+  'a8': { ar: 'نعم، تصله التحديثات عبر الإنترنت تلقائيا وبتوقيع آمن، فيزداد مع الوقت.', de: 'Ja, Updates kommen automatisch und sicher signiert über das Internet, so wächst Bilal mit der Zeit.', en: 'Yes, updates arrive automatically and securely signed over the internet, so Bilal grows over time.' },
+
+  // ---------- Interessenten-Liste
+  'notify.title': { ar: 'هل تريد <g>بلال</g>؟', de: 'Du möchtest <g>einen Bilal?</g>', en: 'Would you like <g>a Bilal?</g>' },
+  'notify.lead': { ar: 'اترك بريدك الإلكتروني، وسنخبرك عندما يتوفر.', de: 'Hinterlass deine E-Mail-Adresse, wir melden uns, sobald es ihn gibt.', en: 'Leave your email address and we will let you know when it is available.' },
+  'notify.ph': { ar: 'بريدك الإلكتروني', de: 'Deine E-Mail-Adresse', en: 'Your email address' },
+  'notify.btn': { ar: 'أخبرني', de: 'Benachrichtige mich', en: 'Notify me' },
+  'notify.ok': { ar: 'شكرا لك، سنخبرك.', de: 'Danke, wir melden uns.', en: 'Thank you, we will be in touch.' },
+  'notify.err': { ar: 'لم ينجح ذلك، حاول مرة أخرى.', de: 'Das hat nicht geklappt, bitte noch einmal versuchen.', en: 'That did not work, please try again.' },
+  'notify.bad': { ar: 'تحقق من البريد الإلكتروني.', de: 'Bitte die E-Mail-Adresse prüfen.', en: 'Please check the email address.' },
+  'notify.privacy': { ar: 'نستخدم بريدك لهذا الغرض فقط، ولا نعطيه لأحد، ونحذفه متى طلبت.', de: 'Wir nutzen deine Adresse nur dafür, geben sie nicht weiter und löschen sie auf Wunsch.', en: 'We use your address only for this, never share it, and delete it on request.' },
+
   'sim.eyebrow': { ar: 'المحاكي', de: 'Simulator', en: 'Simulator' },
   'sim.title':   { ar: 'جربه الآن، <g>كما هو بالضبط</g>', de: 'Probier ihn aus, <g>genau so, wie er ist.</g>', en: 'Try it, <g>exactly as it is.</g>' },
   'sim.lead': {
@@ -41,6 +126,13 @@ export const T = {
   'sim.white':   { ar: 'أبيض', de: 'Weiß', en: 'White' },
   'sim.black':   { ar: 'أسود', de: 'Schwarz', en: 'Black' },
   'sim.hint':    { ar: 'اسحب لتدوير الجهاز، واسحب على الشاشة لتصفح الصفحات', de: 'Ziehen zum Drehen · auf dem Display wischen zum Blättern', en: 'Drag to rotate · swipe the screen to browse' },
+  'sim.city':    { ar: 'ابحث عن مدينتك', de: 'Deine Stadt suchen', en: 'Find your city' },
+  'sim.here':    { ar: 'موقعي', de: 'Mein Standort', en: 'My location' },
+  'sim.azan':    { ar: 'استمع إلى الأذان', de: 'Azan anhören', en: 'Hear the Azan' },
+  'sim.stop':    { ar: 'إيقاف الأذان', de: 'Azan stoppen', en: 'Stop the Azan' },
+  'sim.loadingCity': { ar: 'جار تحميل المواقيت…', de: 'Zeiten werden geladen …', en: 'Loading times…' },
+  'sim.cityErr': { ar: 'تعذر تحميل المدينة', de: 'Stadt konnte nicht geladen werden', en: 'Could not load the city' },
+  'sim.locDenied': { ar: 'لم يسمح بالوصول إلى الموقع', de: 'Standort nicht freigegeben', en: 'Location not allowed' },
   'sim.loading': { ar: 'جار تحميل النموذج…', de: 'Modell wird geladen …', en: 'Loading model…' },
 
   'feat.eyebrow': { ar: 'المزايا', de: 'Funktionen', en: 'Features' },
