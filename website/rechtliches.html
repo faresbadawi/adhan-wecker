@@ -7,61 +7,63 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#040607">
 <link rel="icon" href="assets/favicon.png">
-<link rel="stylesheet" href="css/style.css?v=202611181011">
+<link rel="stylesheet" href="css/style.css?v=202611181023">
 <style>
   body { font-family: "Josefin", system-ui, sans-serif; line-height: 1.7; }
   .legal { max-width: 820px; margin: 0 auto; padding: 110px var(--gutter) 80px; }
-  .legal h1 { font: 400 clamp(34px, 5vw, 52px)/1.2 "Marcellus", serif; margin: 0 0 8px; }
-  .legal h2 { font: 400 28px/1.3 "Marcellus", serif; margin: 56px 0 12px; padding-top: 10px; border-top: 1px solid var(--line); }
-  .legal h3 { font: 600 19px/1.4 "Josefin", sans-serif; margin: 28px 0 6px; color: var(--amber); }
+  .legal h1 { font: 400 clamp(34px, 5vw, 52px)/1.25 "Marcellus", serif; margin: 0 0 8px; }
+  .legal h2 { font: 400 28px/1.4 "Marcellus", serif; margin: 56px 0 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .legal h3 { font: 600 19px/1.5 "Josefin", sans-serif; margin: 28px 0 6px; color: var(--amber); }
   .legal p, .legal li { color: #e7dccd; font-size: 17px; }
   .legal a { color: var(--amber); }
-  .legal .note { border: 1px solid rgba(201,164,92,.3); border-radius: 16px; padding: 14px 18px; color: var(--muted); font-size: 15px; }
-  .legal .note p { margin: 4px 0; color: var(--muted); font-size: 15px; }
-  .legal .ar { font-family: "Amiri", serif; font-size: 18px; direction: rtl; text-align: right; }
-  .back { display: inline-flex; gap: 8px; align-items: center; text-decoration: none; color: var(--gold); margin-bottom: 26px; }
+  .legal .note { border: 1px solid rgba(201,164,92,.3); border-radius: 16px; padding: 12px 18px; color: var(--muted); font-size: 15px; margin: 14px 0 0; }
+  [lang="ar"] .legal, .legal[lang="ar"] { font-family: "Amiri", serif; }
+  .legal[lang="ar"] h1, .legal[lang="ar"] h2 { font-family: "Amiri", serif; font-weight: 700; line-height: 1.6; }
+  .legal[lang="ar"] h3 { font-family: "Amiri", serif; font-size: 21px; }
+  .legal[lang="ar"] p, .legal[lang="ar"] li { font-size: 19px; line-height: 1.9; }
+  .ltr { direction: ltr; unicode-bidi: isolate; }
+  .legal[hidden] { display: none; }
+  .lang button.sel { background: var(--gold-grad); }
 </style>
 </head>
 <body>
 <nav class="nav solid">
   <a class="brand" href="./"><b>بلال</b><span class="latin">BILAL</span></a>
   <span></span>
-  <a class="btn ghost" href="./" style="justify-self:end;padding:8px 18px">← Bilal</a>
+  <div class="nav-end">
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="ar" lang="ar">ع</button><button data-lang="de">DE</button><button data-lang="en">EN</button>
+    </div>
+    <a class="icon-btn" href="./" aria-label="Bilal"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/></svg></a>
+  </div>
 </nav>
 
-<main class="legal">
+<!-- ======================= Deutsch (maßgeblich) ======================= -->
+<main class="legal" lang="de" data-lang="de">
   <h1>Impressum &amp; Datenschutz</h1>
-  <div class="note">
-    <p class="ar">البيانات القانونية مكتوبة باللغة الألمانية، وهي اللغة المعتمدة. للتواصل: <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a></p>
-    <p>The legal information is provided in German, which is the binding language. Contact: <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a></p>
-  </div>
 
   <h2 id="impressum">Impressum</h2>
   <p>Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</p>
   <p>Fares Badawi<br>
-    <!-- Anschrift: hier Straße, Hausnummer, PLZ und Ort eintragen (Pflichtangabe) -->
+    <!-- Anschrift: Straße, Hausnummer, PLZ und Ort eintragen (Pflichtangabe) -->
   </p>
   <h3>Kontakt</h3>
-  <p>E-Mail: <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a></p>
+  <p>Telefon: <a class="ltr" href="tel:+4915780822788">+49 1578 0822788</a><br>
+     E-Mail: <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a></p>
   <h3>Verantwortlich für den Inhalt</h3>
   <p>Fares Badawi (Anschrift wie oben)</p>
   <h3>Hinweis</h3>
   <p>Diese Seite stellt das Projekt „Bilal“ vor. Bilal wird über diese Seite nicht verkauft.</p>
 
   <h2 id="datenschutz">Datenschutzerklärung</h2>
-
   <h3>1. Verantwortlicher</h3>
-  <p>Verantwortlich für die Datenverarbeitung auf dieser Webseite ist Fares Badawi, E-Mail: <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a> (Anschrift siehe Impressum).</p>
-
+  <p>Verantwortlich für die Datenverarbeitung auf dieser Webseite ist Fares Badawi, Telefon <a class="ltr" href="tel:+4915780822788">+49 1578 0822788</a>, E-Mail <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a> (Anschrift siehe Impressum).</p>
   <h3>2. Grundsatz</h3>
   <p>Diese Seite setzt keine Cookies, nutzt keine Analyse- oder Werbedienste und erstellt keine Nutzerprofile. Daten werden nur verarbeitet, soweit es für die Anzeige der Seite und die unten genannten Funktionen nötig ist.</p>
-
   <h3>3. Hosting (GitHub Pages)</h3>
   <p>Die Seite wird über GitHub Pages bereitgestellt (GitHub Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA). Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie Ihre IP-Adresse, Datum und Uhrzeit sowie die aufgerufene Adresse, um die Seite auszuliefern und zu schützen. Rechtsgrundlage ist unser berechtigtes Interesse an einer sicheren und zuverlässigen Bereitstellung (Art. 6 Abs. 1 lit. f DSGVO). Dabei können Daten in die USA übertragen werden; GitHub ist nach dem EU-US Data Privacy Framework zertifiziert. Weitere Informationen: <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung von GitHub</a>.</p>
-
   <h3>4. Bibliothek für die 3D-Darstellung (jsDelivr)</h3>
   <p>Für das 3D-Modell lädt die Seite die Programmbibliothek „three.js“ vom Dienst jsDelivr. Dabei wird Ihre IP-Adresse an die Betreiber von jsDelivr übermittelt. Rechtsgrundlage ist unser berechtigtes Interesse an einer funktionierenden Darstellung (Art. 6 Abs. 1 lit. f DSGVO).</p>
-
   <h3>5. Simulator: Stadt, Standort und Wetter</h3>
   <p>Nur wenn Sie im Simulator selbst eine Stadt suchen oder auf „Mein Standort“ tippen, werden folgende Dienste genutzt:</p>
   <ul>
@@ -69,26 +71,133 @@
     <li><b>Standort des Geräts</b>: Ihr Browser fragt Sie vorher um Erlaubnis. Die Koordinaten werden nur im Browser verwendet und zur Ermittlung des Ortsnamens an <b>BigDataCloud</b> übermittelt; wir speichern sie nicht.</li>
   </ul>
   <p>Rechtsgrundlage ist Ihre Einwilligung durch die bewusste Nutzung der Funktion (Art. 6 Abs. 1 lit. a DSGVO).</p>
-
   <h3>6. Hörprobe des Azan</h3>
   <p>Beim Abspielen des Azan wird die Tondatei von GitHub Pages geladen (siehe Punkt 3).</p>
-
   <h3>7. Benachrichtigung („Benachrichtige mich“)</h3>
   <p>Wenn Sie Ihre E-Mail-Adresse eintragen, speichern wir diese zusammen mit der gewählten Sprache und dem Zeitpunkt. Zum Schutz vor Missbrauch speichern wir außerdem einen gekürzten, nicht umkehrbaren Prüfwert (Hash) Ihrer IP-Adresse, nicht die IP-Adresse selbst. Die Daten liegen in einer Datenbank bei Cloudflare (Cloudflare Inc., 101 Townsend St., San Francisco, CA 94107, USA; zertifiziert nach dem EU-US Data Privacy Framework).</p>
   <p>Zweck ist ausschließlich, Sie zu informieren, sobald Bilal erhältlich ist. Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Sie können die Einwilligung jederzeit per E-Mail widerrufen; Ihre Adresse wird dann gelöscht. Spätestens nach der einmaligen Benachrichtigung bzw. wenn das Projekt eingestellt wird, löschen wir die Daten. Eine Weitergabe an Dritte findet nicht statt.</p>
-
   <h3>8. Sprache der Seite</h3>
   <p>Die gewählte Sprache wird nur in Ihrem Browser gespeichert (lokaler Speicher), damit die Seite beim nächsten Besuch in derselben Sprache erscheint. Diese Angabe wird nicht an uns übertragen.</p>
-
   <h3>9. Ihre Rechte</h3>
-  <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21) sowie das Recht, eine erteilte Einwilligung jederzeit zu widerrufen (Art. 7 Abs. 3). Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO). Eine formlose E-Mail an die oben genannte Adresse genügt.</p>
-
+  <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21) sowie das Recht, eine erteilte Einwilligung jederzeit zu widerrufen (Art. 7 Abs. 3). Außerdem können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren (Art. 77 DSGVO). Eine formlose Nachricht an die oben genannten Kontaktdaten genügt.</p>
   <p style="margin-top:40px;color:var(--muted);font-size:15px">Stand: November 2026</p>
+</main>
+
+<!-- ======================= العربية ======================= -->
+<main class="legal" lang="ar" dir="rtl" data-lang="ar" hidden>
+  <h1>بيانات الناشر وسياسة الخصوصية</h1>
+  <p class="note">هذه ترجمة للتيسير، والنسخة الألمانية هي المعتمدة قانونيا.</p>
+
+  <h2 id="impressum-ar">بيانات الناشر</h2>
+  <p>وفق المادة 5 من القانون الألماني للخدمات الرقمية (DDG)</p>
+  <p class="ltr" style="text-align:right">Fares Badawi</p>
+  <h3>التواصل</h3>
+  <p>الهاتف: <a class="ltr" href="tel:+4915780822788">+49 1578 0822788</a><br>
+     البريد الإلكتروني: <a class="ltr" href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a></p>
+  <h3>المسؤول عن المحتوى</h3>
+  <p><span class="ltr">Fares Badawi</span> (العنوان كما في الأعلى)</p>
+  <h3>ملاحظة</h3>
+  <p>تعرض هذه الصفحة مشروع «بلال»، ولا يباع بلال عن طريقها.</p>
+
+  <h2 id="datenschutz-ar">سياسة الخصوصية</h2>
+  <h3>1. المسؤول</h3>
+  <p>المسؤول عن معالجة البيانات في هذه الصفحة هو <span class="ltr">Fares Badawi</span>، الهاتف <a class="ltr" href="tel:+4915780822788">+49 1578 0822788</a>، البريد <a class="ltr" href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a>.</p>
+  <h3>2. المبدأ</h3>
+  <p>لا تستخدم هذه الصفحة ملفات تعريف الارتباط (الكوكيز)، ولا خدمات تحليل أو إعلانات، ولا تنشئ ملفات تعريف للزوار. ولا نعالج البيانات إلا بالقدر اللازم لعرض الصفحة والوظائف المذكورة أدناه.</p>
+  <h3>3. الاستضافة (GitHub Pages)</h3>
+  <p>تستضيف الصفحة شركة <span class="ltr">GitHub Inc.</span> في الولايات المتحدة. وعند فتح الصفحة تعالج GitHub بيانات تقنية ضرورية مثل عنوان IP والتاريخ والوقت والصفحة المطلوبة، لتوصيل الصفحة وحمايتها. والأساس القانوني هو مصلحتنا المشروعة في تقديم الصفحة بأمان (المادة 6، الفقرة 1، البند f من اللائحة الأوروبية لحماية البيانات). وقد تنقل البيانات إلى الولايات المتحدة، وGitHub معتمدة وفق إطار حماية البيانات بين الاتحاد الأوروبي والولايات المتحدة.</p>
+  <h3>4. مكتبة العرض ثلاثي الأبعاد (jsDelivr)</h3>
+  <p>لعرض النموذج ثلاثي الأبعاد تحمل الصفحة مكتبة <span class="ltr">three.js</span> من خدمة <span class="ltr">jsDelivr</span>، فيصل عنوان IP الخاص بك إلى مشغلي هذه الخدمة، بناء على مصلحتنا المشروعة في عرض الصفحة بشكل صحيح.</p>
+  <h3>5. المحاكي: المدينة والموقع والطقس</h3>
+  <p>فقط إذا بحثت بنفسك عن مدينة في المحاكي أو ضغطت على «موقعي» تستخدم الخدمات التالية:</p>
+  <ul>
+    <li><b class="ltr">Open-Meteo</b> (البحث عن المدينة والطقس): يرسل إليها ما كتبته أو الإحداثيات، وعنوان IP.</li>
+    <li><b>موقع الجهاز</b>: يطلب متصفحك إذنك أولا. تستخدم الإحداثيات في المتصفح فقط، وترسل إلى <b class="ltr">BigDataCloud</b> لمعرفة اسم المكان، ولا نحفظها.</li>
+  </ul>
+  <p>والأساس القانوني هو موافقتك باستخدامك هذه الوظيفة (المادة 6، الفقرة 1، البند a).</p>
+  <h3>6. الاستماع إلى الأذان</h3>
+  <p>عند تشغيل الأذان يحمل ملف الصوت من GitHub Pages (انظر البند 3).</p>
+  <h3>7. التنبيه («أخبرني»)</h3>
+  <p>إذا كتبت بريدك الإلكتروني نحفظه مع اللغة المختارة والوقت. ولحماية الخدمة من سوء الاستخدام نحفظ كذلك قيمة تحقق مختصرة لا يمكن عكسها (Hash) من عنوان IP، لا العنوان نفسه. وتحفظ البيانات في قاعدة بيانات لدى <span class="ltr">Cloudflare Inc.</span> في الولايات المتحدة، وهي معتمدة وفق الإطار نفسه.</p>
+  <p>والغرض الوحيد هو إخبارك عندما يتوفر بلال. والأساس القانوني هو موافقتك (المادة 6، الفقرة 1، البند a). ويمكنك سحب موافقتك في أي وقت برسالة، فنحذف بريدك. ونحذف البيانات على الأكثر بعد إرسال التنبيه مرة واحدة أو عند إيقاف المشروع، ولا نعطيها لأحد.</p>
+  <h3>8. لغة الصفحة</h3>
+  <p>تحفظ اللغة التي تختارها في متصفحك فقط، لتظهر الصفحة بها في الزيارة القادمة، ولا ترسل إلينا.</p>
+  <h3>9. حقوقك</h3>
+  <p>لك الحق في معرفة بياناتك وتصحيحها وحذفها وتقييد معالجتها ونقلها والاعتراض عليها، وفي سحب موافقتك في أي وقت، وفي تقديم شكوى إلى جهة رقابية لحماية البيانات. ويكفي أن تراسلنا على بيانات التواصل المذكورة أعلاه.</p>
+  <p style="margin-top:40px;color:var(--muted);font-size:15px">آخر تحديث: نوفمبر 2026</p>
+</main>
+
+<!-- ======================= English ======================= -->
+<main class="legal" lang="en" data-lang="en" hidden>
+  <h1>Legal notice &amp; Privacy</h1>
+  <p class="note">This translation is provided for convenience; the German version is legally binding.</p>
+
+  <h2 id="impressum-en">Legal notice</h2>
+  <p>Information pursuant to § 5 of the German Digital Services Act (DDG)</p>
+  <p>Fares Badawi</p>
+  <h3>Contact</h3>
+  <p>Phone: <a href="tel:+4915780822788">+49 1578 0822788</a><br>
+     Email: <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a></p>
+  <h3>Responsible for the content</h3>
+  <p>Fares Badawi (address as above)</p>
+  <h3>Note</h3>
+  <p>This page presents the “Bilal” project. Bilal is not sold through this page.</p>
+
+  <h2 id="datenschutz-en">Privacy policy</h2>
+  <h3>1. Controller</h3>
+  <p>The controller for data processing on this website is Fares Badawi, phone <a href="tel:+4915780822788">+49 1578 0822788</a>, email <a href="mailto:ing.fares.badawi@gmail.com">ing.fares.badawi@gmail.com</a>.</p>
+  <h3>2. Principle</h3>
+  <p>This page sets no cookies, uses no analytics or advertising services and creates no user profiles. Data is only processed as far as necessary to display the page and provide the functions listed below.</p>
+  <h3>3. Hosting (GitHub Pages)</h3>
+  <p>The page is hosted by GitHub Inc. (USA). When you open it, GitHub processes technically necessary data such as your IP address, date and time and the requested address in order to deliver and protect the page. The legal basis is our legitimate interest in secure, reliable delivery (Art. 6(1)(f) GDPR). Data may be transferred to the USA; GitHub is certified under the EU-US Data Privacy Framework.</p>
+  <h3>4. 3D library (jsDelivr)</h3>
+  <p>For the 3D model, the page loads the “three.js” library from jsDelivr, which transmits your IP address to its operators, based on our legitimate interest in a working display.</p>
+  <h3>5. Simulator: city, location and weather</h3>
+  <p>Only if you search for a city in the simulator yourself or tap “My location” are the following services used:</p>
+  <ul>
+    <li><b>Open-Meteo</b> (city search and weather): your search term or coordinates and your IP address are sent to Open-Meteo.</li>
+    <li><b>Device location</b>: your browser asks for permission first. The coordinates are used in the browser only and sent to <b>BigDataCloud</b> to find the place name; we do not store them.</li>
+  </ul>
+  <p>The legal basis is your consent by deliberately using the function (Art. 6(1)(a) GDPR).</p>
+  <h3>6. Azan audio</h3>
+  <p>When you play the Azan, the audio file is loaded from GitHub Pages (see section 3).</p>
+  <h3>7. Notification (“Notify me”)</h3>
+  <p>If you enter your email address, we store it together with the chosen language and the time. To prevent abuse we also store a shortened, irreversible hash of your IP address, not the IP address itself. The data is stored in a database at Cloudflare Inc. (USA), certified under the same framework.</p>
+  <p>The sole purpose is to inform you when Bilal is available. The legal basis is your consent (Art. 6(1)(a) GDPR). You can withdraw it at any time by sending us a message, and we will delete your address. We delete the data at the latest after the one-time notification or if the project is discontinued. We never share it with third parties.</p>
+  <h3>8. Page language</h3>
+  <p>The language you choose is stored only in your browser so the page appears in it next time. It is not sent to us.</p>
+  <h3>9. Your rights</h3>
+  <p>You have the right of access, rectification, erasure, restriction of processing, data portability and objection (Art. 15–21 GDPR), the right to withdraw consent at any time (Art. 7(3)), and the right to lodge a complaint with a data protection authority (Art. 77). A simple message to the contact details above is enough.</p>
+  <p style="margin-top:40px;color:var(--muted);font-size:15px">Last updated: November 2026</p>
 </main>
 
 <footer>
   <a class="brand" href="./"><b>بلال</b><span class="latin">BILAL</span></a>
-  <p class="credit"><span>Design von <b>Fares</b></span><span class="latin">DESIGN BY FARES</span></p>
+  <p class="credit"><span>Design · <b>Fares</b></span><span class="latin">DESIGN BY FARES</span></p>
 </footer>
+
+<script>
+// Sprache wie auf der Hauptseite (gleicher Speicher), Anker der Hauptseite auf die passende Sprache umleiten
+(function () {
+  var lang = 'ar';
+  try { lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('bilal-lang') || 'ar'; } catch (e) {}
+  if (['ar', 'de', 'en'].indexOf(lang) < 0) lang = 'ar';
+  function set(l) {
+    lang = l;
+    try { localStorage.setItem('bilal-lang', l); } catch (e) {}
+    document.documentElement.lang = l;
+    document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+    document.querySelectorAll('main.legal').forEach(function (m) { m.hidden = m.dataset.lang !== l; });
+    document.querySelectorAll('.lang button').forEach(function (b) { b.classList.toggle('sel', b.dataset.lang === l); });
+  }
+  document.querySelectorAll('.lang button').forEach(function (b) { b.onclick = function () { set(b.dataset.lang); }; });
+  set(lang);
+  var h = location.hash.replace('#', '');
+  if (h && lang !== 'de') {
+    var el = document.getElementById(h + '-' + lang);
+    if (el) setTimeout(function () { el.scrollIntoView(); }, 50);
+  }
+})();
+</script>
 </body>
 </html>

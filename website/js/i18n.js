@@ -54,6 +54,8 @@ export const T = {
   'story.verse.tr': { ar: 'سورة النساء، الآية 103', de: '„Das Gebet ist den Gläubigen zu festgesetzten Zeiten vorgeschrieben.“ (Sure An-Nisa, 4:103)', en: '“Indeed, prayer has been decreed upon the believers at fixed times.” (Surah An-Nisa, 4:103)' },
 
   // ---------- Die Geschichte des Azan (Quellen: Koran, Bukhari, Muslim; Sira ausdrücklich als Sira gekennzeichnet)
+  'story.more': { ar: 'اقرأ قصة بلال والأذان', de: 'Die Geschichte von Bilal und dem Azan lesen', en: 'Read the story of Bilal and the Azan' },
+  'dlg.close': { ar: 'إغلاق', de: 'Schließen', en: 'Close' },
   'hist.eyebrow': { ar: 'قصة الأذان', de: 'Die Geschichte des Azan', en: 'The story of the Azan' },
   'hist.title': { ar: 'من صوت بلال <g>إلى بيتك</g>', de: 'Von Bilals Stimme <g>bis in dein Zuhause.</g>', en: 'From Bilal’s voice <g>to your home.</g>' },
   'hist.verse.tr': {
