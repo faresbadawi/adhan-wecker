@@ -515,3 +515,23 @@ html[dir="rtl"] .city { padding: 5px 14px 5px 6px; }
 .legal-links { display: flex; gap: 22px; justify-content: center; margin-top: 18px; font-size: 16px; }
 .legal-links a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; }
 .legal-links a:hover { color: var(--ivory); border-color: var(--amber); }
+
+/* ---------- Menü (☰): alle Abschnitte, Impressum, Datenschutz */
+.menu-btn { border: 0; cursor: pointer; }
+.menu-btn svg { stroke-width: 2.4; }
+.menu-panel {
+  position: fixed; z-index: 49; inset: var(--nav-h) 0 auto auto; width: min(380px, 100vw); max-height: calc(100svh - var(--nav-h));
+  overflow: auto; padding: 18px 22px 26px; background: rgba(8,7,6,.97); backdrop-filter: blur(16px);
+  border-inline-start: 1px solid rgba(201,164,92,.25); border-bottom: 1px solid rgba(201,164,92,.25); border-end-start-radius: 24px;
+  transform: translateY(-12px); opacity: 0; pointer-events: none; transition: opacity .3s, transform .35s cubic-bezier(.2,.7,.2,1);
+}
+html[dir="rtl"] .menu-panel { inset: var(--nav-h) auto auto 0; border-inline-start: 0; border-inline-end: 1px solid rgba(201,164,92,.25); border-end-start-radius: 0; border-end-end-radius: 24px; }
+.menu-panel.open { opacity: 1; transform: none; pointer-events: auto; }
+.menu-panel ol { list-style: none; margin: 0; padding: 0; counter-reset: m; }
+.menu-panel li a { display: flex; align-items: center; gap: 14px; padding: 12px 6px; text-decoration: none; color: var(--ivory); font-family: var(--head); font-size: 21px; line-height: 1.4; border-bottom: 1px solid rgba(201,164,92,.1); transition: color .25s, padding .25s; }
+.menu-panel li a::before { counter-increment: m; content: counter(m, decimal-leading-zero); font: 13px "Josefin", sans-serif; color: var(--amber); width: 22px; }
+.menu-panel li a:hover { color: var(--amber); padding-inline-start: 12px; }
+.menu-legal { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; }
+.menu-legal a { color: var(--muted); font-size: 16px; text-decoration: none; }
+.menu-legal a:hover { color: var(--ivory); }
+.menu-btn.open { box-shadow: 0 0 0 2px var(--amber), 0 0 18px rgba(232,160,78,.5); }
