@@ -25,6 +25,7 @@ function setLang(l) {
   // Produktfotos zeigen die Uhr in derselben Sprache
   $$('[data-img]').forEach(img => { img.src = `assets/img/${img.dataset.img}${l === 'ar' ? '' : '-' + l}.webp`; });
   $$('.lang button').forEach(b => b.classList.toggle('sel', b.dataset.lang === l));
+  movePill();
   $('#guideLink').href = GUIDE[l];
   $('#guideLink2').href = GUIDE_AR;
   $('#guideLink2').style.display = l === 'en' ? '' : 'none';
@@ -32,7 +33,26 @@ function setLang(l) {
   listeners.forEach(fn => fn(l));
   requestAnimationFrame(onScroll);
 }
-$$('.lang button').forEach(b => b.onclick = () => setLang(b.dataset.lang));
+// Sprachknopf: goldene Markierung gleitet zur gewählten Sprache, der Inhalt blendet weich über
+const langBox = $('.lang'), pill = document.createElement('span');
+pill.className = 'pill';
+langBox.prepend(pill);
+function movePill() {
+  const b = langBox.querySelector('button.sel');
+  if (!b) return;
+  pill.style.left = b.offsetLeft + 'px';
+  pill.style.width = b.offsetWidth + 'px';
+}
+addEventListener('resize', movePill);
+document.fonts && document.fonts.ready.then(movePill);
+$$('.lang button').forEach(b => b.onclick = () => {
+  if (b.dataset.lang === lang) return;
+  $$('.lang button').forEach(x => x.classList.toggle('sel', x === b));
+  movePill();
+  if (reduce) { setLang(b.dataset.lang); return; }
+  document.body.classList.add('switching');
+  setTimeout(() => { setLang(b.dataset.lang); requestAnimationFrame(() => document.body.classList.remove('switching')); }, 260);
+});
 window.bilalLang = () => lang;
 
 // ---------- Kopfzeile
@@ -94,8 +114,29 @@ fetch('assets/muster-kreis.json').then(r => r.json()).then(data => {
   ring.setAttribute('class', 'ring'); ring.setAttribute('cx', 500); ring.setAttribute('cy', 500); ring.setAttribute('r', 488);
   ring.setAttribute('pathLength', '1'); ring.style.strokeDasharray = '1';
   svg.appendChild(ring);
+  // Goldverlauf über das ganze Muster
+  const defs = document.createElementNS(SVGNS, 'defs');
+  defs.innerHTML = '<linearGradient id="mgold" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1000" y2="1000">' +
+    '<stop offset="0" stop-color="#f6d690"/><stop offset=".35" stop-color="#c9a45c"/><stop offset=".55" stop-color="#fff0c4"/>' +
+    '<stop offset=".75" stop-color="#b8893a"/><stop offset="1" stop-color="#e8c27a"/></linearGradient>';
+  svg.appendChild(defs);
   const list = build(svg, data, { cx: 500, cy: 500 });
-  svg.lastChild.setAttribute('clip-path', 'url(#mclip)');
+  const lines = svg.lastChild;
+  lines.setAttribute('class', 'lines');
+  lines.setAttribute('clip-path', 'url(#mclip)');
+  // Leuchtender Stiftkopf: ein kurzes, helles Stück, das vorne an jeder Linie mitläuft
+  const heads = document.createElementNS(SVGNS, 'g');
+  heads.setAttribute('class', 'heads');
+  heads.setAttribute('clip-path', 'url(#mclip)');
+  list.forEach(q => {
+    const h = q.el.cloneNode();
+    h.style.strokeDasharray = '0.05 3';
+    h.style.strokeDashoffset = '0.05';
+    h.style.opacity = 0;
+    heads.appendChild(h);
+    q.head = h;
+  });
+  svg.appendChild(heads);
   motif = { list, ring };
   onScroll();
 });
@@ -118,7 +159,6 @@ sizeGallery();
 let ticking = false;
 const heroInner = $('#heroInner'), heroDraw = $('#heroDraw'), sbar = $('#scrollbar');
 const slides = $$('.slide');
-const lifeImgs = $$('.life-grid img');
 function onScroll() {
   ticking = false;
   nav.classList.toggle('solid', scrollY > 30);
@@ -157,20 +197,18 @@ function onScroll() {
 
   // Ornament: Linien von der Mitte nach außen, dazu eine langsame Drehung
   if (motif) {
-    const m = reduce ? 1 : clamp(progressOf(motifSec) * 1.25);
-    if (!reduce) $('#motifDraw').style.setProperty('--mr', (progressOf(motifSec) * 22.5).toFixed(2));
-    motif.ring.style.strokeDashoffset = 1 - clamp(m * 1.6);
+    // langsam: das Muster ist erst kurz vor Ende der (langen) Szene fertig gezeichnet
+    const m = reduce ? 1 : clamp(progressOf(motifSec) * 1.12);
+    if (!reduce) $('#motifDraw').style.setProperty('--mr', (progressOf(motifSec) * 15).toFixed(2));
+    motif.ring.style.strokeDashoffset = 1 - clamp(m * 1.4);
     motif.list.forEach(q => {
-      const local = clamp((m - q.k * 0.6) / 0.4);
+      const local = clamp((m - q.k * 0.45) / 0.55);
       q.el.style.strokeDashoffset = 1 - local;
+      // heller Kopf genau an der Spitze, nur während die Linie wächst
+      q.head.style.strokeDashoffset = 0.05 - local;
+      q.head.style.opacity = local > 0 && local < 1 ? 1 : 0;
     });
   }
-  // Fotos im Alltag: Bild wandert langsamer als der Rahmen
-  if (!reduce) lifeImgs.forEach(im => {
-    const r = im.closest(".frame").getBoundingClientRect();
-    if (r.bottom < 0 || r.top > innerHeight) return;
-    im.style.setProperty('--py', (((r.top + r.height / 2) - innerHeight / 2) * -0.12).toFixed(1));
-  });
   updateStatement();
 }
 addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -191,7 +229,7 @@ function splitStatement() {
 }
 function updateStatement() {
   const r = st.getBoundingClientRect();
-  const k = reduce ? 1 : clamp((innerHeight * 0.8 - r.top) / (r.height + innerHeight * 0.3));
+  const k = reduce ? 1 : clamp((innerHeight * 0.9 - r.top) / (r.height + innerHeight * 0.12));
   const n = Math.round(k * words.length);
   words.forEach((w, i) => w.classList.toggle('on', i < n));
 }
@@ -268,6 +306,29 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
     if (a && e.isIntersecting) { map.forEach(x => x.classList.remove('active')); a.classList.add('active'); }
   }), { rootMargin: '-45% 0px -50% 0px' });
   map.forEach((a, id) => { const s = document.getElementById(id); if (s) so.observe(s); });
+}
+
+// ---------- Bilder per Klick vergrößern
+{
+  const box = document.createElement('div');
+  box.className = 'lightbox';
+  box.innerHTML = '<img alt=""><button aria-label="×">×</button>';
+  document.body.appendChild(box);
+  const big = box.querySelector('img');
+  const close = () => box.classList.remove('open');
+  box.onclick = close;
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  const hint = '<span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"/></svg></span>';
+  $$('.life-grid .frame').forEach(f => f.insertAdjacentHTML('beforeend', hint));
+  $$('.life-grid img, .slide img, .duo img').forEach(img => {
+    img.classList.add('zoomable');
+    img.addEventListener('click', e => {
+      e.stopPropagation();
+      big.src = img.currentSrc || img.src;
+      big.style.background = img.closest('.life-grid') ? '' : 'radial-gradient(ellipse at 50% 40%, #241c13, #070808 70%)';
+      box.classList.add('open');
+    });
+  });
 }
 
 // ---------- Simulator erst laden, wenn man in die Nähe scrollt
