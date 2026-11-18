@@ -724,3 +724,13 @@ button, a, summary, select, input { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
 #notifyForm input:focus-visible, #cityInput:focus-visible { outline: none; }
 .acc-inner > h4:not(:first-child) { margin-top: 30px; }
+
+/* ---------- Simulator: Einschaltknopf klein in der oberen Ecke, verdeckt nichts mehr */
+.sim-ui { inset: 0 !important; justify-content: center; align-items: flex-end !important; }
+.power { position: absolute; top: 14px; inset-inline-end: 14px; padding: 4px !important; gap: 0; }
+.power #powerLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.power .knob { width: 34px; height: 34px; }
+.power svg { width: 17px; height: 17px; }
+.sim-hint { inset-inline: 64px; }
+@media (max-width: 760px) { .power { top: 10px; inset-inline-end: 10px; } .power .knob { width: 30px; height: 30px; } .power svg { width: 15px; height: 15px; } }
+@media (max-width: 640px) { .sim-ui { flex-direction: row !important; justify-content: center !important; padding: 12px !important; } .finish button { padding: 6px 13px; font-size: 15px; } }
