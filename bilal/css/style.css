@@ -94,7 +94,7 @@ h3 { font-family: var(--head); line-height: var(--head-lh); }
 .draw path { fill: none; stroke: var(--gold); stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 
 /* ---------- 1 · Bühne */
-.hero { min-height: 100svh; display: grid; place-items: center; padding: var(--nav-h) var(--gutter) 60px; overflow: hidden; isolation: isolate; }
+.hero { min-height: 100svh; display: grid; place-items: center; padding: var(--nav-h) var(--gutter) 60px; overflow: hidden; contain: paint; isolation: isolate; }
 .hero-bg { position: absolute; inset: 0; z-index: -3; background: url(../assets/img/noir.webp) center / cover; opacity: .14; }
 .hero .draw { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; opacity: .55; }
 .hero .draw path { stroke-width: 1; }
@@ -115,13 +115,13 @@ h3 { font-family: var(--head); line-height: var(--head-lh); }
 
 /* ---------- 2 · Produkt-Folien */
 .reveal { padding: 0; height: 330vh; }
-.reveal .sticky { display: grid; grid-template-rows: 1fr auto; align-items: center; justify-items: center; padding: calc(var(--nav-h) + 10px) var(--gutter) 40px; }
+.reveal .sticky { display: grid; grid-template-rows: auto auto; align-content: center; justify-items: center; gap: clamp(10px, 2vh, 28px); padding: calc(var(--nav-h) + 10px) var(--gutter) 40px; }
 .reveal-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 50% 40% at 50% 46%, rgba(232,160,78,.16), transparent 70%); }
-.reveal-stage { position: relative; width: min(1000px, 92vw); aspect-ratio: 16 / 10; max-height: 62svh; }
+.reveal-stage { position: relative; width: min(1000px, 100%); aspect-ratio: 16 / 10; max-height: 60svh; }
 .rv-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transform: scale(.9) translateY(30px); transition: opacity .9s ease, transform 1.2s cubic-bezier(.2,.7,.2,1); filter: drop-shadow(0 40px 60px rgba(0,0,0,.65)); }
 .rv-img.on { opacity: 1; transform: none; }
-.reveal-caps { position: relative; height: 3.4em; width: 100%; text-align: center; }
-.cap { position: absolute; inset: 0; margin: 0; font-size: clamp(32px, 4.6vw, 64px); opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .9s cubic-bezier(.2,.7,.2,1); }
+.reveal-caps { position: relative; height: 2.6em; width: 100%; text-align: center; font-size: clamp(30px, 4.4vw, 62px); }
+.cap { position: absolute; inset: 0; margin: 0; font-size: 1em; line-height: 1.6; opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .9s cubic-bezier(.2,.7,.2,1); }
 .cap.on { opacity: 1; transform: none; }
 .dots { position: absolute; inset-inline-end: var(--gutter); top: 50%; translate: 0 -50%; display: grid; gap: 10px; }
 .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: .35; transition: all .4s; }
@@ -372,3 +372,12 @@ html[dir="ltr"] .specs div::after { transform-origin: left; }
 /* Sprache wechseln: Inhalt blendet weich über */
 main, body > section, body > header, footer { transition: opacity .25s ease; }
 body.switching > section, body.switching > header, body.switching > footer { opacity: 0; }
+
+/* Handy: Produkt-Folien ganz in der Mitte, Punkte unten statt seitlich */
+@media (max-width: 760px) {
+  .reveal-stage { aspect-ratio: 4 / 3; max-height: 46svh; }
+  .reveal-caps { font-size: clamp(26px, 7.4vw, 34px); height: 3.3em; }
+  .dots { inset: auto 0 calc(22px + env(safe-area-inset-bottom)) 0; top: auto; translate: none; display: flex; justify-content: center; gap: 12px; }
+  .stats { gap: 10px; }
+  .stats span { font-size: 17px; }
+}
