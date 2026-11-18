@@ -160,6 +160,7 @@ sizeGallery();
 let ticking = false;
 const heroInner = $('#heroInner'), heroDraw = $('#heroDraw'), sbar = $('#scrollbar');
 const slides = $$('.slide');
+const tlItems = $$('#timeline li');
 function onScroll() {
   ticking = false;
   nav.classList.toggle('solid', scrollY > 30);
@@ -209,6 +210,13 @@ function onScroll() {
       q.head.style.strokeDashoffset = 0.05 - local;
       q.head.style.opacity = local > 0 && local < 1 ? 1 : 0;
     });
+  }
+  // Zeitleiste: goldene Linie wächst mit dem Scrollen, Punkte leuchten auf
+  {
+    const tl = $('#timeline'), r = tl.getBoundingClientRect();
+    const k = clamp((innerHeight * 0.6 - r.top) / r.height);
+    tl.style.setProperty('--tl', reduce ? 1 : k.toFixed(3));
+    tlItems.forEach(li => li.classList.toggle('lit', reduce || li.getBoundingClientRect().top < innerHeight * 0.6));
   }
   updateStatement();
 }
