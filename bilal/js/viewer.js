@@ -29,7 +29,11 @@ export function start(stage, i18n) {
   cam.up.set(0, 0, 1);
   const oc = new OrbitControls(cam, r.domElement);
   oc.enableDamping = true;
-  oc.enableZoom = false;   // Mausrad scrollt die Seite
+  oc.enableZoom = true;    // Zwei Finger, Trackpad-Pinch, Strg+Mausrad oder die Lupen-Knöpfe
+  oc.zoomToCursor = true;
+  oc.zoomSpeed = 0.8;
+  // normales Mausrad scrollt weiter die Seite
+  stage.addEventListener('wheel', e => { if (!e.ctrlKey) e.stopPropagation(); }, { capture: true });
   oc.enablePan = false;
   oc.autoRotate = true;
   oc.autoRotateSpeed = 0.6;
@@ -89,6 +93,7 @@ export function start(stage, i18n) {
         // hochkant (Handy) weiter weg, damit das ganze Gerät ins Bild passt
         const az = 0.5, el = 0.32, d = 38 * Math.max(1, 1.2 / cam.aspect);
         cam.position.set(mc.x + d * Math.cos(el) * Math.sin(az), mc.y + d * Math.cos(el) * Math.cos(az), mc.z + d * Math.sin(el));
+        oc.minDistance = d * 0.28; oc.maxDistance = d * 1.35;
         first = false;
       } else cam.position.add(mc.clone().sub(oc.target));
       oc.target.copy(mc);
@@ -97,6 +102,14 @@ export function start(stage, i18n) {
     });
   }
   load('assets/bilal-weiss.3mf');
+  // Lupen-Knöpfe: näher heran / weiter weg
+  const zoom = f => {
+    const v = cam.position.clone().sub(oc.target);
+    const L = Math.min(oc.maxDistance, Math.max(oc.minDistance, v.length() * f));
+    cam.position.copy(oc.target).add(v.setLength(L)); oc.update();
+  };
+  stage.querySelector('.zoom-in').onclick = () => zoom(0.75);
+  stage.querySelector('.zoom-out').onclick = () => zoom(1.33);
   stage.querySelectorAll('.finish button').forEach(b => b.onclick = () => {
     stage.querySelectorAll('.finish button').forEach(x => x.classList.toggle('sel', x === b));
     load(b.dataset.f);

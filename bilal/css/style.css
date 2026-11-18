@@ -734,3 +734,10 @@ button, a, summary, select, input { -webkit-tap-highlight-color: transparent; }
 .sim-hint { inset-inline: 64px; }
 @media (max-width: 760px) { .power { top: 10px; inset-inline-end: 10px; } .power .knob { width: 30px; height: 30px; } .power svg { width: 15px; height: 15px; } }
 @media (max-width: 640px) { .sim-ui { flex-direction: row !important; justify-content: center !important; padding: 12px !important; } .finish button { padding: 6px 13px; font-size: 15px; } }
+
+/* ---------- Simulator: Lupen-Knöpfe unter dem Einschaltknopf */
+.zoom { position: absolute; top: 64px; inset-inline-end: 14px; display: grid; gap: 6px; }
+.zoom button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: rgba(4,6,7,.62); border: 1px solid rgba(201,164,92,.35); backdrop-filter: blur(8px); cursor: pointer; padding: 0; }
+.zoom svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.zoom button:hover { border-color: var(--amber); }
+@media (max-width: 760px) { .zoom { top: 54px; inset-inline-end: 10px; } .zoom button { width: 40px; height: 40px; } }
