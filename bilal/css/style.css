@@ -470,3 +470,48 @@ html[dir="rtl"] .city { padding: 5px 14px 5px 6px; }
 .notify-msg { min-height: 1.6em; margin: 14px 0 0; color: var(--amber); position: relative; }
 .notify-privacy { color: #9a8a79; font-size: 15px; margin: 6px 0 0; position: relative; }
 @media (max-width: 560px) { #notifyForm { flex-direction: column; } }
+
+/* ---------- Geschichte des Azan */
+.history .verse { margin-top: 10px; }
+.timeline { list-style: none; position: relative; max-width: 1000px; margin: clamp(40px, 6vw, 80px) auto; padding: 0; }
+.timeline::before, .timeline::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; translate: -50% 0; background: rgba(201,164,92,.18); }
+.timeline::after { background: var(--gold-grad); transform-origin: top; transform: scaleY(var(--tl, 0)); box-shadow: 0 0 12px rgba(232,160,78,.6); }
+.timeline li { position: relative; width: calc(50% - 44px); padding: 24px 28px; margin-bottom: 26px; border-radius: 22px; background: linear-gradient(160deg, #16110c, #08090a 70%); border: 1px solid rgba(201,164,92,.16); }
+.timeline li:nth-child(odd) { margin-inline-end: auto; }
+.timeline li:nth-child(even) { margin-inline-start: auto; }
+.timeline li::before { content: ""; position: absolute; top: 30px; width: 14px; height: 14px; rotate: 45deg; background: var(--ink); border: 2px solid var(--amber); box-shadow: 0 0 0 5px var(--ink); transition: background .5s, box-shadow .5s; }
+.timeline li:nth-child(odd)::before { inset-inline-end: -52px; }
+.timeline li:nth-child(even)::before { inset-inline-start: -52px; }
+.timeline li.lit::before { background: var(--amber); box-shadow: 0 0 0 5px var(--ink), 0 0 18px rgba(232,160,78,.9); }
+.era { display: inline-block; color: var(--amber); font-size: 15px; letter-spacing: .02em; margin-bottom: 4px; }
+.timeline h3 { font-size: clamp(22px, 2vw, 28px); margin: 0 0 8px; }
+.timeline p { margin: 0; color: var(--ivory); opacity: .9; font-size: 18px; }
+.timeline cite { display: block; margin-top: 12px; font-style: normal; font-size: 15px; color: var(--muted); padding-inline-start: 12px; border-inline-start: 2px solid rgba(232,160,78,.5); line-height: 1.6; }
+@media (max-width: 760px) {
+  .timeline::before, .timeline::after { left: auto; inset-inline-start: 10px; translate: none; }
+  .timeline li { width: auto; margin-inline-start: 34px !important; margin-inline-end: 0 !important; }
+  .timeline li::before { inset-inline-start: -31px !important; inset-inline-end: auto !important; }
+}
+.virt-title { margin-top: clamp(40px, 6vw, 80px); }
+.virtues { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1150px; margin: 30px auto 0; }
+.virtues blockquote { margin: 0; padding: 28px 26px; border-radius: 22px; background: linear-gradient(160deg, #15110d, #08090a 70%); border: 1px solid rgba(201,164,92,.16); display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
+.virtues p { margin: 0; font-family: var(--head); font-size: clamp(19px, 1.6vw, 22px); line-height: 1.8; }
+.virtues cite { font-style: normal; color: var(--amber); font-size: 15px; }
+@media (max-width: 860px) { .virtues { grid-template-columns: 1fr; } }
+.dua { max-width: 900px; margin: clamp(40px, 6vw, 70px) auto 0; text-align: center; padding: clamp(28px, 4vw, 48px); border-radius: 28px; background: radial-gradient(ellipse at 50% 0%, rgba(232,160,78,.14), transparent 65%), #0b0a09; border: 1px solid rgba(201,164,92,.3); }
+.dua-t { color: var(--amber); font-size: 17px; margin-bottom: 12px; }
+.dua blockquote { margin: 0 0 16px; font: 700 clamp(24px, 2.8vw, 36px)/1.9 "Amiri", serif; color: var(--ivory); }
+.dua p { margin: 0 auto; color: var(--muted); font-size: 17px; max-width: 720px; }
+.sources { max-width: 880px; margin: 40px auto 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.sources summary { cursor: pointer; padding: 18px 4px; font-family: var(--head); font-size: 20px; color: var(--amber); list-style: none; }
+.sources summary::-webkit-details-marker { display: none; }
+.sources summary::after { content: " +"; }
+.sources[open] summary::after { content: " −"; }
+.sources ul { margin: 0; padding: 0 4px; list-style: none; display: grid; gap: 8px; }
+.sources li { color: var(--ivory); font-size: 17px; }
+.sources p { color: var(--muted); font-size: 15px; padding: 14px 4px 20px; margin: 0; }
+
+/* Fuß: Rechtliches */
+.legal-links { display: flex; gap: 22px; justify-content: center; margin-top: 18px; font-size: 16px; }
+.legal-links a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; }
+.legal-links a:hover { color: var(--ivory); border-color: var(--amber); }
