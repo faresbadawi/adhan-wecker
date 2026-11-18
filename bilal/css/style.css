@@ -716,3 +716,11 @@ html[lang="de"] .acc-inner h4, html[lang="en"] .acc-inner h4 { font-weight: 400;
 .acc-src p { font-size: 14px !important; color: var(--muted) !important; margin-top: 8px !important; }
 @media (max-width: 520px) { .acc-head { padding: 16px; gap: 12px; } .acc-icon { width: 42px; height: 42px; } .acc-title small { font-size: 14px; } }
 @media (prefers-reduced-motion: reduce) { .acc-body, .acc-inner { transition: none; } }
+
+/* ---------- Antippen auf dem Handy: kein blauer Kasten; mit Tastatur ein goldener Rahmen */
+html { -webkit-tap-highlight-color: transparent; }
+button, a, summary, select, input { -webkit-tap-highlight-color: transparent; }
+:focus:not(:focus-visible) { outline: none; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+#notifyForm input:focus-visible, #cityInput:focus-visible { outline: none; }
+.acc-inner > h4:not(:first-child) { margin-top: 30px; }
