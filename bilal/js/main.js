@@ -1,5 +1,5 @@
 // Bilal – Produktseite: Sprache, Scroll-Szenen, Muster zeichnen, Simulator bei Bedarf laden.
-import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js';
+import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181011';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
@@ -58,6 +58,22 @@ window.bilalLang = () => lang;
 
 // ---------- Kopfzeile
 const nav = $('#nav');
+
+// Menü ☰ mit allen Abschnitten; schließt bei Auswahl, Klick daneben oder Esc
+{
+  const btn = $('#menuBtn'), panel = $('#menuPanel');
+  const set = open => {
+    panel.classList.toggle('open', open);
+    btn.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open);
+    panel.setAttribute('aria-hidden', !open);
+    if (open) nav.classList.add('solid');
+  };
+  btn.onclick = e => { e.stopPropagation(); set(!panel.classList.contains('open')); };
+  panel.addEventListener('click', e => { if (e.target.closest('a')) set(false); });
+  addEventListener('click', e => { if (!e.target.closest('#menuPanel')) set(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') set(false); });
+}
 
 // ---------- Einblenden
 const io = new IntersectionObserver(es => es.forEach(e => {
@@ -367,7 +383,7 @@ const stage = $('#simStage');
 new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return;
   o.disconnect();
-  import('./viewer.js').then(m => m.start(stage, { t, onLang, lang: () => lang }));
+  import('./viewer.js?v=202611181011').then(m => m.start(stage, { t, onLang, lang: () => lang }));
 }, { rootMargin: '700px 0px' }).observe(stage);
 
 setLang(lang);

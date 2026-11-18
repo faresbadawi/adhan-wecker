@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.png">
 <link rel="preload" href="fonts/Amiri-Bold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=202611181011">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -23,19 +23,40 @@
 <nav class="nav" id="nav">
   <a class="brand" href="#top" aria-label="Bilal"><b>بلال</b><span class="latin">BILAL</span></a>
   <ul class="links">
+    <li><a href="#story" data-t="story.eyebrow"></a></li>
+    <li><a href="#history" data-t="hist.eyebrow"></a></li>
     <li><a href="#try" data-t="nav.try"></a></li>
     <li><a href="#features" data-t="nav.features"></a></li>
-    <li><a href="#story" data-t="story.eyebrow"></a></li>
-    <li><a href="#design" data-t="nav.design"></a></li>
     <li><a href="#guide" data-t="nav.guide"></a></li>
   </ul>
   <div class="nav-end">
     <div class="lang" role="group" aria-label="Language">
       <button data-lang="ar" lang="ar">ع</button><button data-lang="de">DE</button><button data-lang="en">EN</button>
     </div>
-    <a class="icon-btn" href="#guide" aria-label="Guide"><svg viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg></a>
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </nav>
+
+<!-- Menü mit allen Abschnitten (Handy und Computer) -->
+<div class="menu-panel" id="menuPanel" aria-hidden="true">
+  <ol>
+    <li><a href="#story" data-t="story.eyebrow"></a></li>
+    <li><a href="#history" data-t="hist.eyebrow"></a></li>
+    <li><a href="#try" data-t="nav.try"></a></li>
+    <li><a href="#setup" data-t="setup.eyebrow"></a></li>
+    <li><a href="#features" data-t="nav.features"></a></li>
+    <li><a href="#design" data-t="nav.design"></a></li>
+    <li><a href="#gift" data-t="gift.eyebrow"></a></li>
+    <li><a href="#app" data-t="app.eyebrow"></a></li>
+    <li><a href="#faq" data-t="faq.eyebrow"></a></li>
+    <li><a href="#guide" data-t="nav.guide"></a></li>
+  </ol>
+  <div class="menu-legal">
+    <a href="rechtliches.html#impressum" data-t="legal.imprint"></a>
+    <a href="rechtliches.html#datenschutz" data-t="legal.privacy"></a>
+    <a href="mailto:ing.fares.badawi@gmail.com" data-t="legal.contact"></a>
+  </div>
+</div>
 
 <!-- 1 · Bühne -->
 <header class="hero" id="top">
@@ -372,7 +393,7 @@
   <small><span class="num">© 2026</span> · <span data-t="copy"></span></small>
 </footer>
 
-<script src="sim/out/bilal-sim.js"></script>
-<script type="module" src="js/main.js"></script>
+<script src="sim/out/bilal-sim.js?v=202611181011"></script>
+<script type="module" src="js/main.js?v=202611181011"></script>
 </body>
 </html>
