@@ -663,3 +663,56 @@ html[dir="rtl"] .deck-btn svg { transform: scaleX(-1); }
 .deck-dots button.on { width: 26px; border-radius: 6px; background: var(--amber); opacity: 1; }
 .deck-count { color: var(--muted); font-size: 14px; min-width: 42px; text-align: center; }
 @media (max-width: 520px) { .deck { border-radius: 22px; } .deck-count { display: none; } }
+
+/* ---------- "Warum Bilal": Akkordeon zum Aufklappen */
+.accordion { max-width: 900px; margin: 40px auto 0; display: grid; gap: 14px; text-align: start; }
+.acc-item { border-radius: 24px; border: 1px solid rgba(201,164,92,.2); background: linear-gradient(160deg, #16110c, #08090a 70%); overflow: hidden; transition: border-color .4s, box-shadow .4s; }
+.acc-item.open { border-color: rgba(232,160,78,.55); box-shadow: 0 20px 50px rgba(0,0,0,.45), 0 0 30px rgba(232,160,78,.08); }
+.acc-head { width: 100%; display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: none; border: 0; color: inherit; cursor: pointer; text-align: start; font: inherit; }
+.acc-icon { flex: none; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(232,160,78,.5); background: #0b0908; transition: background .4s; }
+.acc-icon svg { width: 24px; height: 24px; fill: none; stroke: var(--amber); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: stroke .4s; }
+.acc-item.open .acc-icon { background: var(--gold-grad); }
+.acc-item.open .acc-icon svg { stroke: var(--ink); }
+.acc-title { flex: 1; display: grid; gap: 2px; }
+.acc-title b { font-family: var(--head); font-size: clamp(22px, 2.2vw, 28px); line-height: 1.4; font-weight: 700; }
+html[lang="de"] .acc-title b, html[lang="en"] .acc-title b { font-weight: 400; }
+.acc-title small { color: var(--muted); font-size: 16px; line-height: 1.5; }
+.acc-plus { flex: none; position: relative; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(201,164,92,.5); }
+.acc-plus::before, .acc-plus::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 2px; translate: -50% -50%; background: var(--amber); border-radius: 2px; transition: transform .4s; }
+.acc-plus::after { transform: rotate(90deg); }
+.acc-item.open .acc-plus::after { transform: rotate(0deg); }
+.acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .55s cubic-bezier(.2,.7,.2,1); }
+.acc-item.open .acc-body { grid-template-rows: 1fr; }
+.acc-inner { overflow: hidden; min-height: 0; padding: 0 clamp(20px, 4vw, 40px); opacity: 0; transition: opacity .4s, padding .55s; }
+.acc-item.open .acc-inner { opacity: 1; padding-bottom: 30px; transition: opacity .5s .15s, padding .55s; }
+.acc-inner > * + * { margin-top: 16px; }
+.acc-inner p { margin: 0; color: var(--ivory); opacity: .92; font-size: 18px; }
+.acc-lead { font-family: var(--head); font-size: clamp(19px, 1.8vw, 23px) !important; line-height: 1.75; opacity: 1 !important; }
+html[lang="de"] .acc-lead, html[lang="en"] .acc-lead { line-height: 1.55; }
+.acc-inner h4 { margin: 0; font-family: var(--head); font-size: 22px; color: var(--amber); font-weight: 700; line-height: 1.5; }
+html[lang="de"] .acc-inner h4, html[lang="en"] .acc-inner h4 { font-weight: 400; }
+.acc-verse { margin: 22px 0 0; text-align: center; padding: 18px 10px; border-top: 1px solid rgba(201,164,92,.15); border-bottom: 1px solid rgba(201,164,92,.15); }
+.acc-verse blockquote { margin: 0; font: 700 clamp(24px, 3vw, 38px)/1.9 "Amiri", serif; background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.acc-verse.dua blockquote { font-size: clamp(21px, 2.4vw, 30px); }
+.acc-verse figcaption { color: var(--muted); font-size: 16px; margin-top: 6px; }
+.acc-verse figcaption.top { color: var(--amber); margin: 0 0 6px; }
+.acc-q { margin: 16px 0 0; padding: 4px 16px; border-inline-start: 2px solid var(--amber); font-size: 20px; line-height: 1.7; }
+.acc-q cite, .acc-inner cite { display: block; font-style: normal; color: var(--muted); font-size: 15px; line-height: 1.6; }
+.acc-steps { list-style: none; margin: 24px 0 0; padding: 0; position: relative; }
+.acc-steps::before { content: ""; position: absolute; top: 8px; bottom: 8px; inset-inline-start: 7px; width: 2px; background: linear-gradient(var(--amber), rgba(232,160,78,.15)); }
+.acc-steps li { position: relative; padding-inline-start: 34px; padding-bottom: 22px; }
+.acc-steps li::before { content: ""; position: absolute; top: 8px; inset-inline-start: 2px; width: 12px; height: 12px; rotate: 45deg; background: var(--ink); border: 2px solid var(--amber); }
+.acc-steps h4 { font-size: 20px !important; color: var(--ivory) !important; }
+.acc-steps p { font-size: 17px !important; margin-top: 4px !important; }
+.acc-steps cite { margin-top: 6px; }
+.acc-era { color: var(--amber); font-size: 14px; }
+.acc-hadith { display: grid; gap: 12px; }
+.acc-hadith blockquote { margin: 0; padding: 16px 18px; border-radius: 16px; background: rgba(255,255,255,.025); border: 1px solid rgba(201,164,92,.14); }
+.acc-hadith p { font-family: var(--head); font-size: 20px !important; line-height: 1.75; }
+.acc-hadith cite { color: var(--amber) !important; margin-top: 6px; }
+.acc-src ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.acc-src li { font-size: 16px; }
+.acc-src li .num { color: var(--amber); margin-inline-start: 8px; }
+.acc-src p { font-size: 14px !important; color: var(--muted) !important; margin-top: 8px !important; }
+@media (max-width: 520px) { .acc-head { padding: 16px; gap: 12px; } .acc-icon { width: 42px; height: 42px; } .acc-title small { font-size: 14px; } }
+@media (prefers-reduced-motion: reduce) { .acc-body, .acc-inner { transition: none; } }

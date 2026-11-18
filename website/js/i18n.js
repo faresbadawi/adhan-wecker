@@ -207,6 +207,7 @@ export const T = {
   'notify.btn': { ar: 'أخبرني', de: 'Benachrichtige mich', en: 'Notify me' },
   'notify.ok': { ar: 'شكرا لك، سنخبرك.', de: 'Danke, wir melden uns.', en: 'Thank you, we will be in touch.' },
   'notify.err': { ar: 'لم ينجح ذلك، حاول مرة أخرى.', de: 'Das hat nicht geklappt, bitte noch einmal versuchen.', en: 'That did not work, please try again.' },
+  'notify.mail': { ar: 'فتحنا لك رسالة جاهزة في برنامج البريد، أرسلها فقط.', de: 'Wir haben eine fertige E-Mail geöffnet, bitte einfach absenden.', en: 'We opened a ready-made email for you, just press send.' },
   'notify.bad': { ar: 'تحقق من البريد الإلكتروني.', de: 'Bitte die E-Mail-Adresse prüfen.', en: 'Please check the email address.' },
   'notify.privacy': { ar: 'نستخدم بريدك لهذا الغرض فقط، ولا نعطيه لأحد، ونحذفه متى طلبت.', de: 'Wir nutzen deine Adresse nur dafür, geben sie nicht weiter und löschen sie auf Wunsch.', en: 'We use your address only for this, never share it, and delete it on request.' },
 
