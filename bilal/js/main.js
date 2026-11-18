@@ -1,5 +1,5 @@
 // Bilal – Produktseite: Sprache, Scroll-Szenen, Muster zeichnen, Simulator bei Bedarf laden.
-import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181011';
+import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181023';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
@@ -23,6 +23,7 @@ function setLang(l) {
   document.title = t('title');
   $$('[data-t]').forEach(el => { el.innerHTML = html(t(el.dataset.t)); });
   $$('[data-ph]').forEach(el => { el.placeholder = t(el.dataset.ph); });
+  $$('[data-t-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.tAria)); });
   // Produktfotos zeigen die Uhr in derselben Sprache
   $$('[data-img]').forEach(img => { img.src = `assets/img/${img.dataset.img}${l === 'ar' ? '' : '-' + l}.webp`; });
   $$('.lang button').forEach(b => b.classList.toggle('sel', b.dataset.lang === l));
@@ -227,13 +228,6 @@ function onScroll() {
       q.head.style.opacity = local > 0 && local < 1 ? 1 : 0;
     });
   }
-  // Zeitleiste: goldene Linie wächst mit dem Scrollen, Punkte leuchten auf
-  {
-    const tl = $('#timeline'), r = tl.getBoundingClientRect();
-    const k = clamp((innerHeight * 0.6 - r.top) / r.height);
-    tl.style.setProperty('--tl', reduce ? 1 : k.toFixed(3));
-    tlItems.forEach(li => li.classList.toggle('lit', reduce || li.getBoundingClientRect().top < innerHeight * 0.6));
-  }
   updateStatement();
 }
 addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
@@ -333,6 +327,40 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
   map.forEach((a, id) => { const s = document.getElementById(id); if (s) so.observe(s); });
 }
 
+// ---------- Fenster: Geschichte von Bilal und vom Azan
+{
+  const dlg = $('#storyDlg'), body = dlg.querySelector('.dlg-body');
+  // Zeitleiste im Fenster: goldene Linie wächst mit dem Scrollen, Punkte leuchten auf
+  const updateTimeline = () => {
+    const tl = $('#timeline'), r = tl.getBoundingClientRect(), H = innerHeight;
+    tl.style.setProperty('--tl', reduce ? 1 : clamp((H * 0.65 - r.top) / r.height).toFixed(3));
+    tlItems.forEach(li => li.classList.toggle('lit', reduce || li.getBoundingClientRect().top < H * 0.65));
+  };
+  body.addEventListener('scroll', () => requestAnimationFrame(updateTimeline), { passive: true });
+  const open = () => {
+    if (dlg.open) return;
+    dlg.showModal();
+    body.scrollTop = 0;
+    document.documentElement.classList.add('dlg-open');
+    requestAnimationFrame(updateTimeline);
+    if (location.hash !== '#history') history.replaceState(null, '', '#history');
+  };
+  const close = () => dlg.open && dlg.close();
+  dlg.addEventListener('close', () => {
+    document.documentElement.classList.remove('dlg-open');
+    if (location.hash === '#history') history.replaceState(null, '', location.pathname + location.search);
+  });
+  $('#dlgClose').onclick = close;
+  dlg.addEventListener('click', e => { if (e.target === dlg) close(); }); // Klick neben das Fenster
+  $('#storyMore').onclick = open;
+  // Links auf die Geschichte (Menü, Leiste) öffnen das Fenster statt zu springen
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href="#history"]');
+    if (a) { e.preventDefault(); open(); }
+  });
+  if (location.hash === '#history') setTimeout(open, 600);
+}
+
 // ---------- Interessenten-Liste (gespeichert in der Bilal-Zentrale bei Cloudflare)
 {
   const ZENTRALE = 'https://bilal-zentrale.stretching-reminder-worker.workers.dev/api/interest';
@@ -383,7 +411,7 @@ const stage = $('#simStage');
 new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return;
   o.disconnect();
-  import('./viewer.js?v=202611181011').then(m => m.start(stage, { t, onLang, lang: () => lang }));
+  import('./viewer.js?v=202611181023').then(m => m.start(stage, { t, onLang, lang: () => lang }));
 }, { rootMargin: '700px 0px' }).observe(stage);
 
 setLang(lang);
