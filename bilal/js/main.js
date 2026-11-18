@@ -1,5 +1,5 @@
 // Bilal – Produktseite: Sprache, Scroll-Szenen, Muster zeichnen, Simulator bei Bedarf laden.
-import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181055';
+import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181134';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
@@ -327,75 +327,26 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
 }
 
 
-// ---------- Lesefenster "Warum Bilal": Reiter und Folien, ohne Scrollen
+// ---------- "Warum Bilal": Akkordeon, ein Titel öffnet seinen Text direkt darunter
 {
-  const deck = $('#deck'), stage = $('#deckStage'), dots = $('#deckDots'), count = $('#deckCount');
-  const tabs = $$('.tabs button');
-  const tabBox = $('.tabs'), tabPill = document.createElement('span');
-  tabPill.className = 'pill';
-  tabBox.prepend(tabPill);
-  let tab = 'idea', i = 0;
-  const group = () => stage.querySelector(`.sl-group[data-tab="${tab}"]`);
-  const slides = () => [...group().children];
-
-  // Fenster so hoch wie die längste Folie dieses Reiters (nichts wird abgeschnitten, kein Scrollen)
-  function fit() {
-    const h = Math.max(...slides().map(s => s.scrollHeight));
-    stage.style.height = h + 'px';
-  }
-  function moveTabPill() {
-    const b = tabBox.querySelector('button.sel');
-    if (b) { tabPill.style.left = b.offsetLeft + 'px'; tabPill.style.width = b.offsetWidth + 'px'; }
-  }
-  function show(n, dir = 0) {
-    const list = slides();
-    i = (n + list.length) % list.length;
-    $$('.sl-group').forEach(g => g.classList.toggle('on', g.dataset.tab === tab));
-    list.forEach((s, k) => {
-      s.classList.toggle('on', k === i);
-      s.classList.toggle('before', k < i);
-      s.classList.toggle('after', k > i);
-      s.setAttribute('aria-hidden', k !== i);
-    });
-    dots.innerHTML = list.map((_, k) => `<button class="${k === i ? 'on' : ''}" data-k="${k}" aria-label="${k + 1}"></button>`).join('');
-    count.textContent = `${i + 1} / ${list.length}`;
-    deck.dataset.dir = dir;
-  }
-  function setTab(name, n = 0) {
-    tab = name;
-    tabs.forEach(b => { b.classList.toggle('sel', b.dataset.tab === name); b.setAttribute('aria-selected', b.dataset.tab === name); });
-    moveTabPill();
-    show(n);
-    fit();
-  }
-  tabs.forEach(b => b.onclick = () => setTab(b.dataset.tab));
-  $('#deckNext').onclick = () => show(i + 1, 1);
-  $('#deckPrev').onclick = () => show(i - 1, -1);
-  dots.addEventListener('click', e => { const b = e.target.closest('button'); if (b) show(+b.dataset.k); });
-  deck.addEventListener('keydown', e => {
-    const rtl = lang === 'ar';
-    if (e.key === 'ArrowLeft') show(i + (rtl ? 1 : -1));
-    if (e.key === 'ArrowRight') show(i + (rtl ? -1 : 1));
-  });
-  // Wischen: in Leserichtung weiter
-  let x0 = null;
-  stage.addEventListener('pointerdown', e => { x0 = e.clientX; });
-  stage.addEventListener('pointerup', e => {
-    if (x0 === null) return;
-    const dx = e.clientX - x0, rtl = lang === 'ar';
-    x0 = null;
-    if (Math.abs(dx) < 45) return;
-    show(i + ((dx < 0) !== rtl ? 1 : -1));
-  });
-  // Links "Geschichte des Azan" (Menü, Leiste) öffnen den passenden Reiter
+  const items = $$('.acc-item');
+  const set = (it, open) => {
+    it.classList.toggle('open', open);
+    it.querySelector('.acc-head').setAttribute('aria-expanded', open);
+  };
+  items.forEach(it => it.querySelector('.acc-head').addEventListener('click', () => {
+    const open = !it.classList.contains('open');
+    items.forEach(o => set(o, o === it && open)); // nur einer offen, bleibt übersichtlich
+    if (open) setTimeout(() => {
+      const r = it.getBoundingClientRect();
+      if (r.top < 70 || r.top > innerHeight * 0.6) scrollTo({ top: scrollY + r.top - 80, behavior: reduce ? 'auto' : 'smooth' });
+    }, 380);
+  }));
+  // "Geschichte des Azan" im Menü: Abschnitt öffnen bei "Wer war Bilal?"
   document.addEventListener('click', e => {
-    const a = e.target.closest('[data-open-tab]');
-    if (a) setTimeout(() => setTab(a.dataset.openTab), 50);
+    const l = e.target.closest('[data-open-acc]');
+    if (l) items.forEach((o, k) => set(o, k === +l.dataset.openAcc));
   });
-  addEventListener('resize', () => { fit(); moveTabPill(); });
-  onLang(() => requestAnimationFrame(() => { fit(); moveTabPill(); }));
-  document.fonts && document.fonts.ready.then(() => { fit(); moveTabPill(); });
-  setTab('idea');
 }
 
 // ---------- Interessenten-Liste (gespeichert in der Bilal-Zentrale bei Cloudflare)
@@ -415,7 +366,13 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
       if (!r.ok) throw new Error(r.status);
       form.reset();
       show('notify.ok');
-    } catch { show('notify.err'); }
+    } catch {
+      // Ausweg, solange die Zentrale nicht erreichbar ist: fertige E-Mail im E-Mail-Programm öffnen
+      const subj = encodeURIComponent('Bilal: ' + t('notify.btn'));
+      const body = encodeURIComponent(t('notify.lead') + '\n\n' + email);
+      location.href = `mailto:ing.fares.badawi@gmail.com?subject=${subj}&body=${body}`;
+      show('notify.mail');
+    }
     btn.disabled = false;
   });
 }
@@ -448,7 +405,7 @@ const stage = $('#simStage');
 new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return;
   o.disconnect();
-  import('./viewer.js?v=202611181055').then(m => m.start(stage, { t, onLang, lang: () => lang }));
+  import('./viewer.js?v=202611181134').then(m => m.start(stage, { t, onLang, lang: () => lang }));
 }, { rootMargin: '700px 0px' }).observe(stage);
 
 setLang(lang);
