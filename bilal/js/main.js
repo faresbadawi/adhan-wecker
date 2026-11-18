@@ -1,5 +1,5 @@
 // Bilal – Produktseite: Sprache, Scroll-Szenen, Muster zeichnen, Simulator bei Bedarf laden.
-import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181023';
+import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181043';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
@@ -177,7 +177,6 @@ sizeGallery();
 let ticking = false;
 const heroInner = $('#heroInner'), heroDraw = $('#heroDraw'), sbar = $('#scrollbar');
 const slides = $$('.slide');
-const tlItems = $$('#timeline li');
 function onScroll() {
   ticking = false;
   nav.classList.toggle('solid', scrollY > 30);
@@ -327,39 +326,6 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
   map.forEach((a, id) => { const s = document.getElementById(id); if (s) so.observe(s); });
 }
 
-// ---------- Fenster: Geschichte von Bilal und vom Azan
-{
-  const dlg = $('#storyDlg'), body = dlg.querySelector('.dlg-body');
-  // Zeitleiste im Fenster: goldene Linie wächst mit dem Scrollen, Punkte leuchten auf
-  const updateTimeline = () => {
-    const tl = $('#timeline'), r = tl.getBoundingClientRect(), H = innerHeight;
-    tl.style.setProperty('--tl', reduce ? 1 : clamp((H * 0.65 - r.top) / r.height).toFixed(3));
-    tlItems.forEach(li => li.classList.toggle('lit', reduce || li.getBoundingClientRect().top < H * 0.65));
-  };
-  body.addEventListener('scroll', () => requestAnimationFrame(updateTimeline), { passive: true });
-  const open = () => {
-    if (dlg.open) return;
-    dlg.showModal();
-    body.scrollTop = 0;
-    document.documentElement.classList.add('dlg-open');
-    requestAnimationFrame(updateTimeline);
-    if (location.hash !== '#history') history.replaceState(null, '', '#history');
-  };
-  const close = () => dlg.open && dlg.close();
-  dlg.addEventListener('close', () => {
-    document.documentElement.classList.remove('dlg-open');
-    if (location.hash === '#history') history.replaceState(null, '', location.pathname + location.search);
-  });
-  $('#dlgClose').onclick = close;
-  dlg.addEventListener('click', e => { if (e.target === dlg) close(); }); // Klick neben das Fenster
-  $('#storyMore').onclick = open;
-  // Links auf die Geschichte (Menü, Leiste) öffnen das Fenster statt zu springen
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href="#history"]');
-    if (a) { e.preventDefault(); open(); }
-  });
-  if (location.hash === '#history') setTimeout(open, 600);
-}
 
 // ---------- Interessenten-Liste (gespeichert in der Bilal-Zentrale bei Cloudflare)
 {
@@ -411,7 +377,7 @@ const stage = $('#simStage');
 new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return;
   o.disconnect();
-  import('./viewer.js?v=202611181023').then(m => m.start(stage, { t, onLang, lang: () => lang }));
+  import('./viewer.js?v=202611181043').then(m => m.start(stage, { t, onLang, lang: () => lang }));
 }, { rootMargin: '700px 0px' }).observe(stage);
 
 setLang(lang);

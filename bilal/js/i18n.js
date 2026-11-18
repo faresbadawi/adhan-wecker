@@ -54,6 +54,15 @@ export const T = {
   'story.verse.tr': { ar: 'سورة النساء، الآية 103', de: '„Das Gebet ist den Gläubigen zu festgesetzten Zeiten vorgeschrieben.“ (Sure An-Nisa, 4:103)', en: '“Indeed, prayer has been decreed upon the believers at fixed times.” (Surah An-Nisa, 4:103)' },
 
   // ---------- Die Geschichte des Azan (Quellen: Koran, Bukhari, Muslim; Sira ausdrücklich als Sira gekennzeichnet)
+  'ch.idea.t': { ar: 'الفكرة', de: 'Die Idee', en: 'The idea' },
+  'ch.idea.p': { ar: 'لماذا صنعنا بلال: صوت الأذان الذي نفتقده في الغربة.', de: 'Warum es Bilal gibt: der Azan, den wir in der Fremde vermissen.', en: 'Why Bilal exists: the Azan we miss far from home.' },
+  'ch.bilal.t': { ar: 'من هو بلال؟', de: 'Wer war Bilal?', en: 'Who was Bilal?' },
+  'ch.bilal.p': { ar: 'أول مؤذن في الإسلام، وقصة الأذان من مكة إلى المدينة.', de: 'Der erste Muezzin des Islam und die Geschichte des Azan von Mekka bis Medina.', en: 'The first muezzin of Islam and the story of the Azan from Mecca to Medina.' },
+  'ch.fadl.t': { ar: 'فضل الأذان', de: 'Der Wert des Azan', en: 'The virtue of the Azan' },
+  'ch.fadl.p': { ar: 'ما ورد عن الأذان في القرآن والسنة الصحيحة، والدعاء بعده.', de: 'Was Koran und authentische Sunna über den Azan sagen, und das Bittgebet danach.', en: 'What the Quran and authentic Sunnah say about the Azan, and the supplication after it.' },
+  'ch.read': { ar: 'اقرأ', de: 'Lesen', en: 'Read' },
+  'page.story': { ar: 'بلال والأذان', de: 'Bilal und der Azan', en: 'Bilal and the Azan' },
+  'page.back': { ar: 'العودة إلى بلال', de: 'Zurück zu Bilal', en: 'Back to Bilal' },
   'story.more': { ar: 'اقرأ قصة بلال والأذان', de: 'Die Geschichte von Bilal und dem Azan lesen', en: 'Read the story of Bilal and the Azan' },
   'dlg.close': { ar: 'إغلاق', de: 'Schließen', en: 'Close' },
   'hist.eyebrow': { ar: 'قصة الأذان', de: 'Die Geschichte des Azan', en: 'The story of the Azan' },

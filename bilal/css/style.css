@@ -568,3 +568,44 @@ html.dlg-open { overflow: hidden; }
 .phone-screen { padding-top: 34px; position: relative; }
 .phone-screen::before { content: ""; position: absolute; top: 0; inset-inline: 0; height: 34px; background: #000; }
 .phone::before { top: 18px; width: 82px; height: 22px; }
+
+/* ---------- Hauptseite: drei Karten zur Unterseite */
+.chapters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1150px; margin: 40px auto 0; }
+.chapter {
+  position: relative; display: flex; flex-direction: column; gap: 10px; padding: 30px 28px 26px; border-radius: 26px; text-decoration: none; color: inherit; overflow: hidden; isolation: isolate;
+  background: linear-gradient(160deg, #19130d, #08090a 70%); border: 1px solid rgba(201,164,92,.2); transition: transform .4s cubic-bezier(.2,.7,.2,1), border-color .4s, box-shadow .4s;
+}
+.chapter::after { content: ""; position: absolute; inset: 0; z-index: -1; background: url(../assets/muster-bilal.svg) center / 120px; opacity: .05; transition: opacity .4s; }
+.chapter:hover { transform: translateY(-6px); border-color: rgba(232,160,78,.6); box-shadow: 0 24px 50px rgba(0,0,0,.5), 0 0 30px rgba(232,160,78,.12); }
+.chapter:hover::after { opacity: .1; }
+.ch-icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(232,160,78,.55); background: #0b0908; margin-bottom: 6px; }
+.ch-icon svg { width: 26px; height: 26px; fill: none; stroke: var(--amber); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.chapter h3 { margin: 0; font-size: clamp(24px, 2.2vw, 30px); }
+.chapter p { margin: 0; color: var(--muted); font-size: 17px; flex: 1; }
+.ch-go { display: inline-flex; align-items: center; gap: 8px; color: var(--amber); font-size: 16px; margin-top: 6px; }
+.ch-go i { font-style: normal; transition: transform .35s; }
+html[dir="ltr"] .ch-go i { transform: scaleX(-1); }
+.chapter:hover .ch-go i { transform: translateX(-6px); }
+html[dir="ltr"] .chapter:hover .ch-go i { transform: scaleX(-1) translateX(-6px); }
+@media (max-width: 860px) { .chapters { grid-template-columns: 1fr; } }
+
+/* ---------- Unterseite "Bilal und der Azan" */
+.story-hero { position: relative; min-height: 78svh; display: grid; place-content: center; justify-items: center; text-align: center; gap: 10px; padding: calc(var(--nav-h) + 40px) var(--gutter) 60px; overflow: hidden; contain: paint; isolation: isolate;
+  background: radial-gradient(ellipse 60% 50% at 50% 45%, rgba(232,160,78,.14), transparent 70%), var(--ink); }
+.story-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: url(../assets/muster-bilal.svg) center / 200px; opacity: .07;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 10%, transparent 70%); mask-image: radial-gradient(ellipse at center, #000 10%, transparent 70%); }
+.story-hero .crest { width: 64px; height: 64px; }
+.story-hero h1 { margin: 0; font-family: var(--head); font-weight: 700; font-size: clamp(40px, 6.5vw, 86px); line-height: var(--head-lh); }
+html[lang="de"] .story-hero h1, html[lang="en"] .story-hero h1 { font-weight: 400; }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+.chips a { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 999px; text-decoration: none; color: var(--ivory); border: 1px solid rgba(201,164,92,.4); background: rgba(10,9,8,.6); font-size: 17px; transition: background .3s, border-color .3s; }
+.chips a .num { color: var(--amber); font-size: 13px; }
+.chips a:hover, .chips a.active { background: rgba(232,160,78,.15); border-color: var(--amber); }
+.chap { border-top: 1px solid rgba(201,164,92,.12); }
+.chap-head { position: relative; max-width: 860px; margin: 0 auto; text-align: center; }
+.chap-num { display: block; font-size: clamp(60px, 9vw, 120px); line-height: 1; font-weight: 200; background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: .55; margin-bottom: 4px; }
+.chap-head .lead { margin-inline: auto; }
+.story-cards.one { grid-template-columns: 1fr; max-width: 820px; margin: 30px auto 0; }
+.chap .timeline { margin-top: 30px; }
+.chap-end { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; padding-top: 30px; }
+.story-page .links a.active { color: var(--ivory); }
