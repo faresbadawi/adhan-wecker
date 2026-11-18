@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.png">
 <link rel="preload" href="fonts/Amiri-Bold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=202611181043">
+<link rel="stylesheet" href="css/style.css?v=202611181055">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -24,7 +24,7 @@
   <a class="brand" href="#top" aria-label="Bilal"><b>بلال</b><span class="latin">BILAL</span></a>
   <ul class="links">
     <li><a href="#story" data-t="story.eyebrow"></a></li>
-    <li><a href="geschichte.html" data-t="hist.eyebrow"></a></li>
+    <li><a href="#story" data-open-tab="bilal" data-t="hist.eyebrow"></a></li>
     <li><a href="#try" data-t="nav.try"></a></li>
     <li><a href="#features" data-t="nav.features"></a></li>
     <li><a href="#guide" data-t="nav.guide"></a></li>
@@ -41,7 +41,7 @@
 <div class="menu-panel" id="menuPanel" aria-hidden="true">
   <ol>
     <li><a href="#story" data-t="story.eyebrow"></a></li>
-    <li><a href="geschichte.html" data-t="hist.eyebrow"></a></li>
+    <li><a href="#story" data-open-tab="bilal" data-t="hist.eyebrow"></a></li>
     <li><a href="#try" data-t="nav.try"></a></li>
     <li><a href="#setup" data-t="setup.eyebrow"></a></li>
     <li><a href="#features" data-t="nav.features"></a></li>
@@ -109,25 +109,42 @@
     <p class="eyebrow rv" data-t="story.eyebrow"></p>
     <h2 class="rv d1" data-t="story.title"></h2>
   </div>
-  <div class="chapters">
-    <a class="chapter rv" href="geschichte.html#idee">
-      <span class="ch-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg></span>
-      <h3 data-t="ch.idea.t"></h3>
-      <p data-t="ch.idea.p"></p>
-      <span class="ch-go"><span data-t="ch.read"></span> <i aria-hidden="true">←</i></span>
-    </a>
-    <a class="chapter rv" href="geschichte.html#bilal">
-      <span class="ch-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c-1.2 1.6-1.2 2.8 0 4M8 22V11a4 4 0 0 1 8 0v11M5 22h14M11 22v-4a1 1 0 0 1 2 0v4M10 9h4"/></svg></span>
-      <h3 data-t="ch.bilal.t"></h3>
-      <p data-t="ch.bilal.p"></p>
-      <span class="ch-go"><span data-t="ch.read"></span> <i aria-hidden="true">←</i></span>
-    </a>
-    <a class="chapter rv" href="geschichte.html#fadl">
-      <span class="ch-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V6a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2zM8 8h6M8 12h6"/><path d="M18 19v2H6"/></svg></span>
-      <h3 data-t="ch.fadl.t"></h3>
-      <p data-t="ch.fadl.p"></p>
-      <span class="ch-go"><span data-t="ch.read"></span> <i aria-hidden="true">←</i></span>
-    </a>
+  <div class="tabs rv d2" role="tablist">
+    <button role="tab" data-tab="idea" class="sel"><span data-t="ch.idea.t"></span></button>
+    <button role="tab" data-tab="bilal"><span data-t="ch.bilal.t"></span></button>
+    <button role="tab" data-tab="fadl"><span data-t="ch.fadl.t"></span></button>
+  </div>
+  <div class="deck rv d2" id="deck" tabindex="0" aria-roledescription="carousel">
+    <div class="deck-stage" id="deckStage">
+      <div class="sl-group" data-tab="idea">
+        <article class="sl sl-text"><p class="sl-big" data-t="story.p1"></p></article>
+        <article class="sl sl-verse"><blockquote lang="ar" dir="rtl">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا</blockquote><p class="sl-cap" data-t="story.verse.tr"></p></article>
+        <article class="sl sl-text"><h3 data-t="story.p.t"></h3><p data-t="story.p.p"></p></article>
+      </div>
+      <div class="sl-group" data-tab="bilal">
+        <article class="sl sl-text"><h3 data-t="story.b.t"></h3><p data-t="story.b.p"></p><blockquote class="sl-q"><span data-t="story.b.q"></span><cite data-t="story.b.src"></cite></blockquote></article>
+        <article class="sl sl-verse"><blockquote lang="ar" dir="rtl">يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ</blockquote><p class="sl-cap" data-t="hist.verse.tr"></p></article>
+        <article class="sl sl-step"><span class="sl-era" data-t="t1.era"></span><h3 data-t="t1.t"></h3><p data-t="t1.p"></p><cite data-t="t1.s"></cite></article>
+        <article class="sl sl-step"><span class="sl-era" data-t="t2.era"></span><h3 data-t="t2.t"></h3><p data-t="t2.p"></p><cite data-t="t2.s"></cite></article>
+        <article class="sl sl-step"><span class="sl-era" data-t="t3.era"></span><h3 data-t="t3.t"></h3><p data-t="t3.p"></p><cite data-t="t3.s"></cite></article>
+        <article class="sl sl-step"><span class="sl-era" data-t="t4.era"></span><h3 data-t="t4.t"></h3><p data-t="t4.p"></p><cite data-t="t4.s"></cite></article>
+        <article class="sl sl-step"><span class="sl-era" data-t="t5.era"></span><h3 data-t="t5.t"></h3><p data-t="t5.p"></p><cite data-t="t5.s"></cite></article>
+        <article class="sl sl-step"><span class="sl-era" data-t="t6.era"></span><h3 data-t="t6.t"></h3><p data-t="t6.p"></p><cite data-t="t6.s"></cite></article>
+      </div>
+      <div class="sl-group" data-tab="fadl">
+        <article class="sl sl-hadith"><p class="sl-quote" data-t="v1.q"></p><cite data-t="v1.s"></cite></article>
+        <article class="sl sl-hadith"><p class="sl-quote" data-t="v2.q"></p><cite data-t="v2.s"></cite></article>
+        <article class="sl sl-hadith"><p class="sl-quote" data-t="v3.q"></p><cite data-t="v3.s"></cite></article>
+        <article class="sl sl-verse"><p class="sl-cap top" data-t="dua.t"></p><blockquote lang="ar" dir="rtl" class="dua-text">اللهم رب هذه الدعوة التامة، والصلاة القائمة، آت محمدا الوسيلة والفضيلة، وابعثه مقاما محمودا الذي وعدته</blockquote><p class="sl-cap" data-t="dua.tr"></p></article>
+        <article class="sl sl-src"><h3 data-t="src.title"></h3><ul><li><b lang="ar">القرآن الكريم</b> <span class="num">4:103 · 62:9</span></li><li><b>Sahih al-Bukhari</b> <span class="num">604 · 609 · 614 · 1149 · 3754</span></li><li><b>Sahih Muslim</b> <span class="num">377 · 384 · 387 · 2458</span></li><li><b>Sunan Abi Dawud</b> <span class="num">499 · 4985</span></li><li><b>Jami‘ at-Tirmidhi</b> <span class="num">189</span></li></ul><p data-t="src.note"></p></article>
+      </div>
+    </div>
+    <div class="deck-nav">
+      <button class="deck-btn prev" id="deckPrev" aria-label="‹"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="deck-dots" id="deckDots"></div>
+      <span class="deck-count num" id="deckCount"></span>
+      <button class="deck-btn next" id="deckNext" aria-label="›"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
   </div>
 </section>
 
@@ -359,7 +376,7 @@
 
 
 
-<script src="sim/out/bilal-sim.js?v=202611181043"></script>
-<script type="module" src="js/main.js?v=202611181043"></script>
+<script src="sim/out/bilal-sim.js?v=202611181055"></script>
+<script type="module" src="js/main.js?v=202611181055"></script>
 </body>
 </html>
