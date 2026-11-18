@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.png">
 <link rel="preload" href="fonts/Amiri-Bold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=202611181134">
+<link rel="stylesheet" href="css/style.css?v=202611181256">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -118,8 +118,9 @@
       </button>
       <div class="acc-body"><div class="acc-inner">
         <p class="acc-lead" data-t="story.p1"></p>
-        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا</blockquote><figcaption data-t="story.verse.tr"></figcaption></figure>
         <h4 data-t="story.p.t"></h4>
+        <p data-t="story.p.intro"></p>
+        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا</blockquote><figcaption data-t="story.verse.tr"></figcaption></figure>
         <p data-t="story.p.p"></p>
       </div></div>
     </div>
@@ -132,7 +133,6 @@
       <div class="acc-body"><div class="acc-inner">
         <p data-t="story.b.p"></p>
         <blockquote class="acc-q"><span data-t="story.b.q"></span><cite data-t="story.b.src"></cite></blockquote>
-        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ</blockquote><figcaption data-t="hist.verse.tr"></figcaption></figure>
         <ol class="acc-steps">
           <li><span class="acc-era" data-t="t1.era"></span><h4 data-t="t1.t"></h4><p data-t="t1.p"></p><cite data-t="t1.s"></cite></li>
           <li><span class="acc-era" data-t="t2.era"></span><h4 data-t="t2.t"></h4><p data-t="t2.p"></p><cite data-t="t2.s"></cite></li>
@@ -150,6 +150,14 @@
         <span class="acc-plus" aria-hidden="true"></span>
       </button>
       <div class="acc-body"><div class="acc-inner">
+        <h4 data-t="q.t"></h4>
+        <p data-t="q.p"></p>
+        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ</blockquote><figcaption data-t="hist.verse.tr"></figcaption></figure>
+        <p data-t="q.jumua"></p>
+        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">وَإِذَا نَادَيْتُمْ إِلَى الصَّلَاةِ اتَّخَذُوهَا هُزُوًا وَلَعِبًا</blockquote><figcaption data-t="q.maida.tr"></figcaption></figure>
+        <p data-t="q.maida"></p>
+        <h4 data-t="q.sunna.t"></h4>
+        <p data-t="q.sunna"></p>
         <div class="acc-hadith">
           <blockquote><p data-t="v1.q"></p><cite data-t="v1.s"></cite></blockquote>
           <blockquote><p data-t="v2.q"></p><cite data-t="v2.s"></cite></blockquote>
@@ -159,11 +167,11 @@
         <div class="acc-src">
           <h4 data-t="src.title"></h4>
           <ul>
-            <li><b lang="ar">القرآن الكريم</b> <span class="num">4:103 · 62:9</span></li>
-            <li><b>Sahih al-Bukhari</b> <span class="num">604 · 609 · 614 · 1149 · 3754</span></li>
-            <li><b>Sahih Muslim</b> <span class="num">377 · 384 · 387 · 2458</span></li>
-            <li><b>Sunan Abi Dawud</b> <span class="num">499 · 4985</span></li>
-            <li><b>Jami‘ at-Tirmidhi</b> <span class="num">189</span></li>
+            <li><b data-t="src.q"></b> <span class="num" data-t="src.q.n"></span></li>
+            <li><b data-t="src.b"></b> <span class="num">527 · 604 · 609 · 614 · 1149 · 3754</span></li>
+            <li><b data-t="src.m"></b> <span class="num">85 · 377 · 384 · 387 · 2458</span></li>
+            <li><b data-t="src.d"></b> <span class="num">499 · 4985</span></li>
+            <li><b data-t="src.t"></b> <span class="num">189</span></li>
           </ul>
           <p data-t="src.note"></p>
         </div>
@@ -400,7 +408,7 @@
 
 
 
-<script src="sim/out/bilal-sim.js?v=202611181134"></script>
-<script type="module" src="js/main.js?v=202611181134"></script>
+<script src="sim/out/bilal-sim.js?v=202611181256"></script>
+<script type="module" src="js/main.js?v=202611181256"></script>
 </body>
 </html>
