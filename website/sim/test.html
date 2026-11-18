@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Bilal Simulator Test</title>
+<style>body{margin:0;background:#111;display:grid;place-items:center;height:100vh}canvas{width:960px;height:640px;image-rendering:pixelated;cursor:pointer}</style></head>
+<body><canvas id="c" width="480" height="320"></canvas>
+<script src="out/bilal-sim.js"></script>
+<script>
+const lang=new URLSearchParams(location.search).get('lang')||'ar';
+BilalSim({locateFile:f=>'out/'+f}).then(M=>{
+  M.ccall('sim_init',null,['string'],[lang]);
+  const c=document.getElementById('c'),x=c.getContext('2d'),img=x.createImageData(480,320);
+  const pos=e=>{const r=c.getBoundingClientRect();return[Math.round((e.clientX-r.left)/r.width*480),Math.round((e.clientY-r.top)/r.height*320)]};
+  let down=0;
+  c.onpointerdown=e=>{down=1;c.setPointerCapture(e.pointerId);M._sim_touch(...pos(e),1)};
+  c.onpointermove=e=>{if(down)M._sim_touch(...pos(e),1)};
+  c.onpointerup=e=>{down=0;M._sim_touch(...pos(e),0)};
+  (function loop(){M._sim_tick(); if(M._sim_dirty()){img.data.set(M.HEAPU8.subarray(M._sim_frame(),M._sim_frame()+480*320*4));x.putImageData(img,0,0);} requestAnimationFrame(loop);})();
+  window.M=M;
+});
+</script></body></html>
