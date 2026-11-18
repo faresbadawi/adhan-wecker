@@ -22,6 +22,7 @@ function setLang(l) {
   document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
   document.title = t('title');
   $$('[data-t]').forEach(el => { el.innerHTML = html(t(el.dataset.t)); });
+  $$('[data-ph]').forEach(el => { el.placeholder = t(el.dataset.ph); });
   // Produktfotos zeigen die Uhr in derselben Sprache
   $$('[data-img]').forEach(img => { img.src = `assets/img/${img.dataset.img}${l === 'ar' ? '' : '-' + l}.webp`; });
   $$('.lang button').forEach(b => b.classList.toggle('sel', b.dataset.lang === l));
@@ -308,6 +309,28 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
   map.forEach((a, id) => { const s = document.getElementById(id); if (s) so.observe(s); });
 }
 
+// ---------- Interessenten-Liste (gespeichert in der Bilal-Zentrale bei Cloudflare)
+{
+  const ZENTRALE = 'https://bilal-zentrale.stretching-reminder-worker.workers.dev/api/interest';
+  const form = $('#notifyForm'), msg = $('#notifyMsg');
+  const show = k => { msg.dataset.t = k; msg.textContent = t(k); };
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = form.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return show('notify.bad');
+    const btn = form.querySelector('button');
+    btn.disabled = true;
+    try {
+      const r = await fetch(ZENTRALE, { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, lang, website: form.website.value }) });
+      if (!r.ok) throw new Error(r.status);
+      form.reset();
+      show('notify.ok');
+    } catch { show('notify.err'); }
+    btn.disabled = false;
+  });
+}
+
 // ---------- Bilder per Klick vergrößern
 {
   const box = document.createElement('div');
@@ -320,7 +343,7 @@ $$('.mini svg *').forEach(s => s.setAttribute('pathLength', '1'));
   addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
   const hint = '<span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"/></svg></span>';
   $$('.life-grid .frame').forEach(f => f.insertAdjacentHTML('beforeend', hint));
-  $$('.life-grid img, .slide img, .duo img').forEach(img => {
+  $$('.life-grid img, .slide img, .duo img, .gift img').forEach(img => {
     img.classList.add('zoomable');
     img.addEventListener('click', e => {
       e.stopPropagation();

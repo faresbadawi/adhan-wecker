@@ -25,9 +25,11 @@ char g_simLang[4] = "ar";
 
 extern "C" uint32_t millis(void) { return (uint32_t)emscripten_get_now(); }
 
-// Ort der Beispiel-Gebetszeiten
-static const char *CITY = "Berlin";
-static const double LAT = 52.52, LNG = 13.405;
+// Ort der Gebetszeiten: Berlin, bis die Webseite einen anderen Ort setzt (sim_set_location)
+static char CITY[64] = "Berlin";
+static double LAT = 52.52, LNG = 13.405;
+static int32_t g_tzOff = 0;     // Sekunden östlich von UTC am gewählten Ort
+static bool g_tzFixed = false;  // false: Zeitzone des Browsers
 
 // ---------- Gebetszeiten (Muslim World League: Fajr 18°, Isha 17°, Asr Schafi'i)
 
@@ -97,7 +99,7 @@ static void computeDay(int y, int m, int d, double tz, model::PrayerDay &out)
     out.hijriYear = (int16_t)(30 * n + j - 30);
 }
 
-static double tzHours(const struct tm &t) { return t.tm_gmtoff / 3600.0; }
+static double tzHours(const struct tm &t) { return (g_tzFixed ? g_tzOff : t.tm_gmtoff) / 3600.0; }
 
 static bool forDay(const struct tm &day, model::PrayerDay &out)
 {
@@ -164,10 +166,19 @@ static bool nightTimes(const struct tm &now, model::NightTimes &out)
     return true;
 }
 
-// ---------- Beispielwetter
+// ---------- Wetter: Beispiel, bis die Webseite echtes Wetter liefert (sim_set_weather)
+
+static model::Weather s_weather;
+static bool s_haveWeather = false;
 
 static model::Weather sampleWeather(bool isDay)
 {
+    if (s_haveWeather)
+    {
+        model::Weather w = s_weather;
+        w.isDay = isDay;
+        return w;
+    }
     model::Weather w;
     w.valid = true;
     w.isDay = isDay;
@@ -244,9 +255,10 @@ static void refreshCalendar(const struct tm &now)
     calendar_screen::setMonth(now, h);
 }
 
+static int shownDay = -1, moonHour = -1; // -1 erzwingt Neuberechnung (z. B. neuer Ort)
+
 static void everySecond(const struct tm &now)
 {
-    static int shownDay = -1, moonHour = -1;
     prayer_screen::setClock(now);
     clock_screen::setClock(now);
 
@@ -302,7 +314,16 @@ static void everySecond(const struct tm &now)
 static void localNow(struct tm &t)
 {
     const time_t s = time(nullptr);
-    localtime_r(&s, &t);
+    if (!g_tzFixed)
+    {
+        localtime_r(&s, &t);
+        return;
+    }
+    // Ortszeit des gewählten Ortes (wie die Uhr mit eingestellter Stadt)
+    const time_t l = s + g_tzOff;
+    gmtime_r(&l, &t);
+    t.tm_gmtoff = g_tzOff;
+    t.tm_isdst = 0;
 }
 
 // ---------- Schnittstelle zur Webseite
@@ -363,7 +384,8 @@ extern "C"
     EMSCRIPTEN_KEEPALIVE void sim_page(int page) { ui::showPage((ui::Page)page); }
 
     // Azan-Anzeige für das nächste Gebet ein- oder ausblenden (der Ton kommt von der Webseite)
-    EMSCRIPTEN_KEEPALIVE int sim_azan(int on)
+    // label: Name des Muezzins, erscheint wie bei der Hörprobe auf der Uhr unter dem Gebet
+    EMSCRIPTEN_KEEPALIVE int sim_azan(int on, const char *label)
     {
         struct tm now;
         localNow(now);
@@ -372,8 +394,45 @@ extern "C"
         nextPrayer(now, s_today, next, left);
         if (on)
             ui::showPage(ui::PAGE_PRAYER);
-        prayer_screen::showAzan(on, next);
+        prayer_screen::showAzan(on, next, label && *label, label ? label : "", true);
         return next;
+    }
+
+    // Ort für Gebetszeiten, Uhrzeit (Zeitzone) und Anzeige; Name nur mit lateinischen Buchstaben (Schrift der Uhr)
+    EMSCRIPTEN_KEEPALIVE void sim_set_location(double lat, double lng, int tzOffsetSec, const char *name)
+    {
+        LAT = lat;
+        LNG = lng;
+        g_tzOff = tzOffsetSec;
+        g_tzFixed = true;
+        snprintf(CITY, sizeof(CITY), "%s", name);
+        prayer_screen::setCity(CITY);
+        weather_screen::setCity(CITY);
+        clock_screen::setCity(CITY);
+        shownDay = -1;
+        moonHour = -1;
+    }
+
+    // Wetter: Himmel als model::Sky, Vorhersage für heute, morgen, übermorgen
+    EMSCRIPTEN_KEEPALIVE void sim_set_weather(float temp, float feels, int humidity, float wind, int sky, int rain,
+                                              int sky0, int max0, int min0, int sky1, int max1, int min1, int sky2, int max2, int min2)
+    {
+        model::Weather w;
+        w.valid = true;
+        w.sky = (model::Sky)sky;
+        w.temp = temp;
+        w.feelsLike = feels;
+        w.humidity = (uint8_t)humidity;
+        w.windKmh = wind;
+        w.tempMax = (int8_t)max0;
+        w.tempMin = (int8_t)min0;
+        w.rainChance = (int8_t)rain;
+        w.forecast[0] = {(model::Sky)sky0, (int8_t)max0, (int8_t)min0};
+        w.forecast[1] = {(model::Sky)sky1, (int8_t)max1, (int8_t)min1};
+        w.forecast[2] = {(model::Sky)sky2, (int8_t)max2, (int8_t)min2};
+        s_weather = w;
+        s_haveWeather = true;
+        moonHour = -1; // beim nächsten Sekundentakt anzeigen
     }
 
     EMSCRIPTEN_KEEPALIVE uint8_t *sim_frame() { return s_rgba; }

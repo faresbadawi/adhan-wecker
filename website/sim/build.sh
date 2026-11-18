@@ -32,7 +32,7 @@ UI_SRC=("$ROOT"/src/ui/*.cpp sim_main.cpp "$ROOT/src/model.cpp")
 em++ "${FLAGS[@]}" -std=gnu++17 "${UI_SRC[@]}" "$OBJ"/lvgl/*.o "$OBJ"/ui/*.o \
   --preload-file "$ROOT/data/bg/noir.bin@/bg/noir.bin" \
   -sMODULARIZE=1 -sEXPORT_NAME=BilalSim -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1 \
-  -sEXPORTED_FUNCTIONS=_sim_init,_sim_tick,_sim_touch,_sim_page,_sim_azan,_sim_frame,_sim_dirty \
+  -sEXPORTED_FUNCTIONS=_sim_init,_sim_tick,_sim_touch,_sim_page,_sim_azan,_sim_frame,_sim_dirty,_sim_set_location,_sim_set_weather \
   -sEXPORTED_RUNTIME_METHODS=ccall,HEAPU8 \
   -o "$OUT/bilal-sim.js"
 

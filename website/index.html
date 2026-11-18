@@ -25,6 +25,7 @@
   <ul class="links">
     <li><a href="#try" data-t="nav.try"></a></li>
     <li><a href="#features" data-t="nav.features"></a></li>
+    <li><a href="#story" data-t="story.eyebrow"></a></li>
     <li><a href="#design" data-t="nav.design"></a></li>
     <li><a href="#guide" data-t="nav.guide"></a></li>
   </ul>
@@ -81,12 +82,50 @@
   </div>
 </section>
 
+<!-- 3b · Warum Bilal -->
+<section class="story" id="story">
+  <div class="story-head">
+    <p class="eyebrow rv" data-t="story.eyebrow"></p>
+    <h2 class="rv d1" data-t="story.title"></h2>
+    <p class="lead rv d2" data-t="story.p1"></p>
+  </div>
+  <figure class="verse rv">
+    <svg class="crest" viewBox="0 0 100 100" aria-hidden="true"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="10"/></svg>
+    <blockquote lang="ar" dir="rtl">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا</blockquote>
+    <figcaption data-t="story.verse.tr"></figcaption>
+  </figure>
+  <div class="story-cards">
+    <article class="scard rv">
+      <h3 data-t="story.b.t"></h3>
+      <p data-t="story.b.p"></p>
+      <blockquote><span data-t="story.b.q"></span><cite data-t="story.b.src"></cite></blockquote>
+    </article>
+    <article class="scard rv d1">
+      <h3 data-t="story.p.t"></h3>
+      <p data-t="story.p.p"></p>
+    </article>
+  </div>
+</section>
+
 <!-- 4 · Simulator -->
 <section class="sim" id="try">
   <div class="head center">
     <p class="eyebrow" data-t="sim.eyebrow"></p>
     <h2 data-t="sim.title"></h2>
     <p class="lead" data-t="sim.lead"></p>
+  </div>
+  <div class="sim-bar">
+    <div class="city">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <input id="cityInput" type="search" autocomplete="off" data-ph="sim.city">
+      <button id="locBtn" class="chip" data-t="sim.here"></button>
+      <ul id="cityList" class="city-list"></ul>
+      <span id="cityStatus" class="city-status" aria-live="polite"></span>
+    </div>
+    <div class="azan-ctl">
+      <select id="voice" aria-label="Muezzin"><option value="alafasy">Mishary Alafasy</option><option value="islam_sobhi">Islam Sobhi</option></select>
+      <button id="azanBtn" class="chip gold"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span data-t="sim.azan"></span></button>
+    </div>
   </div>
   <div class="sim-stage" id="simStage">
     <div class="sim-loading" id="simLoading" data-t="sim.loading"></div>
@@ -99,6 +138,19 @@
       </div>
     </div>
   </div>
+</section>
+
+<!-- 4b · In drei Schritten -->
+<section class="setup" id="setup">
+  <div class="head center">
+    <p class="eyebrow rv" data-t="setup.eyebrow"></p>
+    <h2 class="rv d1" data-t="setup.title"></h2>
+  </div>
+  <ol class="steps">
+    <li class="rv"><span class="step-n num">1</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg><h3 data-t="s1.t"></h3><p data-t="s1.p"></p></li>
+    <li class="rv d1"><span class="step-n num">2</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.2"/></svg><h3 data-t="s2.t"></h3><p data-t="s2.p"></p></li>
+    <li class="rv d2"><span class="step-n num">3</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V11l7-5 7 5v10M10 21v-5h4v5M12 2v4"/></svg><h3 data-t="s3.t"></h3><p data-t="s3.p"></p></li>
+  </ol>
 </section>
 
 <!-- 5 · Funktionen als Folien quer durchs Bild -->
@@ -159,6 +211,35 @@
   </div>
 </section>
 
+<!-- 7c · Geschenk mit Widmung -->
+<section class="gift" id="gift">
+  <div class="gift-grid">
+    <div>
+      <p class="eyebrow rv" data-t="gift.eyebrow"></p>
+      <h2 class="rv d1" data-t="gift.title"></h2>
+      <p class="lead rv d2" data-t="gift.lead"></p>
+    </div>
+    <figure class="rv d1"><img loading="lazy" src="assets/img/widmung.webp" alt=""></figure>
+  </div>
+</section>
+
+<!-- 7d · App -->
+<section class="app" id="app">
+  <div class="app-grid">
+    <div class="phone rv"><div class="phone-screen"><img loading="lazy" data-img="app" alt=""></div></div>
+    <div>
+      <p class="eyebrow rv" data-t="app.eyebrow"></p>
+      <h2 class="rv d1" data-t="app.title"></h2>
+      <p class="lead rv d2" data-t="app.lead"></p>
+      <div class="app-actions rv d2">
+        <a class="btn" href="https://github.com/faresbadawi/adhan-wecker/releases/latest" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg><span data-t="app.android"></span></a>
+        <a class="btn ghost" href="https://faresbadawi.github.io/adhan-wecker/" target="_blank" rel="noopener" data-t="app.iphone"></a>
+      </div>
+      <div class="qr rv d2"><img src="assets/img/qr-app.svg" alt="QR"><span data-t="app.qr"></span></div>
+    </div>
+  </div>
+</section>
+
 <!-- 8 · Weitere Funktionen -->
 <section class="more">
   <h2 class="center rv" data-t="more.title"></h2>
@@ -186,6 +267,39 @@
     <div><dt data-t="s8.k"></dt><dd data-t="s8.v"></dd></div>
     <div><dt data-t="s9.k"></dt><dd data-t="s9.v"></dd></div>
   </dl>
+</section>
+
+<!-- 9b · Fragen & Antworten -->
+<section class="faq" id="faq">
+  <div class="head center">
+    <p class="eyebrow rv" data-t="faq.eyebrow"></p>
+    <h2 class="rv d1" data-t="faq.title"></h2>
+  </div>
+  <div class="faq-list rv d2">
+    <details><summary data-t="q1"></summary><p data-t="a1"></p></details>
+    <details><summary data-t="q2"></summary><p data-t="a2"></p></details>
+    <details><summary data-t="q3"></summary><p data-t="a3"></p></details>
+    <details><summary data-t="q4"></summary><p data-t="a4"></p></details>
+    <details><summary data-t="q5"></summary><p data-t="a5"></p></details>
+    <details><summary data-t="q6"></summary><p data-t="a6"></p></details>
+    <details><summary data-t="q7"></summary><p data-t="a7"></p></details>
+    <details><summary data-t="q8"></summary><p data-t="a8"></p></details>
+  </div>
+</section>
+
+<!-- 9c · Interessenten -->
+<section class="notify" id="notify">
+  <div class="notify-box rv">
+    <h2 data-t="notify.title"></h2>
+    <p class="lead" data-t="notify.lead"></p>
+    <form id="notifyForm" novalidate>
+      <input type="email" name="email" required autocomplete="email" data-ph="notify.ph" maxlength="120">
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <button class="btn" type="submit" data-t="notify.btn"></button>
+    </form>
+    <p class="notify-msg" id="notifyMsg" aria-live="polite"></p>
+    <p class="notify-privacy" data-t="notify.privacy"></p>
+  </div>
 </section>
 
 <!-- 10 · Anleitung -->

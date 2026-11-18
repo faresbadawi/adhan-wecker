@@ -3,7 +3,10 @@
 //   GET  /                     Übersichtsseite (Passwort = Geheimnis ADMIN_PASSWORD)
 //   GET  /admin/api/clocks     Liste der Uhren          ┐
 //   POST /admin/api/update     {"ids":[…]} oder {"all":true}  ├ nur mit Authorization: Bearer <Passwort>
-//   POST /admin/api/forget     {"id":"…"}               ┘
+//   POST /admin/api/forget     {"id":"…"}               │
+//   GET  /admin/api/interest   Interessenten-Liste       │
+//   POST /admin/api/interest/delete {"email":"…"}        ┘
+//   POST /api/interest         Produktseite: {"email","lang"} (nur von der Produktseite, gedrosselt)
 import PAGE from './page.html';
 
 const MANIFEST = 'https://faresbadawi.github.io/adhan-wecker/ota/manifest.json';
@@ -49,6 +52,32 @@ async function hello(req, env) {
   return json({ update: row.update_wanted === 1 });
 }
 
+// Produktseite: E-Mail für die Interessenten-Liste. Nur von den eigenen Seiten, höchstens 5 je Stunde und Adresse.
+const ORIGINS = ['https://faresbadawi.github.io'];
+const cors = req => {
+  const o = req.headers.get('origin') || '';
+  const ok = ORIGINS.includes(o) || /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?$/.test(o);
+  return ok ? { 'access-control-allow-origin': o, 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'content-type', vary: 'origin' } : null;
+};
+async function interest(req, env) {
+  const h = cors(req);
+  if (!h) return json({ error: 'origin' }, 403);
+  const reply = (data, status = 200) => { const r = json(data, status); for (const [k, v] of Object.entries(h)) r.headers.set(k, v); return r; };
+  if (req.method === 'OPTIONS') return reply({});
+  let b;
+  try { b = await req.json(); } catch { return reply({ error: 'json' }, 400); }
+  if (b.website) return reply({ ok: true }); // Falle für Bots: verstecktes Feld ausgefüllt
+  const email = String(b.email || '').trim().toLowerCase();
+  if (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return reply({ error: 'email' }, 400);
+  const ipHash = (await sha256('bilal:' + (req.headers.get('cf-connecting-ip') || ''))).slice(0, 16);
+  const t = now();
+  const recent = await env.DB.prepare('SELECT COUNT(*) AS n FROM interest WHERE ip_hash = ? AND created > ?').bind(ipHash, t - 3600).first();
+  if (recent && recent.n >= 5) return reply({ error: 'later' }, 429);
+  await env.DB.prepare('INSERT OR IGNORE INTO interest (email, lang, created, ip_hash) VALUES (?, ?, ?, ?)')
+    .bind(email, clip(b.lang, 4), t, ipHash).run();
+  return reply({ ok: true });
+}
+
 async function latest() {
   try {
     const r = await fetch(MANIFEST, { cf: { cacheTtl: 120 } });
@@ -66,8 +95,16 @@ async function admin(req, env, path) {
     ]);
     return json({ now: now(), latest: l, clocks: results });
   }
+  if (path === '/admin/api/interest' && req.method === 'GET') {
+    const { results } = await env.DB.prepare('SELECT email, lang, created FROM interest ORDER BY created DESC').all();
+    return json({ interest: results });
+  }
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
   const b = await req.json().catch(() => ({}));
+  if (path === '/admin/api/interest/delete') {
+    await env.DB.prepare('DELETE FROM interest WHERE email = ?').bind(String(b.email || '')).run();
+    return json({ ok: true });
+  }
   if (path === '/admin/api/update') {
     if (b.all) await env.DB.prepare('UPDATE clocks SET update_wanted = 1').run();
     else for (const id of (b.ids || []).slice(0, 200)) await env.DB.prepare('UPDATE clocks SET update_wanted = 1 WHERE id = ?').bind(String(id)).run();
@@ -84,6 +121,7 @@ export default {
   async fetch(req, env) {
     const { pathname } = new URL(req.url);
     if (pathname === '/api/hello' && req.method === 'POST') return hello(req, env);
+    if (pathname === '/api/interest' && (req.method === 'POST' || req.method === 'OPTIONS')) return interest(req, env);
     if (pathname.startsWith('/admin/api/')) return admin(req, env, pathname);
     if (pathname === '/' || pathname === '/index.html') {
       return new Response(PAGE, { headers: {

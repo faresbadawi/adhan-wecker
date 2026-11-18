@@ -13,3 +13,12 @@ CREATE TABLE IF NOT EXISTS clocks (
   last_seen INTEGER NOT NULL,
   update_wanted INTEGER NOT NULL DEFAULT 0
 );
+
+-- Interessenten von der Produktseite (nur E-Mail und Sprache)
+CREATE TABLE IF NOT EXISTS interest (
+  email TEXT PRIMARY KEY,
+  lang TEXT NOT NULL DEFAULT '',
+  created INTEGER NOT NULL,     -- Unix-Sekunden
+  ip_hash TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS interest_ip ON interest (ip_hash, created);

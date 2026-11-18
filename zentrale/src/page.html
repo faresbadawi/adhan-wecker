@@ -106,7 +106,11 @@ function renderLogin(err) {
   };
 }
 
-async function load() { data = await call('/admin/api/clocks'); render(); }
+async function load() {
+  const [c, i] = await Promise.all([call('/admin/api/clocks'), call('/admin/api/interest').catch(() => ({ interest: [] }))]);
+  data = { ...c, interest: i.interest || [] };
+  render();
+}
 
 function render() {
   const { clocks, latest, now } = data;
@@ -137,10 +141,22 @@ function render() {
           <button class="icon-btn" data-del="${esc(c.id)}" title="Aus der Liste entfernen" aria-label="Entfernen">${TRASH}</button></div>
       </div>`;
     }).join('') : '<div class="empty">Noch keine Uhr hat sich gemeldet. Uhren melden sich wenige Minuten nach dem Einschalten.</div>'}</div>
+    <div class="bar"><h2>Interessenten (${data.interest.length})</h2>${data.interest.length ? '<button class="ghost" id="copy">Adressen kopieren</button>' : ''}</div>
+    <div class="list">${data.interest.length ? data.interest.map(p => `<div class="clock">
+        <div class="name">${esc(p.email)}</div>
+        <div class="meta"><span>${esc((p.lang || '').toUpperCase())}</span><span>${ago(now - p.created)}</span></div>
+        <div class="acts"><button class="icon-btn" data-delmail="${esc(p.email)}" title="Löschen" aria-label="Löschen">${TRASH}</button></div>
+      </div>`).join('') : '<div class="empty">Noch niemand hat sich auf der Produktseite eingetragen.</div>'}</div>
     <p class="hint">Uhren melden sich alle 10 Minuten. Ein Update startet beim nächsten Melden, ohne Gebet oder Wecker zu stören. Gezeigt wird nur die eingestellte Stadt, keine genaue Position.</p>`;
   $('#out').onclick = logout;
   $('#all').onclick = async () => { await call('/admin/api/update', { all: true }); toast('Alle Uhren aktualisieren sich beim nächsten Melden'); load(); };
   document.querySelectorAll('[data-up]').forEach(b => b.onclick = async () => { await call('/admin/api/update', { ids: [b.dataset.up] }); toast('Update angefordert'); load(); });
+  document.querySelectorAll('[data-delmail]').forEach(b => b.onclick = async () => {
+    if (!confirm('Diese E-Mail-Adresse endgültig löschen?')) return;
+    await call('/admin/api/interest/delete', { email: b.dataset.delmail }); load();
+  });
+  const cp = $('#copy');
+  if (cp) cp.onclick = async () => { await navigator.clipboard.writeText(data.interest.map(p => p.email).join(', ')); toast('Adressen kopiert'); };
   document.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
     if (!confirm('Diese Uhr aus der Liste entfernen? Meldet sie sich wieder, erscheint sie erneut.')) return;
     await call('/admin/api/forget', { id: b.dataset.del }); load();
