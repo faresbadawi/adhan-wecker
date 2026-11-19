@@ -1,5 +1,5 @@
 // Bilal – Produktseite: Sprache, Scroll-Szenen, Muster zeichnen, Simulator bei Bedarf laden.
-import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611181327';
+import { T, LANGS, GUIDE, GUIDE_AR } from './i18n.js?v=202611191112';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = s => document.querySelector(s);
@@ -405,7 +405,7 @@ const stage = $('#simStage');
 new IntersectionObserver(([e], o) => {
   if (!e.isIntersecting) return;
   o.disconnect();
-  import('./viewer.js?v=202611181327').then(m => m.start(stage, { t, onLang, lang: () => lang }));
+  import('./viewer.js?v=202611191112').then(m => m.start(stage, { t, onLang, lang: () => lang }));
 }, { rootMargin: '700px 0px' }).observe(stage);
 
 setLang(lang);

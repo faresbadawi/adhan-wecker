@@ -37,8 +37,12 @@ body {
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; }
 svg { display: block; }
-.latin { font-family: "Marcellus", serif; letter-spacing: .35em; direction: ltr; unicode-bidi: isolate; }
-.num { font-family: "Josefin", sans-serif; direction: ltr; unicode-bidi: isolate; }
+.latin { font-family: "Marcellus", serif; letter-spacing: .35em; }
+.dim-layer { direction: ltr; }
+.dim-layer > * { left: 0; top: 0; }
+.num { font-family: "Josefin", sans-serif; }
+.dim-layer { direction: ltr; }
+.dim-layer > * { left: 0; top: 0; }
 .gold { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .center { text-align: center; margin-inline: auto; }
 
@@ -741,3 +745,16 @@ button, a, summary, select, input { -webkit-tap-highlight-color: transparent; }
 .zoom svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; stroke-width: 2.2; stroke-linecap: round; }
 .zoom button:hover { border-color: var(--amber); }
 @media (max-width: 760px) { .zoom { top: 54px; inset-inline-end: 10px; } .zoom button { width: 40px; height: 40px; } }
+
+/* ---------- Simulator: Maße in cm */
+.dim-layer { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.dim-label { font: 600 14px var(--body); color: var(--ink); background: var(--gold-grad); padding: 3px 9px; border-radius: 999px; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.dim-layer { direction: ltr; }
+.dim-layer > * { left: 0; top: 0; }
+.bottom-ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.dims { display: flex; align-items: center; gap: 7px; font: 16px var(--body); color: var(--gold); background: rgba(4,6,7,.62); padding: 9px 15px; border-radius: 999px; border: 1px solid rgba(201,164,92,.35); backdrop-filter: blur(8px); cursor: pointer; line-height: 1.2; }
+.dims svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linejoin: round; }
+.dims.sel { color: var(--ink); background: var(--gold-grad); border-color: transparent; }
+.sim-ui { z-index: 2; }
+@media (max-width: 640px) { .dims { padding: 8px 12px; font-size: 15px; } }
+@media (max-width: 640px) { .dim-label { font-size: 12px; padding: 2px 7px; } }

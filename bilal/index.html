@@ -14,7 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/favicon.png">
 <link rel="preload" href="fonts/Amiri-Bold.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=202611181327">
+<link rel="stylesheet" href="css/style.css?v=202611191112">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -208,9 +208,12 @@
     <div class="sim-ui">
       <button class="power" id="power" aria-pressed="false"><span class="knob"><svg viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/></svg></span><span id="powerLabel" data-t="sim.on"></span></button>
       <div class="zoom" role="group"><button class="zoom-in" data-t-aria="sim.zin"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button><button class="zoom-out" data-t-aria="sim.zout"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button></div>
+      <div class="bottom-ctl">
+        <button class="dims chip-ui" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span data-t="sim.dims"></span></button>
       <div class="finish" role="group">
         <button data-f="assets/bilal-weiss.3mf" class="sel"><i></i><span data-t="sim.white"></span></button>
         <button data-f="assets/bilal-schwarz.3mf"><i></i><span data-t="sim.black"></span></button>
+      </div>
       </div>
     </div>
   </div>
@@ -409,7 +412,7 @@
 
 
 
-<script src="sim/out/bilal-sim.js?v=202611181327"></script>
-<script type="module" src="js/main.js?v=202611181327"></script>
+<script src="sim/out/bilal-sim.js?v=202611191112"></script>
+<script type="module" src="js/main.js?v=202611191112"></script>
 </body>
 </html>
