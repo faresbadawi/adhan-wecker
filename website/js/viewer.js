@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { ThreeMFLoader } from 'three/addons/loaders/3MFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 const W = 480, H = 320;
 
@@ -30,7 +31,7 @@ export function start(stage, i18n) {
   const oc = new OrbitControls(cam, r.domElement);
   oc.enableDamping = true;
   oc.enableZoom = true;    // Zwei Finger, Trackpad-Pinch, Strg+Mausrad oder die Lupen-Knöpfe
-  oc.zoomToCursor = true;
+  oc.touches.TWO = null; // zwei Finger: eigener Pinch weiter unten
   oc.zoomSpeed = 0.8;
   // normales Mausrad scrollt weiter die Seite
   stage.addEventListener('wheel', e => { if (!e.ctrlKey) e.stopPropagation(); }, { capture: true });
@@ -82,6 +83,7 @@ export function start(stage, i18n) {
       if (model) sc.remove(model);
       model = g;
       sc.add(g);
+      buildDims(new THREE.Box3().setFromObject(g));
       const dc = new THREE.Box3().setFromObject(disp || g).getCenter(new THREE.Vector3());
       screen.matrix.makeBasis(RT, UP, N);
       screen.matrix.setPosition(dc.addScaledVector(N, 0.058));
@@ -103,11 +105,11 @@ export function start(stage, i18n) {
   }
   load('assets/bilal-weiss.3mf');
   // Lupen-Knöpfe: näher heran / weiter weg
-  const zoom = f => {
+  function zoom(f) {
     const v = cam.position.clone().sub(oc.target);
     const L = Math.min(oc.maxDistance, Math.max(oc.minDistance, v.length() * f));
     cam.position.copy(oc.target).add(v.setLength(L)); oc.update();
-  };
+  }
   stage.querySelector('.zoom-in').onclick = () => zoom(0.75);
   stage.querySelector('.zoom-out').onclick = () => zoom(1.33);
   stage.querySelectorAll('.finish button').forEach(b => b.onclick = () => {
@@ -198,6 +200,65 @@ export function start(stage, i18n) {
       SKY(d.weather_code[2]), R(d.temperature_2m_max[2]), R(d.temperature_2m_min[2])];
     if (!on) setPower(true); else applyPlace();
   }
+
+  // ---------- Maße in cm: Linien mit Beschriftung am Gerät, per Knopf ein- und ausblendbar
+  const lr = new CSS2DRenderer();
+  lr.domElement.className = 'dim-layer';
+  stage.prepend(lr.domElement);
+  const dims = new THREE.Group(); dims.visible = false; sc.add(dims);
+  const lineMat = new THREE.LineBasicMaterial({ color: 0xe8a04e, depthTest: false, transparent: true });
+  const seg = (a, b) => { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), lineMat); l.renderOrder = 10; return l; };
+  const fmt = v => (Math.round(v * 10) / 10).toLocaleString(i18n.lang() === 'de' ? 'de-DE' : 'en-US') + (i18n.lang() === 'ar' ? ' سم' : ' cm');
+  const labels = [];
+  function dimLine(a, b, tick, len) {
+    dims.add(seg(a, b));
+    for (const p of [a, b]) dims.add(seg(p.clone().addScaledVector(tick, -0.5), p.clone().addScaledVector(tick, 0.5)));
+    const el = document.createElement('span'); el.className = 'dim-label';
+    const o = new CSS2DObject(el); o.position.copy(a).add(b).multiplyScalar(0.5);
+    o.userData.len = len; labels.push(o); dims.add(o);
+  }
+  function buildDims(box) {
+    labels.forEach(o => o.element.remove()); labels.length = 0;
+    dims.clear();
+    const { min: m, max: M } = box, k = 1.2, V = THREE.Vector3;
+    // Breite: vorne unten · Tiefe: rechts unten · Höhe: hinten rechts
+    dimLine(new V(m.x, M.y + k, m.z), new V(M.x, M.y + k, m.z), new V(0, 1, 0), M.x - m.x);
+    dimLine(new V(M.x + k, m.y, m.z), new V(M.x + k, M.y, m.z), new V(1, 0, 0), M.y - m.y);
+    dimLine(new V(M.x + k, m.y - k, m.z), new V(M.x + k, m.y - k, M.z), new V(1, 0, 0), M.z - m.z);
+    setDimText();
+  }
+  const setDimText = () => labels.forEach(o => { o.element.textContent = fmt(o.userData.len); o.element.dir = i18n.lang() === 'ar' ? 'rtl' : 'ltr'; });
+  const dimBtn = stage.querySelector('.dims');
+  dimBtn.onclick = () => {
+    dims.visible = !dims.visible;
+    dimBtn.classList.toggle('sel', dims.visible);
+    dimBtn.setAttribute('aria-pressed', dims.visible);
+    lr.domElement.style.display = dims.visible ? '' : 'none';
+  };
+  lr.domElement.style.display = 'none';
+  i18n.onLang(setDimText);
+  const sizeLr = () => { const { width, height } = stage.getBoundingClientRect(); lr.setSize(width, height); };
+  new ResizeObserver(sizeLr).observe(stage); sizeLr();
+
+  // ---------- Zwei Finger: näher heran / weiter weg (auch wenn ein Finger auf dem Display liegt)
+  const fingers = new Map(); let pinch0 = 0;
+  const gap = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  stage.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 2) {
+      pinch0 = gap();
+      if (touching) { touching = false; oc.enabled = true; if (sim) sim._sim_touch(0, 0, 0); }
+      e.stopPropagation(); // nicht als Berührung des Displays werten
+    }
+  }, true);
+  stage.addEventListener('pointermove', e => {
+    if (!fingers.has(e.pointerId)) return;
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 2 && pinch0 > 0) { const d = gap(); if (d > 0) { zoom(pinch0 / d); pinch0 = d; } }
+  }, true);
+  const lift = e => { fingers.delete(e.pointerId); if (fingers.size < 2) pinch0 = 0; };
+  addEventListener('pointerup', lift); addEventListener('pointercancel', lift);
 
   // ---------- Berührung auf dem 3D-Display
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -291,5 +352,6 @@ export function start(stage, i18n) {
     if (!visible) return;
     oc.update();
     r.render(sc, cam);
+    if (dims.visible) lr.render(sc, cam);
   })();
 }

@@ -261,6 +261,7 @@ export const T = {
   'sim.white':   { ar: 'أبيض', de: 'Weiß', en: 'White' },
   'sim.black':   { ar: 'أسود', de: 'Schwarz', en: 'Black' },
   'sim.hint':    { ar: 'اسحب لتدوير الجهاز، وقرّب بإصبعين، واسحب على الشاشة لتصفح الصفحات', de: 'Ziehen zum Drehen · zwei Finger zum Zoomen · auf dem Display wischen zum Blättern', en: 'Drag to rotate · pinch to zoom · swipe the screen to browse' },
+  'sim.dims': { ar: 'المقاسات', de: 'Maße', en: 'Size' },
   'sim.zin': { ar: 'تقريب', de: 'Näher heran', en: 'Zoom in' },
   'sim.zout': { ar: 'تبعيد', de: 'Weiter weg', en: 'Zoom out' },
   'sim.city':    { ar: 'ابحث عن مدينتك', de: 'Deine Stadt suchen', en: 'Find your city' },
