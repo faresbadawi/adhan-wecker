@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بلال · ساعة الأذان الذكية</title>
+<meta name="description" content="Bilal – بلال: Gebetszeiten & Azan · مواقيت الصلاة والأذان · Prayer times & Azan">
+<meta name="theme-color" content="#040607">
+<meta property="og:title" content="Bilal · بلال">
+<meta property="og:description" content="مواقيت الصلاة والأذان · Gebetszeiten & Azan · Prayer times & Azan">
+<meta property="og:image" content="https://faresbadawi.github.io/adhan-wecker/bilal/assets/img/og.jpg">
+<meta property="og:url" content="https://faresbadawi.github.io/adhan-wecker/bilal/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preload" href="fonts/Amiri-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=202611191112">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body>
+
+<div class="scrollbar" aria-hidden="true"><i id="scrollbar"></i></div>
+<nav class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Bilal"><b>بلال</b></a>
+  <ul class="links">
+    <li><a href="#try" data-t="nav.try"></a></li>
+    <li><a href="#features" data-t="nav.features"></a></li>
+    <li><a href="#design" data-t="nav.design"></a></li>
+    <li><a href="#guide" data-t="nav.guide"></a></li>
+  </ul>
+  <div class="nav-end">
+    <div class="lang" role="group" aria-label="Language">
+      <button data-lang="ar" lang="ar">ع</button><button data-lang="de">DE</button><button data-lang="en">EN</button>
+    </div>
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</nav>
+
+<!-- Menü mit allen Abschnitten (Handy und Computer) -->
+<div class="menu-panel" id="menuPanel" aria-hidden="true">
+  <ol>
+    <li><a href="#story" data-t="story.eyebrow"></a></li>
+    <li><a href="#story" data-open-acc="1" data-t="hist.eyebrow"></a></li>
+    <li><a href="#try" data-t="nav.try"></a></li>
+    <li><a href="#setup" data-t="setup.eyebrow"></a></li>
+    <li><a href="#features" data-t="nav.features"></a></li>
+    <li><a href="#design" data-t="nav.design"></a></li>
+    <li><a href="#gift" data-t="gift.eyebrow"></a></li>
+    <li><a href="#app" data-t="app.eyebrow"></a></li>
+    <li><a href="#faq" data-t="faq.eyebrow"></a></li>
+    <li><a href="#guide" data-t="nav.guide"></a></li>
+  </ol>
+  <div class="menu-legal">
+    <a href="rechtliches.html#impressum" data-t="legal.imprint"></a>
+    <a href="rechtliches.html#datenschutz" data-t="legal.privacy"></a>
+    <a href="mailto:ing.fares.badawi@gmail.com" data-t="legal.contact"></a>
+  </div>
+</div>
+
+<!-- 1 · Bühne -->
+<header class="hero" id="top">
+  <div class="hero-bg"></div>
+  <svg class="draw" id="heroDraw" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <div class="hero-vignette"></div>
+  <canvas class="dust" id="dust" aria-hidden="true"></canvas>
+  <div class="hero-inner" id="heroInner">
+    <svg class="crest up" viewBox="0 0 100 100" aria-hidden="true"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="10"/></svg>
+    <h1 class="up d1">بلال</h1>
+    <div class="latin wordmark up d2">B I L A L</div>
+    <p class="sub up d3" data-t="hero.sub"></p>
+    <a class="btn up d4" href="#try" data-t="hero.cta"></a>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"></div>
+</header>
+
+<!-- 2 · Produkt dreht sich beim Scrollen (Folien) -->
+<section class="reveal" id="reveal">
+  <div class="sticky">
+    <div class="reveal-glow"></div>
+    <div class="reveal-stage">
+      <img data-img="hero-weiss" alt="" class="rv-img on">
+      <img data-img="hero-schwarz" alt="" class="rv-img">
+      <img src="assets/img/rueckseite.webp" alt="" class="rv-img">
+    </div>
+    <div class="reveal-caps">
+      <h2 class="cap on" data-t="reveal.1"></h2>
+      <h2 class="cap" data-t="reveal.2"></h2>
+      <h2 class="cap" data-t="reveal.3"></h2>
+    </div>
+    <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+  </div>
+</section>
+
+<!-- 3 · Leitsatz -->
+<section class="statement">
+  <p id="statement" data-t="statement"></p>
+  <div class="stats">
+    <div class="rv"><b class="num" data-count="5">0</b><span data-t="st1"></span></div>
+    <div class="rv d1"><b class="num" data-count="6">0</b><span data-t="st2"></span></div>
+    <div class="rv d2"><b class="num" data-count="3">0</b><span data-t="st3"></span></div>
+    <div class="rv d3"><b class="num" data-count="2">0</b><span data-t="st4"></span></div>
+  </div>
+</section>
+
+<!-- 3b · Warum Bilal -->
+<section class="story" id="story">
+  <div class="story-head center">
+    <p class="eyebrow rv" data-t="story.eyebrow"></p>
+    <h2 class="rv d1" data-t="story.title"></h2>
+  </div>
+  <div class="accordion rv d2" id="accordion">
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">
+        <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg></span>
+        <span class="acc-title"><b data-t="ch.idea.t"></b><small data-t="ch.idea.p"></small></span>
+        <span class="acc-plus" aria-hidden="true"></span>
+      </button>
+      <div class="acc-body"><div class="acc-inner">
+        <p class="acc-lead" data-t="story.p1"></p>
+        <h4 data-t="story.p.t"></h4>
+        <p data-t="story.p.intro"></p>
+        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا</blockquote><figcaption data-t="story.verse.tr"></figcaption></figure>
+        <p data-t="story.p.p"></p>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">
+        <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c-1.2 1.6-1.2 2.8 0 4M8 22V11a4 4 0 0 1 8 0v11M5 22h14M11 22v-4a1 1 0 0 1 2 0v4M10 9h4"/></svg></span>
+        <span class="acc-title"><b data-t="ch.bilal.t"></b><small data-t="ch.bilal.p"></small></span>
+        <span class="acc-plus" aria-hidden="true"></span>
+      </button>
+      <div class="acc-body"><div class="acc-inner">
+        <p data-t="story.b.p"></p>
+        <blockquote class="acc-q"><span data-t="story.b.q"></span><cite data-t="story.b.src"></cite></blockquote>
+        <ol class="acc-steps">
+          <li><span class="acc-era" data-t="t1.era"></span><h4 data-t="t1.t"></h4><p data-t="t1.p"></p><cite data-t="t1.s"></cite></li>
+          <li><span class="acc-era" data-t="t2.era"></span><h4 data-t="t2.t"></h4><p data-t="t2.p"></p><cite data-t="t2.s"></cite></li>
+          <li><span class="acc-era" data-t="t3.era"></span><h4 data-t="t3.t"></h4><p data-t="t3.p"></p><cite data-t="t3.s"></cite></li>
+          <li><span class="acc-era" data-t="t4.era"></span><h4 data-t="t4.t"></h4><p data-t="t4.p"></p><cite data-t="t4.s"></cite></li>
+          <li><span class="acc-era" data-t="t5.era"></span><h4 data-t="t5.t"></h4><p data-t="t5.p"></p><cite data-t="t5.s"></cite></li>
+          <li><span class="acc-era" data-t="t6.era"></span><h4 data-t="t6.t"></h4><p data-t="t6.p"></p><cite data-t="t6.s"></cite></li>
+        </ol>
+      </div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">
+        <span class="acc-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V6a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2zM8 8h6M8 12h6"/><path d="M18 19v2H6"/></svg></span>
+        <span class="acc-title"><b data-t="ch.fadl.t"></b><small data-t="ch.fadl.p"></small></span>
+        <span class="acc-plus" aria-hidden="true"></span>
+      </button>
+      <div class="acc-body"><div class="acc-inner">
+        <h4 data-t="q.t"></h4>
+        <p data-t="q.p"></p>
+        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ</blockquote><figcaption data-t="hist.verse.tr"></figcaption></figure>
+        <p data-t="q.jumua"></p>
+        <figure class="acc-verse"><blockquote lang="ar" dir="rtl">وَإِذَا نَادَيْتُمْ إِلَى الصَّلَاةِ اتَّخَذُوهَا هُزُوًا وَلَعِبًا</blockquote><figcaption data-t="q.maida.tr"></figcaption></figure>
+        <p data-t="q.maida"></p>
+        <h4 data-t="q.sunna.t"></h4>
+        <p data-t="q.sunna"></p>
+        <div class="acc-hadith">
+          <blockquote><p data-t="v1.q"></p><cite data-t="v1.s"></cite></blockquote>
+          <blockquote><p data-t="v2.q"></p><cite data-t="v2.s"></cite></blockquote>
+          <blockquote><p data-t="v3.q"></p><cite data-t="v3.s"></cite></blockquote>
+        </div>
+        <figure class="acc-verse dua"><figcaption class="top" data-t="dua.t"></figcaption><blockquote lang="ar" dir="rtl">اللهم رب هذه الدعوة التامة، والصلاة القائمة، آت محمدا الوسيلة والفضيلة، وابعثه مقاما محمودا الذي وعدته</blockquote><figcaption data-t="dua.tr"></figcaption></figure>
+        <div class="acc-src">
+          <h4 data-t="src.title"></h4>
+          <ul>
+            <li><b data-t="src.q"></b> <span class="num" data-t="src.q.n"></span></li>
+            <li><b data-t="src.b"></b> <span class="num">527 · 604 · 609 · 614 · 1149 · 3754</span></li>
+            <li><b data-t="src.m"></b> <span class="num">85 · 377 · 384 · 387 · 2458</span></li>
+            <li><b data-t="src.d"></b> <span class="num">499 · 4985</span></li>
+            <li><b data-t="src.t"></b> <span class="num">189</span></li>
+          </ul>
+          <p data-t="src.note"></p>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- 4 · Simulator -->
+<section class="sim" id="try">
+  <div class="head center">
+    <p class="eyebrow" data-t="sim.eyebrow"></p>
+    <h2 data-t="sim.title"></h2>
+    <p class="lead" data-t="sim.lead"></p>
+  </div>
+  <div class="sim-bar">
+    <div class="city">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <input id="cityInput" type="search" autocomplete="off" data-ph="sim.city">
+      <button id="locBtn" class="chip" data-t="sim.here"></button>
+      <ul id="cityList" class="city-list"></ul>
+      <span id="cityStatus" class="city-status" aria-live="polite"></span>
+    </div>
+    <div class="azan-ctl">
+      <select id="voice" aria-label="Muezzin"><option value="alafasy">Mishary Alafasy</option><option value="islam_sobhi">Islam Sobhi</option></select>
+      <button id="azanBtn" class="chip gold"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span data-t="sim.azan"></span></button>
+    </div>
+  </div>
+  <div class="sim-stage" id="simStage">
+    <div class="sim-loading" id="simLoading" data-t="sim.loading"></div>
+    <div class="sim-hint" id="simHint" data-t="sim.hint"></div>
+    <div class="sim-ui">
+      <button class="power" id="power" aria-pressed="false"><span class="knob"><svg viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/></svg></span><span id="powerLabel" data-t="sim.on"></span></button>
+      <div class="zoom" role="group"><button class="zoom-in" data-t-aria="sim.zin"><svg viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></svg></button><button class="zoom-out" data-t-aria="sim.zout"><svg viewBox="0 0 24 24"><path d="M6 12h12"/></svg></button></div>
+      <div class="bottom-ctl">
+        <button class="dims chip-ui" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2"/></svg><span data-t="sim.dims"></span></button>
+      <div class="finish" role="group">
+        <button data-f="assets/bilal-weiss.3mf" class="sel"><i></i><span data-t="sim.white"></span></button>
+        <button data-f="assets/bilal-schwarz.3mf"><i></i><span data-t="sim.black"></span></button>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4b · In drei Schritten -->
+<section class="setup" id="setup">
+  <div class="head center">
+    <p class="eyebrow rv" data-t="setup.eyebrow"></p>
+    <h2 class="rv d1" data-t="setup.title"></h2>
+  </div>
+  <ol class="steps">
+    <li class="rv"><span class="step-n num">1</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/></svg><h3 data-t="s1.t"></h3><p data-t="s1.p"></p></li>
+    <li class="rv d1"><span class="step-n num">2</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.2"/></svg><h3 data-t="s2.t"></h3><p data-t="s2.p"></p></li>
+    <li class="rv d2"><span class="step-n num">3</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V11l7-5 7 5v10M10 21v-5h4v5M12 2v4"/></svg><h3 data-t="s3.t"></h3><p data-t="s3.p"></p></li>
+  </ol>
+</section>
+
+<!-- 5 · Funktionen als Folien quer durchs Bild -->
+<section class="gallery" id="features">
+  <div class="sticky">
+    <div class="head">
+      <p class="eyebrow" data-t="feat.eyebrow"></p>
+      <h2 data-t="feat.title"></h2>
+    </div>
+    <div class="track" id="track">
+      <article class="slide"><img data-img="hero-schwarz" alt=""><div><h3 data-t="f1.t"></h3><p data-t="f1.p"></p></div></article>
+      <article class="slide"><img data-img="front-uhr" alt=""><div><h3 data-t="f2.t"></h3><p data-t="f2.p"></p></div></article>
+      <article class="slide"><img data-img="schwarz-nacht" alt=""><div><h3 data-t="f3.t"></h3><p data-t="f3.p"></p></div></article>
+      <article class="slide"><img data-img="weiss-kalender" alt=""><div><h3 data-t="f4.t"></h3><p data-t="f4.p"></p></div></article>
+      <article class="slide"><img data-img="schwarz-mond" alt=""><div><h3 data-t="f5.t"></h3><p data-t="f5.p"></p></div></article>
+      <article class="slide"><img data-img="weiss-wetter" alt=""><div><h3 data-t="f6.t"></h3><p data-t="f6.p"></p></div></article>
+    </div>
+    <div class="progress"><i id="trackBar"></i></div>
+  </div>
+</section>
+
+<!-- 6 · Das Ornament zeichnet sich beim Scrollen -->
+<section class="motif" id="motif">
+  <div class="sticky">
+    <svg class="draw" id="motifDraw" viewBox="0 0 1000 1000" aria-hidden="true"></svg>
+    <div class="motif-text">
+      <p class="eyebrow" data-t="motif.eyebrow"></p>
+      <h2 data-t="motif.title"></h2>
+      <p class="lead" data-t="motif.lead"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · Zwei Farben -->
+<section id="design">
+  <div class="head center">
+    <p class="eyebrow rv" data-t="duo.eyebrow"></p>
+    <h2 class="rv d1" data-t="duo.title"></h2>
+    <p class="lead rv d2" data-t="duo.lead"></p>
+  </div>
+  <div class="duo">
+    <figure class="light rv"><img loading="lazy" data-img="duo-weiss" alt=""><figcaption><span data-t="duo.w"></span><small data-t="duo.ws"></small></figcaption></figure>
+    <figure class="dark rv d1"><img loading="lazy" data-img="duo-schwarz" alt=""><figcaption><span data-t="duo.b"></span><small data-t="duo.bs"></small></figcaption></figure>
+  </div>
+</section>
+
+<!-- 7b · Im Alltag -->
+<section class="life" id="life">
+  <div class="head center">
+    <p class="eyebrow rv" data-t="life.eyebrow"></p>
+    <h2 class="rv d1" data-t="life.title"></h2>
+  </div>
+  <div class="life-grid">
+    <figure class="rv"><div class="frame"><div class="px"><img loading="lazy" src="assets/img/life-1.webp" alt=""></div></div><figcaption data-t="life.1"></figcaption></figure>
+    <figure class="rv d1"><div class="frame"><div class="px"><img loading="lazy" src="assets/img/life-2.webp" alt=""></div></div><figcaption data-t="life.2"></figcaption></figure>
+    <figure class="rv"><div class="frame"><div class="px"><img loading="lazy" src="assets/img/life-3.webp" alt=""></div></div><figcaption data-t="life.3"></figcaption></figure>
+    <figure class="rv d1"><div class="frame"><div class="px"><img loading="lazy" src="assets/img/life-4.webp" alt=""></div></div><figcaption data-t="life.4"></figcaption></figure>
+    <figure class="rv"><div class="frame"><div class="px"><img loading="lazy" src="assets/img/life-5.webp" alt=""></div></div><figcaption data-t="life.5"></figcaption></figure>
+    <figure class="rv d1"><div class="frame"><div class="px"><img loading="lazy" src="assets/img/life-6.webp" alt=""></div></div><figcaption data-t="life.6"></figcaption></figure>
+  </div>
+</section>
+
+<!-- 7c · Geschenk mit Widmung -->
+<section class="gift" id="gift">
+  <div class="gift-grid">
+    <div>
+      <p class="eyebrow rv" data-t="gift.eyebrow"></p>
+      <h2 class="rv d1" data-t="gift.title"></h2>
+      <p class="lead rv d2" data-t="gift.lead"></p>
+    </div>
+    <figure class="rv d1"><img loading="lazy" src="assets/img/widmung.webp" alt=""></figure>
+  </div>
+</section>
+
+<!-- 7d · App -->
+<section class="app" id="app">
+  <div class="app-grid">
+    <div class="phone rv"><div class="phone-screen"><img loading="lazy" data-img="app" alt=""></div></div>
+    <div>
+      <p class="eyebrow rv" data-t="app.eyebrow"></p>
+      <h2 class="rv d1" data-t="app.title"></h2>
+      <p class="lead rv d2" data-t="app.lead"></p>
+      <div class="app-actions rv d2">
+        <a class="btn" href="https://github.com/faresbadawi/adhan-wecker/releases/latest" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg><span data-t="app.android"></span></a>
+        <a class="btn ghost" href="https://faresbadawi.github.io/adhan-wecker/" target="_blank" rel="noopener" data-t="app.iphone"></a>
+      </div>
+      <div class="qr rv d2"><img src="assets/img/qr-app.svg" alt="QR"><span data-t="app.qr"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · Weitere Funktionen -->
+<section class="more">
+  <h2 class="center rv" data-t="more.title"></h2>
+  <div class="grid">
+    <article class="mini rv"><svg viewBox="0 0 24 24"><path d="M12 3c-1.5 2-1.5 3.5 0 5M6 21V11a6 6 0 0 1 12 0v10M4 21h16M10 21v-4a2 2 0 0 1 4 0v4"/></svg><h3 data-t="m1.t"></h3><p data-t="m1.p"></p></article>
+    <article class="mini rv d1"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 10v3l2 2M5 4 2 7M19 4l3 3"/></svg><h3 data-t="m2.t"></h3><p data-t="m2.p"></p></article>
+    <article class="mini rv d2"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><h3 data-t="m3.t"></h3><p data-t="m3.p"></p></article>
+    <article class="mini rv"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg><h3 data-t="m4.t"></h3><p data-t="m4.p"></p></article>
+    <article class="mini rv d1"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg><h3 data-t="m5.t"></h3><p data-t="m5.p"></p></article>
+    <article class="mini rv d2"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg><h3 data-t="m6.t"></h3><p data-t="m6.p"></p></article>
+  </div>
+</section>
+
+<!-- 9 · Technik -->
+<section id="specs">
+  <h2 class="rv" data-t="specs.title"></h2>
+  <dl class="specs rv d1">
+    <div><dt data-t="s1.k"></dt><dd data-t="s1.v"></dd></div>
+    <div><dt data-t="s2.k"></dt><dd data-t="s2.v"></dd></div>
+    <div><dt data-t="s3.k"></dt><dd data-t="s3.v"></dd></div>
+    <div><dt data-t="s4.k"></dt><dd data-t="s4.v"></dd></div>
+    <div><dt data-t="s5.k"></dt><dd data-t="s5.v"></dd></div>
+    <div><dt data-t="s6.k"></dt><dd data-t="s6.v"></dd></div>
+    <div><dt data-t="s7.k"></dt><dd data-t="s7.v"></dd></div>
+    <div><dt data-t="s8.k"></dt><dd data-t="s8.v"></dd></div>
+    <div><dt data-t="s9.k"></dt><dd data-t="s9.v"></dd></div>
+  </dl>
+</section>
+
+<!-- 9b · Fragen & Antworten -->
+<section class="faq" id="faq">
+  <div class="head center">
+    <p class="eyebrow rv" data-t="faq.eyebrow"></p>
+    <h2 class="rv d1" data-t="faq.title"></h2>
+  </div>
+  <div class="faq-list rv d2">
+    <details><summary data-t="q1"></summary><p data-t="a1"></p></details>
+    <details><summary data-t="q2"></summary><p data-t="a2"></p></details>
+    <details><summary data-t="q3"></summary><p data-t="a3"></p></details>
+    <details><summary data-t="q4"></summary><p data-t="a4"></p></details>
+    <details><summary data-t="q5"></summary><p data-t="a5"></p></details>
+    <details><summary data-t="q6"></summary><p data-t="a6"></p></details>
+    <details><summary data-t="q7"></summary><p data-t="a7"></p></details>
+    <details><summary data-t="q8"></summary><p data-t="a8"></p></details>
+  </div>
+</section>
+
+<!-- 9c · Interessenten -->
+<section class="notify" id="notify">
+  <div class="notify-box rv">
+    <h2 data-t="notify.title"></h2>
+    <p class="lead" data-t="notify.lead"></p>
+    <form id="notifyForm" novalidate>
+      <input type="email" name="email" required autocomplete="email" data-ph="notify.ph" maxlength="120">
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <button class="btn" type="submit" data-t="notify.btn"></button>
+    </form>
+    <p class="notify-msg" id="notifyMsg" aria-live="polite"></p>
+    <p class="notify-privacy" data-t="notify.privacy"></p>
+  </div>
+</section>
+
+<!-- 10 · Anleitung -->
+<section class="guide" id="guide">
+  <div class="guide-box rv">
+    <div class="book" aria-hidden="true"><b>بلال</b><span class="latin">GUIDE</span></div>
+    <div>
+      <h2 data-t="guide.title"></h2>
+      <p class="lead" data-t="guide.lead"></p>
+    </div>
+    <div class="guide-actions">
+      <a class="btn" id="guideLink" download><svg viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg><span data-t="guide.dl"></span> <span class="num">PDF</span></a>
+      <a class="btn" id="guideLink2" download><svg viewBox="0 0 24 24"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg><span data-t="guide.dl2"></span> <span class="num">PDF</span></a>
+      <a class="btn ghost" href="https://faresbadawi.github.io/adhan-wecker/" target="_blank" rel="noopener" data-t="guide.app"></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <svg class="crest" viewBox="0 0 100 100" aria-hidden="true"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="10"/></svg>
+  <a class="brand" href="#top"><b>بلال</b><span class="latin">BILAL</span></a>
+  <p class="credit"><span data-t="credit"></span><span class="latin">DESIGN BY FARES</span></p>
+  <nav class="legal-links">
+    <a href="rechtliches.html#impressum" data-t="legal.imprint"></a>
+    <a href="rechtliches.html#datenschutz" data-t="legal.privacy"></a>
+    <a href="mailto:ing.fares.badawi@gmail.com" data-t="legal.contact"></a>
+  </nav>
+  <small><span class="num">© 2026</span> · <span data-t="copy"></span></small>
+</footer>
+
+
+
+
+<script src="sim/out/bilal-sim.js?v=202611201000"></script>
+<script type="module" src="js/main.js?v=202611201000"></script>
+</body>
+</html>
